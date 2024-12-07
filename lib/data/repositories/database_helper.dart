@@ -29,8 +29,6 @@ class DatabaseHelper {
         leaveType TEXT,
         startDate TEXT,
         endDate TEXT,
-        startTime TEXT,
-        endTime TEXT,
         reason TEXT,
         status TEXT
       )
