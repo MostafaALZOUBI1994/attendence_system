@@ -9,7 +9,6 @@ class LeaveHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Trigger FetchLeaves event only if state is LeaveInitial
     if (BlocProvider.of<LeaveBloc>(context).state is LeaveInitial) {
       BlocProvider.of<LeaveBloc>(context).add(FetchLeaves());
     }

@@ -26,9 +26,11 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE leave_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        type TEXT,
+        leaveType TEXT,
         startDate TEXT,
         endDate TEXT,
+        startTime TEXT,
+        endTime TEXT,
         reason TEXT,
         status TEXT
       )
