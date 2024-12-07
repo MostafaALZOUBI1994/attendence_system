@@ -200,9 +200,7 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                           DateTime? endDate =
                           DateTime.tryParse(_endDateTimeController.text);
 
-                          if (startDate != null &&
-                              endDate != null &&
-                              startDate.isBefore(endDate)) {
+                          if (startDate != null && endDate != null && startDate.isBefore(endDate)) {
                             context.read<LeaveBloc>().add(
                               RequestLeave(
                                 startDate: _startDateTimeController.text,
@@ -211,24 +209,16 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                                 leaveType: leaveType!,
                               ),
                             );
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Leave request submitted')),
-                            );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'Start date must be before the end date.')),
+                              const SnackBar(content: Text('Start date must be before the end date.')),
                             );
                           }
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF673AB7),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50, vertical: 15),
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -237,7 +227,7 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                         'Submit Leave',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
-                    ),
+                    )
                   ),
                 ],
               ),
