@@ -27,7 +27,7 @@ class LeaveHistoryPage extends StatelessWidget {
                 final leave = leaves[index];
                 return ListTile(
                   title: Text(leave.leaveType),
-                  subtitle: Text('${leave.startDate} to ${leave.endDate}'),
+                  subtitle: Text('${leave.startDate} ${leave.startTime} to ${leave.endDate} ${leave.endTime}'),
                   trailing: Text(leave.reason),
                 );
               },

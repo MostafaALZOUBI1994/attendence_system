@@ -18,8 +18,6 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
           'leaveType': event.leaveType,
           'startDate': event.startDate,
           'endDate': event.endDate,
-          'startTime': event.startTime,
-          'endTime': event.endTime,
           'reason': event.reason,
           'status': 'Pending',
         });
