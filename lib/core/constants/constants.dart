@@ -35,5 +35,10 @@ class Strings {
   static const provideReasonError = 'Provide a reason';
   static const submitLeaveButton = 'Submit Leave';
   static const startBeforeEndDateError = 'Start date must be before the end date.';
+  static const appBarTitle = 'Attendance';
+  static const markAttendanceTitle = 'Mark Attendance';
+  static const attendanceRowsTitle = 'Attendance Rows';
+  static const snackBarMessage = 'marked successfully!';
+  static const somethingWentWrong = 'Something went wrong.';
 
 }
