@@ -48,5 +48,4 @@ class DatabaseHelper {
       return LeaveRequest.fromJson(maps[i]);
     });
   }
-
 }

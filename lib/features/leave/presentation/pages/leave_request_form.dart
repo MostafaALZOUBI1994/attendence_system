@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-
 import '../bloc/leave_bloc.dart';
 import '../bloc/leave_event.dart';
 import '../bloc/leave_state.dart';
@@ -81,9 +80,10 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Request Leave'),
+          title: const Text('Request Leave', style: TextStyle(color: Colors.white), ),
           centerTitle: true,
           backgroundColor: const Color(0xFF673AB7),
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
@@ -98,11 +98,22 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                     _buildShadowedBox(
                       child: DropdownButtonFormField<String>(
                         value: leaveType,
+                        decoration: const InputDecoration(
+                          labelText: 'Leave Type',
+                          labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                          border: InputBorder.none,
+                        ),
                         items: ['Sick', 'Vacation', 'Personal']
-                            .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                            .map(
+                              (type) => DropdownMenuItem(
+                            value: type,
+                            child: Text(type),
+                          ),
+                        )
                             .toList(),
                         onChanged: (value) => setState(() => leaveType = value),
-                        validator: (value) => value == null ? 'Select leave type' : null,
+                        validator: (value) =>
+                        value == null ? 'Please select a leave type' : null,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -111,7 +122,8 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                         controller: _startDateTimeController,
                         readOnly: true,
                         onTap: () => _selectDateTime(_startDateTimeController),
-                        decoration: const InputDecoration(labelText: 'Start Date & Time'),
+                        decoration: const InputDecoration(labelText: 'Start Date & Time', labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                          border: InputBorder.none,),
                         validator: (value) => value == null || value.isEmpty
                             ? 'Select start date & time'
                             : null,
@@ -123,7 +135,8 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                         controller: _endDateTimeController,
                         readOnly: true,
                         onTap: () => _selectDateTime(_endDateTimeController),
-                        decoration: const InputDecoration(labelText: 'End Date & Time'),
+                        decoration: const InputDecoration(labelText: 'End Date & Time', labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                          border: InputBorder.none),
                         validator: (value) => value == null || value.isEmpty
                             ? 'Select end date & time'
                             : null,
@@ -133,7 +146,8 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                     _buildShadowedBox(
                       child: TextFormField(
                         controller: _reasonController,
-                        decoration: const InputDecoration(labelText: 'Reason'),
+                        decoration: const InputDecoration(labelText: 'Reason', labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                      border: InputBorder.none,),
                         validator: (value) => value == null || value.isEmpty
                             ? 'Provide a reason'
                             : null,
@@ -173,7 +187,17 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                           }
                         }
                       },
-                      child: const Text('Submit Leave'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF673AB7),
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text(
+                        'Submit Leave',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
@@ -187,13 +211,15 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
 
   Widget _buildShadowedBox({required Widget child}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.deepPurple.withOpacity(0.2),
             blurRadius: 10,
+            spreadRadius: 3,
             offset: const Offset(0, 5),
           ),
         ],
