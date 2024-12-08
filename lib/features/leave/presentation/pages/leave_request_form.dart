@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/constants/constants.dart';
 import '../bloc/leave_bloc.dart';
 import '../bloc/leave_event.dart';
 import '../bloc/leave_state.dart';
@@ -10,44 +11,19 @@ class LeaveRequestForm extends StatefulWidget {
   _LeaveRequestFormState createState() => _LeaveRequestFormState();
 }
 
-class _LeaveRequestFormState extends State<LeaveRequestForm>
-    with SingleTickerProviderStateMixin {
+class _LeaveRequestFormState extends State<LeaveRequestForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _reasonController = TextEditingController();
   final TextEditingController _startDateTimeController = TextEditingController();
   final TextEditingController _endDateTimeController = TextEditingController();
 
-  final FocusNode _reasonFocusNode = FocusNode(); // Added FocusNode
   String? leaveType;
-
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-    _controller.forward();
-
-    // Preload focus node listeners (optional)
-    _reasonFocusNode.addListener(() {
-      if (_reasonFocusNode.hasFocus) {
-        // Logic if needed when focused
-      }
-    });
-  }
 
   @override
   void dispose() {
-    _controller.dispose();
     _reasonController.dispose();
     _startDateTimeController.dispose();
     _endDateTimeController.dispose();
-    _reasonFocusNode.dispose();
     super.dispose();
   }
 
@@ -92,136 +68,116 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'Request Leave',
-            style: TextStyle(color: Colors.white),
-          ),
+          title: const Text(Strings.requestLeaveTitle, style: TextStyle(color: Colors.white)),
           centerTitle: true,
           backgroundColor: const Color(0xFF673AB7),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
-          child: FadeTransition(
-            opacity: _animation,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    _buildShadowedBox(
-                      child: DropdownButtonFormField<String>(
-                        value: leaveType,
-                        decoration: const InputDecoration(
-                          labelText: 'Leave Type',
-                          labelStyle: TextStyle(color: Color(0xFF673AB7)),
-                          border: InputBorder.none,
-                        ),
-                        items: ['Sick', 'Vacation', 'Personal']
-                            .map(
-                              (type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          ),
-                        )
-                            .toList(),
-                        onChanged: (value) => setState(() => leaveType = value),
-                        validator: (value) =>
-                        value == null ? 'Please select a leave type' : null,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  _buildShadowedBox(
+                    child: DropdownButtonFormField<String>(
+                      value: leaveType,
+                      decoration: const InputDecoration(
+                        labelText: Strings.leaveTypeLabel,
+                        labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                        border: InputBorder.none,
                       ),
+                      items: ['Sick', 'Vacation', 'Personal']
+                          .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                          .toList(),
+                      onChanged: (value) => setState(() => leaveType = value),
+                      validator: (value) =>
+                      value == null ? Strings.selectLeaveTypeError : null,
                     ),
-                    const SizedBox(height: 20),
-                    _buildShadowedBox(
-                      child: TextFormField(
-                        controller: _startDateTimeController,
-                        readOnly: true,
-                        onTap: () => _selectDateTime(_startDateTimeController),
-                        decoration: const InputDecoration(
-                          labelText: 'Start Date & Time',
-                          labelStyle: TextStyle(color: Color(0xFF673AB7)),
-                          border: InputBorder.none,
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Select start date & time'
-                            : null,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildShadowedBox(
+                    child: TextFormField(
+                      controller: _startDateTimeController,
+                      readOnly: true,
+                      onTap: () => _selectDateTime(_startDateTimeController),
+                      decoration: const InputDecoration(
+                        labelText: Strings.startDateTimeLabel,
+                        labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                        border: InputBorder.none,
                       ),
+                      validator: (value) =>
+                      value == null || value.isEmpty ? Strings.selectStartDateTimeError : null,
                     ),
-                    const SizedBox(height: 20),
-                    _buildShadowedBox(
-                      child: TextFormField(
-                        controller: _endDateTimeController,
-                        readOnly: true,
-                        onTap: () => _selectDateTime(_endDateTimeController),
-                        decoration: const InputDecoration(
-                          labelText: 'End Date & Time',
-                          labelStyle: TextStyle(color: Color(0xFF673AB7)),
-                          border: InputBorder.none,
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Select end date & time'
-                            : null,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildShadowedBox(
+                    child: TextFormField(
+                      controller: _endDateTimeController,
+                      readOnly: true,
+                      onTap: () => _selectDateTime(_endDateTimeController),
+                      decoration: const InputDecoration(
+                        labelText: Strings.endDateTimeLabel,
+                        labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                        border: InputBorder.none,
                       ),
+                      validator: (value) =>
+                      value == null || value.isEmpty ? Strings.selectEndDateTimeError : null,
                     ),
-                    const SizedBox(height: 20),
-                    _buildShadowedBox(
-                      child: TextFormField(
-                        focusNode: _reasonFocusNode, // Attach focus node
-                        controller: _reasonController,
-                        decoration: const InputDecoration(
-                          labelText: 'Reason',
-                          labelStyle: TextStyle(color: Color(0xFF673AB7)),
-                          border: InputBorder.none,
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? 'Provide a reason'
-                            : null,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildShadowedBox(
+                    child: TextFormField(
+                      controller: _reasonController,
+                      decoration: const InputDecoration(
+                        labelText: Strings.reasonLabel,
+                        labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                        border: InputBorder.none,
                       ),
+                      validator: (value) =>
+                      value == null || value.isEmpty ? Strings.provideReasonError : null,
                     ),
-                    const SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          DateTime? startDate = DateTime.tryParse(
-                              _startDateTimeController.text);
-                          DateTime? endDate = DateTime.tryParse(
-                              _endDateTimeController.text);
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        DateTime? startDate = DateTime.tryParse(_startDateTimeController.text);
+                        DateTime? endDate = DateTime.tryParse(_endDateTimeController.text);
 
-                          if (startDate != null &&
-                              endDate != null &&
-                              startDate.isBefore(endDate)) {
-                            context.read<LeaveBloc>().add(
-                              RequestLeave(
-                                startDate: _startDateTimeController.text,
-                                endDate: _endDateTimeController.text,
-                                reason: _reasonController.text,
-                                leaveType: leaveType!,
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'Start date must be before the end date.')),
-                            );
-                          }
+                        if (startDate != null &&
+                            endDate != null &&
+                            startDate.isBefore(endDate)) {
+                          context.read<LeaveBloc>().add(
+                            RequestLeave(
+                              startDate: _startDateTimeController.text,
+                              endDate: _endDateTimeController.text,
+                              reason: _reasonController.text,
+                              leaveType: leaveType!,
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text(Strings.startBeforeEndDateError)),
+                          );
                         }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF673AB7),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50, vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: const Text(
-                        'Submit Leave',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF673AB7),
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                  ],
-                ),
+                    child: const Text(
+                      Strings.submitLeaveButton,
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -249,3 +205,4 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
     );
   }
 }
+

@@ -24,5 +24,16 @@ class Strings {
   static const String missedPunchMarkedMessage =
       "Attendance marked as Missed Punch!";
   static const String earlyOutMarkedMessage = "Attendance marked as Early Out!";
+  static const requestLeaveTitle = 'Request Leave';
+  static const leaveTypeLabel = 'Leave Type';
+  static const startDateTimeLabel = 'Start Date & Time';
+  static const endDateTimeLabel = 'End Date & Time';
+  static const reasonLabel = 'Reason';
+  static const selectLeaveTypeError = 'Please select a leave type';
+  static const selectStartDateTimeError = 'Select start date & time';
+  static const selectEndDateTimeError = 'Select end date & time';
+  static const provideReasonError = 'Provide a reason';
+  static const submitLeaveButton = 'Submit Leave';
+  static const startBeforeEndDateError = 'Start date must be before the end date.';
 
 }
