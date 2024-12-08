@@ -17,6 +17,7 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
   final TextEditingController _startDateTimeController = TextEditingController();
   final TextEditingController _endDateTimeController = TextEditingController();
 
+  final FocusNode _reasonFocusNode = FocusNode(); // Added FocusNode
   String? leaveType;
 
   late AnimationController _controller;
@@ -31,11 +32,22 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
     );
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _controller.forward();
+
+    // Preload focus node listeners (optional)
+    _reasonFocusNode.addListener(() {
+      if (_reasonFocusNode.hasFocus) {
+        // Logic if needed when focused
+      }
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _reasonController.dispose();
+    _startDateTimeController.dispose();
+    _endDateTimeController.dispose();
+    _reasonFocusNode.dispose();
     super.dispose();
   }
 
@@ -80,7 +92,10 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Request Leave', style: TextStyle(color: Colors.white), ),
+          title: const Text(
+            'Request Leave',
+            style: TextStyle(color: Colors.white),
+          ),
           centerTitle: true,
           backgroundColor: const Color(0xFF673AB7),
           iconTheme: const IconThemeData(color: Colors.white),
@@ -122,8 +137,11 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                         controller: _startDateTimeController,
                         readOnly: true,
                         onTap: () => _selectDateTime(_startDateTimeController),
-                        decoration: const InputDecoration(labelText: 'Start Date & Time', labelStyle: TextStyle(color: Color(0xFF673AB7)),
-                          border: InputBorder.none,),
+                        decoration: const InputDecoration(
+                          labelText: 'Start Date & Time',
+                          labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                          border: InputBorder.none,
+                        ),
                         validator: (value) => value == null || value.isEmpty
                             ? 'Select start date & time'
                             : null,
@@ -135,8 +153,11 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                         controller: _endDateTimeController,
                         readOnly: true,
                         onTap: () => _selectDateTime(_endDateTimeController),
-                        decoration: const InputDecoration(labelText: 'End Date & Time', labelStyle: TextStyle(color: Color(0xFF673AB7)),
-                          border: InputBorder.none),
+                        decoration: const InputDecoration(
+                          labelText: 'End Date & Time',
+                          labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                          border: InputBorder.none,
+                        ),
                         validator: (value) => value == null || value.isEmpty
                             ? 'Select end date & time'
                             : null,
@@ -145,9 +166,13 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                     const SizedBox(height: 20),
                     _buildShadowedBox(
                       child: TextFormField(
+                        focusNode: _reasonFocusNode, // Attach focus node
                         controller: _reasonController,
-                        decoration: const InputDecoration(labelText: 'Reason', labelStyle: TextStyle(color: Color(0xFF673AB7)),
-                      border: InputBorder.none,),
+                        decoration: const InputDecoration(
+                          labelText: 'Reason',
+                          labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                          border: InputBorder.none,
+                        ),
                         validator: (value) => value == null || value.isEmpty
                             ? 'Provide a reason'
                             : null,
@@ -157,10 +182,14 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState?.validate() ?? false) {
-                          DateTime? startDate = DateTime.tryParse(_startDateTimeController.text);
-                          DateTime? endDate = DateTime.tryParse(_endDateTimeController.text);
+                          DateTime? startDate = DateTime.tryParse(
+                              _startDateTimeController.text);
+                          DateTime? endDate = DateTime.tryParse(
+                              _endDateTimeController.text);
 
-                          if (startDate != null && endDate != null && startDate.isBefore(endDate)) {
+                          if (startDate != null &&
+                              endDate != null &&
+                              startDate.isBefore(endDate)) {
                             context.read<LeaveBloc>().add(
                               RequestLeave(
                                 startDate: _startDateTimeController.text,
@@ -169,27 +198,19 @@ class _LeaveRequestFormState extends State<LeaveRequestForm>
                                 leaveType: leaveType!,
                               ),
                             );
-
-                            // Add BlocListener to handle the response
-                            BlocListener<LeaveBloc, LeaveState>(
-                              listener: (context, state) {
-                                if (state is LeaveRequestFailure) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(state.errorMessage)),
-                                  );
-                                }
-                              },
-                            );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Start date must be before the end date.')),
+                              const SnackBar(
+                                  content: Text(
+                                      'Start date must be before the end date.')),
                             );
                           }
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF673AB7),
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),

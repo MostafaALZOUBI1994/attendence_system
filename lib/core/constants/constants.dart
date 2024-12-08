@@ -14,4 +14,15 @@ class Strings {
   static const String markAttendanceLabel = 'Mark Attendance';
   static const String requestLeaveLabel = 'Request Leave';
   static const String leaveHistoryLabel = 'Leave History';
+  static const String attendanceTitle = "Mark Attendance";
+  static const String markAttendancePrompt = "Select your attendance status:";
+  static const String present = "Present";
+  static const String missedPunch = "Missed Punch";
+  static const String earlyOut = "Early Out";
+
+  static const String presentMarkedMessage = "Attendance marked as Present!";
+  static const String missedPunchMarkedMessage =
+      "Attendance marked as Missed Punch!";
+  static const String earlyOutMarkedMessage = "Attendance marked as Early Out!";
+
 }
