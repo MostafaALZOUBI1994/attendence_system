@@ -16,7 +16,6 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
   final TextEditingController _reasonController = TextEditingController();
   final TextEditingController _startDateTimeController = TextEditingController();
   final TextEditingController _endDateTimeController = TextEditingController();
-
   String? leaveType;
 
   @override
@@ -59,19 +58,19 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
     return BlocListener<LeaveBloc, LeaveState>(
       listener: (context, state) {
         if (state is LeaveRequestFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          Future.microtask(() => ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.errorMessage)),
-          );
+          ));
         } else if (state is LeaveLoaded) {
-          Navigator.pop(context); // Close form after successful request
+          Navigator.pop(context);
         }
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(Strings.requestLeaveTitle, style: TextStyle(color: Colors.white)),
+          title: const Text("Request Leave", style: TextStyle(color: Colors.white),),
           centerTitle: true,
-          backgroundColor: const Color(0xFF673AB7),
           iconTheme: const IconThemeData(color: Colors.white),
+          backgroundColor: const Color(0xFF673AB7),
         ),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
@@ -85,16 +84,16 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
                     child: DropdownButtonFormField<String>(
                       value: leaveType,
                       decoration: const InputDecoration(
-                        labelText: Strings.leaveTypeLabel,
-                        labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                        labelText: "Leave Type",
                         border: InputBorder.none,
                       ),
                       items: ['Sick', 'Vacation', 'Personal']
-                          .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                          .map((type) =>
+                          DropdownMenuItem(value: type, child: Text(type)))
                           .toList(),
                       onChanged: (value) => setState(() => leaveType = value),
                       validator: (value) =>
-                      value == null ? Strings.selectLeaveTypeError : null,
+                      value == null ? "Please select a leave type." : null,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -104,12 +103,11 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
                       readOnly: true,
                       onTap: () => _selectDateTime(_startDateTimeController),
                       decoration: const InputDecoration(
-                        labelText: Strings.startDateTimeLabel,
-                        labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                        labelText: "Start Date & Time",
                         border: InputBorder.none,
                       ),
                       validator: (value) =>
-                      value == null || value.isEmpty ? Strings.selectStartDateTimeError : null,
+                      value == null || value.isEmpty ? "Select start date & time." : null,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -119,12 +117,11 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
                       readOnly: true,
                       onTap: () => _selectDateTime(_endDateTimeController),
                       decoration: const InputDecoration(
-                        labelText: Strings.endDateTimeLabel,
-                        labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                        labelText: "End Date & Time",
                         border: InputBorder.none,
                       ),
                       validator: (value) =>
-                      value == null || value.isEmpty ? Strings.selectEndDateTimeError : null,
+                      value == null || value.isEmpty ? "Select end date & time." : null,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -132,20 +129,21 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
                     child: TextFormField(
                       controller: _reasonController,
                       decoration: const InputDecoration(
-                        labelText: Strings.reasonLabel,
-                        labelStyle: TextStyle(color: Color(0xFF673AB7)),
+                        labelText: "Reason",
                         border: InputBorder.none,
                       ),
                       validator: (value) =>
-                      value == null || value.isEmpty ? Strings.provideReasonError : null,
+                      value == null || value.isEmpty ? "Provide a reason." : null,
                     ),
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState?.validate() ?? false) {
-                        DateTime? startDate = DateTime.tryParse(_startDateTimeController.text);
-                        DateTime? endDate = DateTime.tryParse(_endDateTimeController.text);
+                        DateTime? startDate =
+                        DateTime.tryParse(_startDateTimeController.text);
+                        DateTime? endDate =
+                        DateTime.tryParse(_endDateTimeController.text);
 
                         if (startDate != null &&
                             endDate != null &&
@@ -160,7 +158,10 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text(Strings.startBeforeEndDateError)),
+                            const SnackBar(
+                              content:
+                              Text("Start date must be before end date."),
+                            ),
                           );
                         }
                       }
@@ -205,4 +206,3 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
     );
   }
 }
-

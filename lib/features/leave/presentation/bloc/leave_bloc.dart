@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../../data/data/leave_request_model.dart';
 import '../../../../data/repositories/database_helper.dart';
 import 'leave_event.dart';
@@ -16,19 +15,34 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
         final leaveRequests = await _databaseHelper.getLeaveRequests();
         _currentLeaves = leaveRequests;
 
-        // Check for overlapping leave requests
-        bool isOverlapping = false;
-        for (var leaveRequest in leaveRequests) {
+        // Calculate total leave days already taken
+        int totalUsedDays = leaveRequests.fold(0, (sum, leaveRequest) {
           DateTime existingStartDate = DateTime.parse(leaveRequest.startDate);
           DateTime existingEndDate = DateTime.parse(leaveRequest.endDate);
-          DateTime newStartDate = DateTime.parse(event.startDate);
-          DateTime newEndDate = DateTime.parse(event.endDate);
+          return sum + existingEndDate.difference(existingStartDate).inDays + 1; // +1 to include the start day
+        });
 
-          if (newStartDate.isBefore(existingEndDate) && newEndDate.isAfter(existingStartDate)) {
-            isOverlapping = true;
-            break;
-          }
+        // Calculate the new leave request days
+        DateTime newStartDate = DateTime.parse(event.startDate);
+        DateTime newEndDate = DateTime.parse(event.endDate);
+        int newLeaveDays = newEndDate.difference(newStartDate).inDays + 1;
+
+        // Check if the new request exceeds the leave limit
+        if (totalUsedDays + newLeaveDays > 30) {
+          emit(LeaveRequestFailure(
+            errorMessage: 'You have exceeded the 30-day annual leave limit. '
+                'You have already used $totalUsedDays days.',
+            currentLeaves: _currentLeaves,
+          ));
+          return;
         }
+
+        // Check for overlapping leave requests
+        bool isOverlapping = leaveRequests.any((leaveRequest) {
+          DateTime existingStartDate = DateTime.parse(leaveRequest.startDate);
+          DateTime existingEndDate = DateTime.parse(leaveRequest.endDate);
+          return newStartDate.isBefore(existingEndDate) && newEndDate.isAfter(existingStartDate);
+        });
 
         if (isOverlapping) {
           emit(LeaveRequestFailure(
@@ -38,7 +52,7 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
           return;
         }
 
-        // If no overlap, process the leave request
+        // If no overlap and within the limit, process the leave request
         await _databaseHelper.insertLeaveRequest({
           'leaveType': event.leaveType,
           'startDate': event.startDate,
