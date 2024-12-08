@@ -1,18 +1,20 @@
-import 'package:attendence_system/data/repositories/database_helper.dart';
-import 'package:attendence_system/features/leave/presentation/bloc/leave_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../data/data/leave_request_model.dart';
+import '../../../../data/repositories/database_helper.dart';
 import 'leave_event.dart';
+import 'leave_state.dart';
 
 class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
   final DatabaseHelper _databaseHelper;
+  List<LeaveRequest> _currentLeaves = [];
 
   LeaveBloc(this._databaseHelper) : super(LeaveInitial()) {
-    // Handle RequestLeave event
     on<RequestLeave>((event, emit) async {
       try {
         // Fetch leave data from the local database
         final leaveRequests = await _databaseHelper.getLeaveRequests();
+        _currentLeaves = leaveRequests;
 
         // Check for overlapping leave requests
         bool isOverlapping = false;
@@ -29,7 +31,10 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
         }
 
         if (isOverlapping) {
-          emit(LeaveRequestFailure(errorMessage: 'Leave dates overlap with an existing request.'));
+          emit(LeaveRequestFailure(
+            errorMessage: 'Leave dates overlap with an existing request.',
+            currentLeaves: _currentLeaves,
+          ));
           return;
         }
 
@@ -44,20 +49,27 @@ class LeaveBloc extends Bloc<LeaveEvent, LeaveState> {
 
         // Fetch updated leave requests
         final updatedLeaveRequests = await _databaseHelper.getLeaveRequests();
+        _currentLeaves = updatedLeaveRequests;
         emit(LeaveLoaded(leaveRequests: updatedLeaveRequests));
 
       } catch (error) {
-        emit(LeaveRequestFailure(errorMessage: error.toString()));
+        emit(LeaveRequestFailure(
+          errorMessage: error.toString(),
+          currentLeaves: _currentLeaves,
+        ));
       }
     });
 
-    // Handle FetchLeaves event
     on<FetchLeaves>((event, emit) async {
       try {
         final leaveRequests = await _databaseHelper.getLeaveRequests();
-        emit(LeaveLoaded(leaveRequests: leaveRequests));
+        _currentLeaves = leaveRequests;
+        emit(LeaveLoaded(leaveRequests: _currentLeaves));
       } catch (error) {
-        emit(LeaveRequestFailure(errorMessage: error.toString()));
+        emit(LeaveRequestFailure(
+          errorMessage: error.toString(),
+          currentLeaves: _currentLeaves,
+        ));
       }
     });
   }

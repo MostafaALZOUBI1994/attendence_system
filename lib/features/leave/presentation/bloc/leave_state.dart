@@ -8,8 +8,12 @@ class LeaveRequestSuccess extends LeaveState {}
 
 class LeaveRequestFailure extends LeaveState {
   final String errorMessage;
+  final List<LeaveRequest> currentLeaves;
 
-  LeaveRequestFailure({required this.errorMessage});
+  LeaveRequestFailure({
+    required this.errorMessage,
+    required this.currentLeaves,
+  });
 }
 
 class LeaveLoaded extends LeaveState {
