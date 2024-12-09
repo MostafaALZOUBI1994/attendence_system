@@ -1,16 +1,9 @@
 # attendence_system
 
-A new Flutter project.
+This app is a demonstration of a Mobile Application Developer task for the Ministry of Economy. It uses Clean Architecture to ensure a scalable, maintainable, and testable codebase.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Features
+Implements modular layers:
+Presentation Layer: Handles UI/UX interactions with the user.
+Data Layer: Manages data sources and repositories.
+Built with best practices in mind, including state management.
