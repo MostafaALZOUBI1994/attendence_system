@@ -81,7 +81,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               children: [
                 _buildWelcomeMessage(),
                 const SizedBox(height: 16),
-                FittedBox(child: _buildSummaryCards()),
+                 FittedBox(child: _buildSummaryCards()),
                 const SizedBox(height: 24),
                 _buildAttendanceOverview(),
                 const SizedBox(height: 24),
