@@ -1,3 +1,4 @@
+import 'package:attendence_system/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/constants.dart';
@@ -18,7 +19,7 @@ class AttendancePage extends StatelessWidget {
         ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: const Color(0xFF673AB7),
+        backgroundColor: primaryColor,
       ),
       body: BlocProvider(
         create: (context) => AttendanceBloc()..add(LoadAttendance()),

@@ -1,3 +1,4 @@
+import 'package:attendence_system/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +21,7 @@ class LeaveHistoryPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Leave History',style: TextStyle(color: Colors.white),),
         centerTitle: true,
-        backgroundColor: const Color(0xFF673AB7),
+        backgroundColor: primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: BlocBuilder<LeaveBloc, LeaveState>(
@@ -85,7 +86,7 @@ class LeaveHistoryPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
-                backgroundColor: const Color(0xFF673AB7),
+                backgroundColor: primaryColor,
                 child: Text(
                   leave.leaveType[0].toUpperCase(),
                   style: const TextStyle(color: Colors.white),

@@ -1,3 +1,4 @@
+import 'package:attendence_system/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -70,7 +71,7 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
           title: const Text("Request Leave", style: TextStyle(color: Colors.white),),
           centerTitle: true,
           iconTheme: const IconThemeData(color: Colors.white),
-          backgroundColor: const Color(0xFF673AB7),
+          backgroundColor: primaryColor, // Updated primaryColor
         ),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
@@ -167,7 +168,7 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF673AB7),
+                      backgroundColor: primaryColor, // Updated primaryColor
                       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -195,7 +196,7 @@ class _LeaveRequestFormState extends State<LeaveRequestForm> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.deepPurple.withOpacity(0.2),
+            color: primaryColor.withOpacity(0.2), // Updated color
             blurRadius: 10,
             spreadRadius: 3,
             offset: const Offset(0, 5),

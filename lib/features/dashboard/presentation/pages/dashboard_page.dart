@@ -11,13 +11,21 @@ import '../../../leave/presentation/bloc/leave_state.dart';
 import '../../../leave/presentation/pages/leave_request_form.dart';
 import '../../../leave/presentation/pages/leave_history_page.dart';
 
+const Color deepTeal = Color(0xFF2A6559);
+const Color softCoral = Color(0xFFF4A27E);
+// Update primary color and other color values
+final Color primaryColor = Color.fromRGBO(182, 138, 53, 1.0); // Golden brown
+final Color secondaryColor = Color.fromRGBO(65, 64, 66, 1.0); // Dark gray
+final Color lightGray = Color.fromRGBO(198, 198, 198, 1.0); // Light gray
+final Color veryLightGray = Color.fromRGBO(225, 225, 225, 1.0); // Very light gray
+
 class DashboardPage extends StatefulWidget {
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
 class _DashboardPageState extends State<DashboardPage> with SingleTickerProviderStateMixin {
-  final Color primaryColor = const Color(0xFF673AB7);
+
   int totalLeaveDays = 0;
   late AnimationController _controller;
   late Animation<double> _pieChartAnimation;
@@ -81,7 +89,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               children: [
                 _buildWelcomeMessage(),
                 const SizedBox(height: 16),
-                 FittedBox(child: _buildSummaryCards()),
+                FittedBox(child: _buildSummaryCards()),
                 const SizedBox(height: 24),
                 _buildAttendanceOverview(),
                 const SizedBox(height: 24),
@@ -99,7 +107,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
     return AppBar(
       title: const Text(Strings.appTitle, style: TextStyle(color: Colors.white)),
       centerTitle: true,
-      backgroundColor: primaryColor,
+      backgroundColor: primaryColor, // Use the updated primary color
     );
   }
 
@@ -161,9 +169,9 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildSummaryCard(title: Strings.daysWorkedTitle, value: "22", color: Colors.green),
-            _buildSummaryCard(title: Strings.leaveBalanceTitle, value: (30 - totalLeaveDays).toString(), color: Colors.blue),
-            _buildSummaryCard(title: Strings.pendingRequestsTitle, value: "2", color: Colors.orange),
+            _buildSummaryCard(title: Strings.daysWorkedTitle, value: "22", color: secondaryColor),
+            _buildSummaryCard(title: Strings.leaveBalanceTitle, value: (30 - totalLeaveDays).toString(), color: primaryColor),
+            _buildSummaryCard(title: Strings.pendingRequestsTitle, value: "2", color: lightGray),
           ],
         ),
       ),
@@ -200,9 +208,9 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                         PieChartData(
                           startDegreeOffset: -90,
                           sections: [
-                            PieChartSectionData(value: animatedWorkedValue, color: Colors.blue, radius: 50, showTitle: false),
-                            PieChartSectionData(value: animatedLeaveValue, color: Colors.orange, radius: 50, showTitle: false),
-                            PieChartSectionData(value: 100 - (animatedWorkedValue + animatedLeaveValue), color: Colors.grey.withOpacity(0.2), radius: 50, showTitle: false),
+                            PieChartSectionData(value: animatedWorkedValue, color: primaryColor, radius: 50, showTitle: false), // Updated primaryColor
+                            PieChartSectionData(value: animatedLeaveValue, color: secondaryColor, radius: 50, showTitle: false), // Updated secondaryColor
+                            PieChartSectionData(value: 100 - (animatedWorkedValue + animatedLeaveValue), color: veryLightGray, radius: 50, showTitle: false), // Updated veryLightGray
                           ],
                           centerSpaceRadius: 60,
                           sectionsSpace: 4,
@@ -215,13 +223,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                             Text(
                               'Present\n${(workedDaysPercentage * (_pieChartAnimation.value / 100)).toStringAsFixed(1)}%',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 16),
+                              style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 16), // Updated primaryColor
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Leave\n${(leaveDaysPercentage * (_pieChartAnimation.value / 100)).toStringAsFixed(1)}%',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 16),
+                              style: TextStyle(color: secondaryColor, fontWeight: FontWeight.bold, fontSize: 16), // Updated secondaryColor
                             ),
                           ],
                         ),
