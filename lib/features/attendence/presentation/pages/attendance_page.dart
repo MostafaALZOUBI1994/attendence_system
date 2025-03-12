@@ -1,150 +1,168 @@
-import 'package:attendence_system/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:attendence_system/features/app_background.dart';
+import 'package:attendence_system/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/constants.dart';
-import '../../../../main.dart';
-import '../bloc/attendance_bloc.dart';
-import '../bloc/attendance_event.dart';
-import '../bloc/attendance_state.dart';
+import 'package:intl/intl.dart';
 
-class AttendancePage extends StatelessWidget {
-  const AttendancePage({Key? key}) : super(key: key);
+
+class ReportsScreen extends StatefulWidget {
+  @override
+  _ReportsScreenState createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends State<ReportsScreen> {
+  String _selectedFilter = "All";
+
+  final List<AttendanceRecord> _allRecords = [
+    AttendanceRecord(date: DateTime(2025, 3, 1), checkIn: "08:30 AM", checkOut: "05:00 PM", status: "On Time"),
+    AttendanceRecord(date: DateTime(2025, 3, 2), checkIn: "09:10 AM", checkOut: "05:15 PM", status: "Late"),
+    AttendanceRecord(date: DateTime(2025, 3, 3), checkIn: "--", checkOut: "--", status: "Absent"),
+  ];
+
+  List<AttendanceRecord> get _filteredRecords {
+    DateTime now = DateTime.now();
+    if (_selectedFilter == "Last 7 Days") {
+      return _allRecords.where((r) => r.date.isAfter(now.subtract(Duration(days: 7)))).toList();
+    } else if (_selectedFilter == "Last 30 Days") {
+      return _allRecords.where((r) => r.date.isAfter(now.subtract(Duration(days: 30)))).toList();
+    }
+    return _allRecords;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          Strings.appBarTitle,
-          style: TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text("Attendance History", style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: BlocProvider(
-        create: (context) => AttendanceBloc()..add(LoadAttendance()),
-        child: BlocBuilder<AttendanceBloc, AttendanceState>(
-          builder: (context, state) {
-            if (state is AttendanceInitial) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is AttendanceLoaded) {
-              return _buildAttendanceList(context, state.records);
-            } else {
-              return const Center(child: Text(Strings.somethingWentWrong));
-            }
-          },
+      body: AppBackground(
+        child: Stack(
+          children: [
+            _buildBackground(),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildFilterChips(),
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _filteredRecords.length,
+                      itemBuilder: (context, index) {
+                        return _buildAttendanceCard(_filteredRecords[index]);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildAttendanceList(
-      BuildContext context, List<Map<String, dynamic>> records) {
-    return Padding(
+  Widget _buildBackground() => Stack(
+    children: [
+      Positioned(top: 100, left: -50, child: _buildDecorativeCircle(200, Color.fromRGBO(182, 138, 53, 0.2))),
+      Positioned(bottom: -80, right: -80, child: _buildDecorativeCircle(250, Color.fromRGBO(182, 138, 53, 0.3))),
+    ],
+  );
+
+  Widget _buildDecorativeCircle(double size, Color color) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+  );
+
+  Widget _buildFilterChips() => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      _buildChip("All"),
+      _buildChip("Last 7 Days"),
+      _buildChip("Last 30 Days"),
+    ],
+  );
+
+  Widget _buildChip(String label) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+    child: ChoiceChip(
+      label: Text(label, style: TextStyle(color: _selectedFilter == label ? Colors.white : Colors.black)),
+      selected: _selectedFilter == label,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: _selectedFilter == label ? Colors.white : Colors.grey,
+          width: 2,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      selectedColor: primaryColor,
+      backgroundColor: Colors.white,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() => _selectedFilter = label);
+        }
+      },
+    ),
+  );
+
+  Widget _buildAttendanceCard(AttendanceRecord record) => Card(
+    margin: EdgeInsets.symmetric(vertical: 8),
+    elevation: 5,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    child: Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            Strings.markAttendanceTitle,
-            style: Theme.of(context).textTheme.titleLarge,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                DateFormat('MMMM d, yyyy').format(record.date),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 5),
+              Row(children: [Icon(Icons.login, color: Colors.green), SizedBox(width: 5), Text("Check-In: ${record.checkIn}")]),
+              Row(children: [Icon(Icons.logout, color: Colors.red), SizedBox(width: 5), Text("Check-Out: ${record.checkOut}")]),
+            ],
           ),
-          const SizedBox(height: 16),
-          _buildAttendanceOption(
-            context,
-            icon: Icons.check_circle,
-            color: Colors.green,
-            title: Strings.present,
-            onTap: () => _markAttendance(context, Strings.present),
-          ),
-          _buildAttendanceOption(
-            context,
-            icon: Icons.error_outline,
-            color: Colors.orange,
-            title: Strings.missedPunch,
-            onTap: () => _markAttendance(context, Strings.missedPunch),
-          ),
-          _buildAttendanceOption(
-            context,
-            icon: Icons.alarm_off,
-            color: Colors.red,
-            title: Strings.earlyOut,
-            onTap: () => _markAttendance(context, Strings.earlyOut),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            Strings.attendanceRowsTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView.builder(
-              itemCount: records.length,
-              itemBuilder: (context, index) {
-                final record = records[index];
-                return Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: _getStatusColor(record['status']),
-                      child: Text(
-                        record['status'][0].toUpperCase(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    title: Text(record['status']),
-                    subtitle: Text(record['date']),
-                  ),
-                );
-              },
-            ),
-          ),
+          _buildStatusChip(record.status),
         ],
       ),
-    );
-  }
+    ),
+  );
 
-  void _markAttendance(BuildContext context, String status) {
-    final attendanceBloc = context.read<AttendanceBloc>();
-    final date = DateTime.now().toString();
-
-    attendanceBloc.add(MarkAttendance(date: date, status: status));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$status ${Strings.snackBarMessage}')),
-    );
-  }
-
-  Widget _buildAttendanceOption(BuildContext context,
-      {required IconData icon,
-        required Color color,
-        required String title,
-        required VoidCallback onTap}) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 4,
-      child: ListTile(
-        leading: Icon(icon, color: color),
-        title: Text(title),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  Color _getStatusColor(String status) {
+  Widget _buildStatusChip(String status) {
+    Color color;
     switch (status) {
-      case Strings.present:
-        return Colors.green;
-      case Strings.missedPunch:
-        return Colors.orange;
-      case Strings.earlyOut:
-        return Colors.red;
+      case "On Time":
+        color = Colors.green;
+        break;
+      case "Late":
+        color = Colors.orange;
+        break;
+      case "Absent":
+        color = Colors.red;
+        break;
       default:
-        return Colors.grey;
+        color = Colors.grey;
     }
+    return Chip(
+      label: Text(status, style: TextStyle(color: Colors.white)),
+      backgroundColor: color,
+    );
   }
+}
+
+class AttendanceRecord {
+  final DateTime date;
+  final String checkIn;
+  final String checkOut;
+  final String status;
+
+  AttendanceRecord({required this.date, required this.checkIn, required this.checkOut, required this.status});
 }
