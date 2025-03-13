@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:attendence_system/features/app_background.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../../../../main.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -14,6 +15,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final List<double> _moodHistory = [0.66, 1.0, 1.0, 0.66, 1.0];
+  final double _performanceScore = 85;
 
   double get _averageMood {
     if (_moodHistory.isEmpty) return 0.0;
@@ -110,6 +112,8 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildHappinessCard(),
           const SizedBox(height: 20),
           AccessCard(),
+          const SizedBox(height: 20),
+          _buildPerformanceIndicator(),
           const SizedBox(height: 20),
           _buildStatsRow(),
           // const SizedBox(height: 20),
@@ -295,6 +299,79 @@ class _ProfilePageState extends State<ProfilePage> {
           style: const TextStyle(fontSize: 12),
         ),
       ],
+    );
+  }
+  Widget _buildPerformanceIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 2),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            "Performance Indicator",
+            style: TextStyle(
+              color: Colors.blueGrey,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SfRadialGauge(
+            axes: <RadialAxis>[
+              RadialAxis(
+                minimum: 0,
+                maximum: 100,
+                ranges: <GaugeRange>[
+                  GaugeRange(startValue: 0, endValue: 40, color: Colors.red),
+                  GaugeRange(startValue: 40, endValue: 70, color: Colors.orange),
+                  GaugeRange(startValue: 70, endValue: 90, color: Colors.blue),
+                  GaugeRange(startValue: 90, endValue: 100, color: Colors.green),
+                ],
+                pointers: <GaugePointer>[
+                  NeedlePointer(value: _performanceScore),
+                ],
+                annotations: <GaugeAnnotation>[
+                  GaugeAnnotation(
+                    widget: Text(
+                      "$_performanceScore%",
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    angle: 90,
+                    positionFactor: 0.8,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildPerformanceBadge(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceBadge() {
+    String badge = _performanceScore >= 90
+        ? "🎯 Early bird"
+        : _performanceScore >= 80
+        ? "🦉 Night owl"
+        : _performanceScore >= 70
+        ? "💼 Consistent Contributor"
+        : "🚀 Needs Improvement";
+
+    return Text(
+      "Badge: $badge",
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Colors.blueGrey,
+      ),
     );
   }
 }
@@ -534,3 +611,4 @@ class _AccessCardState extends State<AccessCard>
     super.dispose();
   }
 }
+

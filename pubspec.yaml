@@ -51,6 +51,7 @@ dependencies:
   confetti: ^0.8.0
   percent_indicator: ^4.2.4
   image_picker: ^1.1.2
+  syncfusion_flutter_gauges: ^28.2.11
 
 dev_dependencies:
   flutter_test:

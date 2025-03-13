@@ -1,15 +1,10 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
-import 'package:attendence_system/data/data/leave_request_model.dart';
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:timelines_plus/timelines_plus.dart';
-import '../../../../core/constants/constants.dart';
 import '../../../../main.dart';
 
 
@@ -220,8 +215,19 @@ class _TimeScreenState extends State<TimeScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("How are you feeling today?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
+        Row(
+          children: [
+            Icon(Icons.emoji_emotions_outlined, color: primaryColor),
+            SizedBox(width: 8),
+            Text("How are you feeling today?",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                )),
+          ],
+        ),
+        SizedBox(height: 15),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -235,38 +241,85 @@ class _TimeScreenState extends State<TimeScreen> {
     ),
   );
 
-  Widget _moodEmoji(String emoji, String label) => Column(
-    children: [
-      Text(emoji, style: TextStyle(fontSize: 30)),
-      SizedBox(height: 5),
-      Text(label, style: TextStyle(fontSize: 14)),
-    ],
+  void _showFeedbackPopup(BuildContext context, String mood) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: ScaleTransition(
+            scale: CurvedAnimation(
+              parent: ModalRoute.of(context)!.animation!,
+              curve: Curves.easeOutBack,
+            ),
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Row(
+                children: [
+                  Icon(Icons.feedback, color: primaryColor),
+                  SizedBox(width: 10),
+                  Text("Share Feedback", style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("You selected \"$mood\". Would you like to share why?"),
+                  SizedBox(height: 10),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: "Type your feedback...",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Cancel", style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // You can send feedback to the server here
+                  },
+                  child: Text("Send", style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _moodEmoji(String emoji, String label) => GestureDetector(
+    onTap: () => _showFeedbackPopup(context, label),
+    child: Column(
+      children: [
+        AnimatedContainer(
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8, spreadRadius: 2)],
+          ),
+          child: Text(emoji, style: TextStyle(fontSize: 30)),
+        ),
+        SizedBox(height: 5),
+        Text(label, style: TextStyle(fontSize: 14)),
+      ],
+    ),
   );
 
-
-  Widget _buildBottomNavigationBar() => AnimatedNotchBottomBar(
-    showLabel: true,
-    notchColor: primaryColor,
-    bottomBarItems: [
-      _bottomBarItem(Icons.home, "Home"),
-      _bottomBarItem(Icons.settings, "Services"),
-      _bottomBarItem(Icons.list_alt, "Attendance"),
-      _bottomBarItem(Icons.person, "Profile"),
-    ],
-    onTap: (index) => setState(() {}),
-    notchBottomBarController: _controller,
-    color: veryLightGray,
-    kBottomRadius: 28.0,
-    elevation: 100,
-    shadowElevation: 5,
-    showShadow: true, kIconSize: 20,
-  );
-
-  BottomBarItem _bottomBarItem(IconData icon, String label) => BottomBarItem(
-    inActiveItem: Icon(icon, color: Colors.grey),
-    activeItem: Icon(icon, color: Colors.white),
-    itemLabel: label,
-  );
+  void _animateEmoji(String emoji, double scale) {
+    // You can implement more specific animations if needed
+    setState(() {});
+  }
 }
 
 class ProcessTimeline extends StatelessWidget {

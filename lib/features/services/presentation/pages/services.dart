@@ -1,9 +1,11 @@
 import 'package:attendence_system/features/services/presentation/pages/ask_ai.dart';
 import 'package:attendence_system/features/services/presentation/pages/hr_request.dart';
+import 'package:attendence_system/features/services/presentation/pages/team_status.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
 import '../../../app_background.dart';
+import 'events.dart';
 
 class ServicesScreen extends StatelessWidget {
   const ServicesScreen({super.key});
@@ -29,24 +31,34 @@ class ServicesScreen extends StatelessWidget {
   Widget _buildServiceGrid(BuildContext context) {
     final services = [
       {
-        'icon': Icons.computer,
-        'title': 'HR Requests',
+        'icon': Icons.assignment_ind, // More HR-specific icon
+        'title': 'HR Support',
         'route': '/hr-requests',
       },
       {
-        'icon': Icons.coffee,
+        'icon': Icons.local_cafe,
         'title': 'Pantry',
         'route': '/pantry',
       },
       {
-        'icon': Icons.support_agent,
+        'icon': Icons.headset_mic,
         'title': 'Help Desk',
         'route': '/help-desk',
       },
       {
-        'icon': Icons.smart_toy,
-        'title': 'Ask AI',
+        'icon': Icons.smart_toy_outlined,
+        'title': 'Ask Bot',
         'route': '/ask-ai',
+      },
+      {
+        'icon': Icons.people_alt_outlined,
+        'title': 'Team Status',
+        'route': '/team-status',
+      },
+      {
+        'icon': Icons.calendar_month,
+        'title': 'Upcoming Events',
+        'route': '/events',
       },
     ];
 
@@ -134,6 +146,10 @@ class ServicesScreen extends StatelessWidget {
         return HRRequestScreen();
       case '/ask-ai':
         return AskAIScreen();
+      case '/team-status':
+        return const TeamStatusScreen();
+      case '/events':
+        return const EventsScreen();
     }
   }
 }
