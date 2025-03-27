@@ -1,9 +1,10 @@
 import 'package:attendence_system/features/services/presentation/pages/ask_ai.dart';
 import 'package:attendence_system/features/services/presentation/pages/hr_request.dart';
+import 'package:attendence_system/features/services/presentation/pages/pantry.dart';
 import 'package:attendence_system/features/services/presentation/pages/team_status.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../main.dart';
+import '../../../../core/constants/constants.dart';
 import '../../../app_background.dart';
 import 'events.dart';
 
@@ -14,9 +15,9 @@ class ServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Services", style: TextStyle(color: Colors.white)),
+        title: const Text("Services", style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: AppBackground(
         child: Column(
@@ -31,14 +32,14 @@ class ServicesScreen extends StatelessWidget {
   Widget _buildServiceGrid(BuildContext context) {
     final services = [
       {
-        'icon': Icons.assignment_ind, // More HR-specific icon
+        'icon': Icons.assignment_ind,
         'title': 'HR Support',
         'route': '/hr-requests',
       },
       {
         'icon': Icons.local_cafe,
         'title': 'Pantry',
-        'route': '/pantry',
+        'route': '/pantry-request',
       },
       {
         'icon': Icons.headset_mic,
@@ -52,8 +53,8 @@ class ServicesScreen extends StatelessWidget {
       },
       {
         'icon': Icons.people_alt_outlined,
-        'title': 'Team Status',
-        'route': '/team-status',
+        'title': 'Team Contacts',
+        'route': '/team-contacts',
       },
       {
         'icon': Icons.calendar_month,
@@ -66,7 +67,7 @@ class ServicesScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: GridView.builder(
         itemCount: services.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 1,
           crossAxisSpacing: 12,
@@ -93,7 +94,7 @@ class ServicesScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 2),
           ],
         ),
@@ -101,10 +102,10 @@ class ServicesScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 40, color: primaryColor),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               title,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -143,13 +144,16 @@ class ServicesScreen extends StatelessWidget {
   Widget? _getScreenForRoute(String routeName) {
     switch (routeName) {
       case '/hr-requests':
-        return HRRequestScreen();
+        return const HRRequestScreen();
       case '/ask-ai':
-        return AskAIScreen();
-      case '/team-status':
-        return const TeamStatusScreen();
+        return const AskAIScreen();
+      case '/team-contacts':
+        return const TeamContactScreen();
       case '/events':
         return const EventsScreen();
+      case '/pantry-request':
+        return const PantryRequestScreen();
     }
+    return null;
   }
 }

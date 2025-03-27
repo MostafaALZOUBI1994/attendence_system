@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 
-import '../../../../main.dart';
+import '../../../../core/constants/constants.dart';
 import '../../../app_background.dart';
 
-class TeamStatusScreen extends StatelessWidget {
-  const TeamStatusScreen({super.key});
+class TeamContactScreen extends StatelessWidget {
+  const TeamContactScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Team Status',style: TextStyle(color: Colors.white),),
+        title: const Text(
+          'Team Contacts',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: AppBackground(
         child: Column(
           children: [
-            _buildStatusLegend(),
+            _buildContactLegend(),
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -34,7 +37,7 @@ class TeamStatusScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusLegend() {
+  Widget _buildContactLegend() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -45,91 +48,90 @@ class TeamStatusScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildLegendItem(primaryColor, 'Onsite'),
-          _buildLegendItem(Colors.orangeAccent, 'Remote'),
-          _buildLegendItem(Colors.redAccent, 'Absent'),
+          _buildLegendItem(Icons.email, 'Email'),
+          _buildLegendItem(Icons.phone, 'Extension'),
         ],
       ),
     );
   }
 
-  Widget _buildLegendItem(Color color, String text) {
+  Widget _buildLegendItem(IconData icon, String text) {
     return Row(
       children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(3),
-          ),
+        Icon(
+          icon,
+          color: secondaryColor,
+          size: 18,
         ),
         const SizedBox(width: 8),
         Text(
           text,
-          style: TextStyle(fontWeight: FontWeight.bold, color: secondaryColor),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: secondaryColor),
         ),
       ],
     );
   }
 
   Widget _buildTeamMemberCard(int index) {
-    final status = ['Onsite', 'Remote', 'Absent'][index % 3];
-    final color = _getStatusColor(status);
+    // Sample data for demonstration purposes
+    final List<Map<String, String>> teamMembers = [
+      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
+      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
+      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
+      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
+      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
+      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
+      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
+      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'}
+    ];
+
+    final member = teamMembers[index];
 
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: BorderSide(color: color.withOpacity(0.3), width: 2),
+        side: BorderSide(color: lightGray.withOpacity(0.3), width: 2),
       ),
       color: Colors.white,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              CircleAvatar(
-                radius: 35,
-                backgroundImage: const AssetImage('assets/user_profile.jpg'), // Add your image
-                backgroundColor: lightGray,
-              ),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color, width: 2),
-                ),
-                child: Icon(
-                  status == 'Onsite' ? Icons.location_on
-                      : status == 'Remote' ? Icons.wifi
-                      : Icons.close,
-                  color: color,
-                  size: 18,
-                ),
-              ),
-            ],
+          const CircleAvatar(
+            radius: 35,
+            backgroundImage: AssetImage('assets/user_profile.jpg'), // Add your image
+            backgroundColor: lightGray,
           ),
           const SizedBox(height: 8),
           Text(
-            'Mostafa ALZOUBI',
-            style: TextStyle(fontWeight: FontWeight.bold, color: secondaryColor),
+            member['name']!,
+            style: const TextStyle(fontWeight: FontWeight.bold, color: secondaryColor),
           ),
-          Text(
-            'Software Engineer',
-            style: TextStyle(color: lightGray),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.email, color: primaryColor, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                member['email']!,
+                style: const TextStyle(fontSize: 12, color: lightGray),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.phone, color: primaryColor, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                'Ext: ${member['extension']}',
+                style: const TextStyle(fontSize: 12, color: lightGray),
+              ),
+            ],
           ),
         ],
       ),
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Onsite': return primaryColor;
-      case 'Remote': return Colors.orangeAccent;
-      default: return Colors.redAccent;
-    }
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../main.dart';
+import '../../../../core/constants/constants.dart';
 import '../../../app_background.dart';
 
 class EventsScreen extends StatelessWidget {
@@ -39,7 +39,7 @@ class EventsScreen extends StatelessWidget {
         ),
       child: Column(
         children: [
-          Text(
+          const Text(
             'Next Birthday In...',
             style: TextStyle(
               color: primaryColor,
@@ -80,14 +80,14 @@ class EventsScreen extends StatelessWidget {
          color: Colors.white
           ),
 
-        child: Row(
+        child: const Row(
           children: [
             Stack(
               alignment: Alignment.center,
               children: [
                 CircleAvatar(
                   radius: 35,
-                  backgroundImage: const AssetImage('assets/user_profile.jpg'),
+                  backgroundImage: AssetImage('assets/user_profile.jpg'),
                   backgroundColor: lightGray,
                 ),
                 Positioned(
@@ -97,7 +97,7 @@ class EventsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,16 +110,16 @@ class EventsScreen extends StatelessWidget {
                       fontSize: 18,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     'Mobile Developer',
                     style: TextStyle(color: Colors.white),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Row(
                     children: [
                       Icon(Icons.calendar_today, color: primaryColor, size: 16),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Text(
                         'October 25',
                         style: TextStyle(color: primaryColor),

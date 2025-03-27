@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../main.dart';
+import '../core/constants/constants.dart';
 
 class AppBackground extends StatelessWidget {
   final Widget child;
@@ -11,7 +10,6 @@ class AppBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Your existing background elements
         Positioned(
           top: 150,
           left: -50,

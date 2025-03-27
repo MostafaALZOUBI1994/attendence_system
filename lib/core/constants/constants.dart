@@ -1,44 +1,12 @@
-class Constants {
-  static const List<String> leaveTypes = ['Sick', 'Vacation', 'Personal'];
-}
+import 'dart:ui';
 
-class Strings {
-  static const String appTitle = 'Attendance Dashboard';
-  static const String welcomeMessage = 'Welcome Back!';
-  static const String todayLabel = 'Today:';
-  static const String daysWorkedTitle = 'Days Worked';
-  static const String leaveBalanceTitle = 'Leave Balance';
-  static const String pendingRequestsTitle = 'Pending Requests';
-  static const String attendanceOverviewTitle = 'Attendance Overview';
-  static const String quickActionsTitle = 'Quick Actions';
-  static const String markAttendanceLabel = 'Mark Attendance';
-  static const String requestLeaveLabel = 'Request Leave';
-  static const String leaveHistoryLabel = 'Leave History';
-  static const String attendanceTitle = "Mark Attendance";
-  static const String markAttendancePrompt = "Select your attendance status:";
-  static const String present = "Present";
-  static const String missedPunch = "Missed Punch";
-  static const String earlyOut = "Early Out";
-
-  static const String presentMarkedMessage = "Attendance marked as Present!";
-  static const String missedPunchMarkedMessage =
-      "Attendance marked as Missed Punch!";
-  static const String earlyOutMarkedMessage = "Attendance marked as Early Out!";
-  static const requestLeaveTitle = 'Request Leave';
-  static const leaveTypeLabel = 'Leave Type';
-  static const startDateTimeLabel = 'Start Date & Time';
-  static const endDateTimeLabel = 'End Date & Time';
-  static const reasonLabel = 'Reason';
-  static const selectLeaveTypeError = 'Please select a leave type';
-  static const selectStartDateTimeError = 'Select start date & time';
-  static const selectEndDateTimeError = 'Select end date & time';
-  static const provideReasonError = 'Provide a reason';
-  static const submitLeaveButton = 'Submit Leave';
-  static const startBeforeEndDateError = 'Start date must be before the end date.';
-  static const appBarTitle = 'Attendance';
-  static const markAttendanceTitle = 'Mark Attendance';
-  static const attendanceRowsTitle = 'Attendance Rows';
-  static const snackBarMessage = 'marked successfully!';
-  static const somethingWentWrong = 'Something went wrong.';
-
-}
+const Color primaryColor = Color.fromRGBO(182, 138, 53, 1.0);
+const Color secondaryColor = Color.fromRGBO(65, 64, 66, 1.0);
+const Color lightGray = Color.fromRGBO(198, 198, 198, 1.0);
+const Color veryLightGray = Color.fromRGBO(225, 225, 225, 1.0);
+const String baseUrl = 'https://taapi.moec.gov.ae/api/lgt/';
+const String login = '${baseUrl}login?langcode=en-US';
+const String empID = 'EMP_ID';
+const String empName = 'EMP_NAME';
+const String empNameAR = 'EMP_NAME_AR';
+const String profileImage = 'PROFILE_IMAGE';

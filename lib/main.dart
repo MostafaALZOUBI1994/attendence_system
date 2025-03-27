@@ -1,39 +1,57 @@
-
 import 'dart:async';
-
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
+import 'package:attendence_system/features/authentication/presentation/bloc/login_bloc.dart';
+import 'package:attendence_system/features/authentication/presentation/pages/login_page.dart';
 import 'package:flutter/material.dart';
-
-import 'features/attendence/presentation/pages/attendance_page.dart';
-import 'features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'core/constants/constants.dart';
+import 'core/injection.dart';
+import 'features/attendence/bloc/attendence_bloc.dart';
+import 'features/attendence/presentation/pages/attendence_page.dart';
+import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
+import 'features/reports/presentation/pages/reports_page.dart';
 import 'features/services/presentation/pages/services.dart';
 
 
-const Color deepTeal = Color(0xFF2A6559);
-const Color softCoral = Color(0xFFF4A27E);
-final Color primaryColor = Color.fromRGBO(182, 138, 53, 1.0);
-final Color secondaryColor = Color.fromRGBO(65, 64, 66, 1.0);
-final Color lightGray = Color.fromRGBO(198, 198, 198, 1.0);
-final Color veryLightGray = Color.fromRGBO(225, 225, 225, 1.0);
 
 
-void main() {
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  await configureDependencies();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => getIt<ProfileBloc>(),
+        ),
+        BlocProvider(
+            create: (context) => getIt<LoginBloc>()),
+        BlocProvider(create: (context) => getIt<AttendenceBloc>()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/',
+        routes: {
+          '/': (context) => LoginScreen(),
+          '/main': (context) => MainScreen(),
+        },
+      ),
     );
   }
 }
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -44,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(const Duration(seconds: 3), () {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => MainScreen()),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
       );
     });
   }
@@ -70,6 +88,8 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -79,10 +99,10 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    TimeScreen(),
-    ServicesScreen(),
-    ReportsScreen(),
-    ProfilePage(),
+    const TimeScreen(),
+    const ServicesScreen(),
+    const ReportsScreen(),
+    const ProfilePage(),
   ];
 
   @override
@@ -105,6 +125,8 @@ class _MainScreenState extends State<MainScreen> {
         elevation: 100,
         shadowElevation: 5,
         showShadow: true,
+        removeMargins: true,
+        bottomBarHeight: 82.0,
         kIconSize: 20,
       ),
     );

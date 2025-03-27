@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import '../../../../main.dart';
+import '../../../../core/constants/constants.dart';
 import '../../../app_background.dart';
 
 class HRRequestScreen extends StatefulWidget {
@@ -14,7 +14,10 @@ class HRRequestScreen extends StatefulWidget {
 }
 
 class _HRRequestScreenState extends State<HRRequestScreen> {
+
   final _formKey = GlobalKey<FormState>();
+  File? _attachment;
+
   final List<String> _leaveTypes = [
     "Private",
     "Official Work",
@@ -30,15 +33,19 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     DateTime.now().add(const Duration(hours: 1)),
   );
   final TextEditingController _reasonController = TextEditingController();
-  File? _attachment;
+  final TextEditingController _correctionDateController = TextEditingController();
+  final TextEditingController _correctedTimeController = TextEditingController();
+  final TextEditingController _correctionReasonController = TextEditingController();
+
+  bool _isLeaveRequest = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("HR Request", style: TextStyle(color: Colors.white)),
+        title: const Text("HR Request", style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: AppBackground(
         child: SingleChildScrollView(
@@ -47,7 +54,9 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
             children: [
               _buildHeader(),
               const SizedBox(height: 20),
-              _buildRequestForm(),
+              _buildRequestToggle(),
+              const SizedBox(height: 20),
+              _isLeaveRequest ? _buildLeaveRequestForm() : _buildAttendanceCorrectionForm(),
             ],
           ),
         ),
@@ -80,9 +89,9 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
             lineWidth: 12,
             percent: 0.8,
             animation: true,
-            center: Column(
+            center: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Text(
                   "5 hrs",
                   style: TextStyle(
@@ -102,7 +111,39 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     );
   }
 
-  Widget _buildRequestForm() {
+  Widget _buildRequestToggle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        ElevatedButton(
+          onPressed: () => setState(() => _isLeaveRequest = true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _isLeaveRequest ? primaryColor : Colors.grey.shade300,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          ),
+          child: const Text(
+            "Leave Request",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => setState(() => _isLeaveRequest = false),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: !_isLeaveRequest ? primaryColor : Colors.grey.shade300,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          ),
+          child: const Text(
+            "Attendance Correction",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLeaveRequestForm() {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 4,
@@ -130,6 +171,34 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     );
   }
 
+  Widget _buildAttendanceCorrectionForm() {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 4,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildCorrectionDateField(),
+              const SizedBox(height: 20),
+              _buildCorrectedTimeField(),
+              const SizedBox(height: 20),
+              _buildCorrectionReasonField(),
+              const SizedBox(height: 20),
+              _buildAttachmentSection(),
+              const SizedBox(height: 20),
+              _buildSubmitButton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDropdownField() {
     return DropdownButtonFormField<String>(
       value: _selectedType,
@@ -144,42 +213,6 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     );
   }
 
-  Widget _buildSubmitButton() {
-    return ElevatedButton(
-      onPressed: _submitForm,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primaryColor,
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-      ),
-      child: const Center(
-        child: Text(
-          "Submit Request",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Success!"),
-          content: const Text("Your request has been submitted"),
-          actions: [
-            TextButton(
-              onPressed: Navigator.of(context).pop,
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-    }
-  }
   Widget _buildDateTimeRow() {
     return Row(
       children: [
@@ -198,7 +231,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
       decoration: InputDecoration(
         labelText: "Date",
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        suffixIcon: Icon(Icons.calendar_today, color: primaryColor),
+        suffixIcon: const Icon(Icons.calendar_today, color: primaryColor),
       ),
       controller: TextEditingController(text: DateFormat.yMd().format(_selectedDate)),
       onTap: () async {
@@ -219,7 +252,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        suffixIcon: Icon(Icons.access_time, color: primaryColor),
+        suffixIcon: const Icon(Icons.access_time, color: primaryColor),
       ),
       controller: TextEditingController(text: time.format(context)),
       onTap: () async {
@@ -240,6 +273,63 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
         labelText: "Reason",
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         hintText: "Enter your reason...",
+      ),
+      validator: (value) => value == null || value.isEmpty ? "Please enter a reason" : null,
+    );
+  }
+
+  Widget _buildCorrectionDateField() {
+    return TextFormField(
+      readOnly: true,
+      decoration: InputDecoration(
+        labelText: "Correction Date",
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        suffixIcon: const Icon(Icons.calendar_today, color: primaryColor),
+      ),
+      controller: _correctionDateController,
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+          lastDate: DateTime.now(),
+        );
+        if (date != null) {
+          setState(() => _correctionDateController.text = DateFormat.yMd().format(date));
+        }
+      },
+    );
+  }
+
+  Widget _buildCorrectedTimeField() {
+    return TextFormField(
+      readOnly: true,
+      decoration: InputDecoration(
+        labelText: "Corrected Time",
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        suffixIcon: const Icon(Icons.access_time, color: primaryColor),
+      ),
+      controller: _correctedTimeController,
+      onTap: () async {
+        final time = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        );
+        if (time != null) {
+          setState(() => _correctedTimeController.text = time.format(context));
+        }
+      },
+    );
+  }
+
+  Widget _buildCorrectionReasonField() {
+    return TextFormField(
+      controller: _correctionReasonController,
+      maxLines: 3,
+      decoration: InputDecoration(
+        labelText: "Reason for Correction",
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        hintText: "Enter the reason for correction...",
       ),
       validator: (value) => value == null || value.isEmpty ? "Please enter a reason" : null,
     );
@@ -269,7 +359,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(Icons.attach_file, color: primaryColor),
+                const Icon(Icons.attach_file, color: primaryColor),
               ],
             ),
           ),
@@ -283,6 +373,43 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() => _attachment = File(pickedFile.path));
+    }
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: _submitForm,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: primaryColor,
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+      ),
+      child: const Center(
+        child: Text(
+          "Submit Request",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Success!"),
+          content: Text(_isLeaveRequest ? "Your leave request has been submitted" : "Your attendance correction request has been submitted"),
+          actions: [
+            TextButton(
+              onPressed: Navigator.of(context).pop,
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
     }
   }
 }

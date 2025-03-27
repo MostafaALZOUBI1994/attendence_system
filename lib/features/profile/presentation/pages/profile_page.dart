@@ -1,10 +1,14 @@
-import 'dart:math';
-
+import 'dart:async';
 import 'package:attendence_system/features/app_background.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import '../../../../main.dart';
+import '../../../../core/constants/constants.dart';
+import '../bloc/profile_bloc.dart';
+import '../bloc/profile_event.dart';
+import '../bloc/profile_state.dart';
+import '../widgets/access_card.dart';
+import '../widgets/health_card.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -15,7 +19,8 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final List<double> _moodHistory = [0.66, 1.0, 1.0, 0.66, 1.0];
-  final double _performanceScore = 85;
+  late double _performanceScore = 0;
+  final double _finalPerformanceScore = 85;
 
   double get _averageMood {
     if (_moodHistory.isEmpty) return 0.0;
@@ -34,6 +39,13 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   @override
+  void initState() {
+
+    super.initState();
+    context.read<ProfileBloc>().add(const ProfileEvent.fetchProfileData());
+    _animatePerformanceScore();
+  }
+  @override
   void dispose() {
     super.dispose();
   }
@@ -47,7 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             _buildProfileHeader(),
             Expanded(
-                child: SingleChildScrollView(child: _buildProfileContent())),
+                child: SingleChildScrollView(child: _buildProfileContent(context))),
           ],
         ),
       ),
@@ -59,15 +71,15 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         Container(
           height: 270,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: primaryColor,
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(40),
               bottomRight: Radius.circular(40),
             ),
           ),
         ),
-        Positioned.fill(
+        const Positioned.fill(
           child: Align(
             alignment: Alignment.center,
             child: SafeArea(
@@ -79,7 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     backgroundImage: AssetImage('assets/user_profile.jpg'),
                     backgroundColor: Colors.white,
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Text(
                     "Mostafa ALZOUBI",
                     style: TextStyle(
@@ -104,22 +116,36 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildProfileContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          _buildHappinessCard(),
-          const SizedBox(height: 20),
-          AccessCard(),
-          const SizedBox(height: 20),
-          _buildPerformanceIndicator(),
-          const SizedBox(height: 20),
-          _buildStatsRow(),
-          // const SizedBox(height: 20),
-          // _buildActionButtons(),
-        ],
-      ),
+  Widget _buildProfileContent(BuildContext context) {
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, state) {
+        if (state is ProfileLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is ProfileLoaded) {
+         // final profileData = state.profileData;
+          final healthData = state.healthData;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildHappinessCard(),
+                const SizedBox(height: 10),
+                _buildPerformanceIndicator(),
+                const SizedBox(height: 10),
+                const AccessCard(),
+                const SizedBox(height: 10),
+                HealthCard(healthData: healthData),
+                const SizedBox(height: 10),
+                _buildStatsRow(),
+              ],
+            ),
+          );
+        } else if (state is ProfileError) {
+          return Text(state.message);
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 
@@ -138,7 +164,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Column(
         children: [
-          Text(
+          const Text(
             "Employee Sentiment",
             style: TextStyle(
               color: primaryColor,
@@ -173,7 +199,7 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             color: primaryColor,
             fontWeight: FontWeight.bold,
           ),
@@ -256,7 +282,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 color: primaryColor,
                 fontWeight: FontWeight.bold,
@@ -268,39 +294,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildActionButton(Icons.edit, "Edit Profile", () {}),
-        _buildActionButton(Icons.notifications, "Reminders", () {}),
-        _buildActionButton(Icons.settings, "Settings", () {}),
-      ],
-    );
-  }
 
-  Widget _buildActionButton(IconData icon, String label, Function() onTap) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: const [
-              BoxShadow(color: Colors.black12, blurRadius: 4),
-            ],
-          ),
-          child: Icon(icon, color: primaryColor, size: 30),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12),
-        ),
-      ],
-    );
-  }
   Widget _buildPerformanceIndicator() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -313,7 +307,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Column(
         children: [
-          Text(
+          const Text(
             "Performance Indicator",
             style: TextStyle(
               color: Colors.blueGrey,
@@ -340,7 +334,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   GaugeAnnotation(
                     widget: Text(
                       "$_performanceScore%",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     angle: 90,
                     positionFactor: 0.8,
@@ -367,248 +361,27 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Text(
       "Badge: $badge",
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
         color: Colors.blueGrey,
       ),
     );
   }
-}
 
-
-class AccessCard extends StatefulWidget {
-  const AccessCard({super.key});
-
-  @override
-  State<AccessCard> createState() => _AccessCardState();
-}
-
-class _AccessCardState extends State<AccessCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-  bool _isFrontVisible = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _animation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  void _toggleCard() {
-    if (_isFrontVisible) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
-    setState(() => _isFrontVisible = !_isFrontVisible);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _toggleCard,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          final rotation = _animation.value * pi;
-          final transform = Matrix4.identity()
-            ..setEntry(3, 2, 0.001)
-            ..rotateY(rotation);
-
-          return Stack(
-            children: [
-              Transform(
-                transform: transform,
-                alignment: Alignment.center,
-                child: rotation > pi / 2
-                    ? Transform(
-                  transform: Matrix4.identity()..rotateY(pi),
-                  alignment: Alignment.center,
-                  child: _buildBack(),
-                )
-                    : _buildFront(),
-              ),
-              // Flip Button at the Top Right Corner
-              Positioned(
-                top: 8,
-                left: 8,
-                child: IconButton(
-                  onPressed: _toggleCard,
-                  icon: const Icon(Icons.flip),
-                  color: Colors.white,
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black.withOpacity(0.6),
-                  ),
-                ),
-              ),
-              // Wallet Button at the Bottom Left Corner
-              Positioned(
-                bottom: 8,
-                left: 8,
-                child: ElevatedButton.icon(
-                  onPressed: () => _addToWallet(context),
-                  icon: const Icon(Icons.credit_card),
-                  label: const Text("Wallet"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildFront() {
-    return _buildCard(
-      child: Column(
-        children: [
-          Image.asset(
-            "assets/ministry_logo.png",
-            height: 50,
-          ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "مصطفى موسى الزعبي",
-                      style: TextStyle(color: primaryColor, fontSize: 10),
-                    ),
-                    Text(
-                      "مبرمج",
-                      style: TextStyle(color: Colors.grey, fontSize: 10),
-                    ),
-                    const SizedBox(height: 15),
-                    Text(
-                      "MOSTAFA MOUSA AL ZOUBI",
-                      style: TextStyle(color: primaryColor, fontSize: 10),
-                    ),
-                    Text(
-                      "Programmer",
-                      style: TextStyle(color: Colors.grey, fontSize: 10),
-                    ),
-                    const SizedBox(height: 15),
-                    Text(
-                      "الرقم الوظيفي : 581795",
-                      style: TextStyle(color: Colors.black, fontSize: 10),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 25),
-              Image.asset(
-                "assets/user_profile.jpg",
-                height: 100,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBack() {
-    return _buildCard(
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            QrImageView(
-              data: 'This is a simple QR code',
-              version: QrVersions.auto,
-              size: 50,
-              gapless: false,
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              "هذه البطاقة التعريفية ملك وزارة الاقتصاد.\n في حال العثور على هذه البطاقة، يرجى ارسالها الى ص.ب 3625\n دبي الامارات العربية المتحدة او الاتصال على الرقم 800-1222",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.end,
-            ),
-
-            const Text(
-              "Valid until\n2025",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
-            ),
-
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.nfc, color: lightGray),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Tap to use",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCard({required Widget child}) {
-    return SizedBox(
-      width: 400,
-      height: 230,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 12, spreadRadius: 2),
-          ],
-          border: Border.all(color: primaryColor, width: 2),
-        ),
-        child: child,
-      ),
-    );
-  }
-
-  void _addToWallet(BuildContext context) {
-    // Wallet integration implementation
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void _animatePerformanceScore() {
+    Timer.periodic(const Duration(milliseconds: 30), (timer) {
+      if (_performanceScore >= _finalPerformanceScore) {
+        timer.cancel();
+      } else {
+        setState(() {
+          _performanceScore += 2;
+          if (_performanceScore > _finalPerformanceScore) {
+            _performanceScore = _finalPerformanceScore;
+          }
+        });
+      }
+    });
   }
 }
 
