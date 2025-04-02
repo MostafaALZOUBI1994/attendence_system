@@ -2,13 +2,14 @@ import 'dart:async';
 import 'package:attendence_system/features/authentication/domain/entities/login_success_model.dart';
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/constants.dart';
-
 import '../../bloc/attendence_bloc.dart';
 import '../../bloc/attendence_event.dart';
 import '../../bloc/attendence_state.dart';
+import '../widgets/mood_check.dart';
 import '../widgets/timeline.dart';
 
 
@@ -76,11 +77,26 @@ class _TimeScreenState extends State<TimeScreen> {
             children: [
               _buildHeader(),
               const SizedBox(height: 10),
-              _buildCard(_buildCheckInButton()),
+              _buildCard(
+                MoodCheckJoystick(
+                  onCheckInWithMood: (String mood) {
+                    // 1. Trigger BLoC event with mood
+                   // _bloc.add(AttendenceEvent.checkInWithMood(mood));
+
+                    // 2. Update UI state
+                    setState(() {
+                      _currentStepIndex = 1; // Move to next step
+                    });
+
+                    // 3. Optional: Show feedback dialog
+                    _showFeedbackPopup(context, mood);
+                  },
+                ),
+              ),
               const SizedBox(height: 10),
               _buildCard(_buildTimeline()),
               const SizedBox(height: 10),
-              _buildMoodCheck(),
+             // _buildMoodCheck(),
             ],
           ),
         ],
@@ -185,7 +201,6 @@ class _TimeScreenState extends State<TimeScreen> {
     ),
   );
 
-  // Attendance Timeline
   Widget _buildTimeline() => Column(
     children: [
       const Text("Attendance Timeline", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -194,7 +209,6 @@ class _TimeScreenState extends State<TimeScreen> {
     ],
   );
 
-  // Other UI Components
   Widget _buildCard(Widget child) => Card(
     elevation: 5,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -208,7 +222,9 @@ class _TimeScreenState extends State<TimeScreen> {
     if (state is Loaded) {
       savedData = state.loginData;
     }
-    final firstName = savedData.empName.split("").first;
+    final firstName = savedData.empName.isNotEmpty
+        ? savedData.empName.split(" ").first
+        : "User";
     return Row(
     children: [
       const SizedBox(width: 15),
@@ -226,36 +242,6 @@ class _TimeScreenState extends State<TimeScreen> {
   },
 );
 
-  Widget _buildMoodCheck() => Padding(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.emoji_emotions_outlined, color: primaryColor),
-            const SizedBox(width: 8),
-            Text("How are you feeling today?",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                )),
-          ],
-        ),
-        const SizedBox(height: 15),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _moodEmoji("😀", "Happy"),
-            _moodEmoji("😐", "Neutral"),
-            _moodEmoji("😞", "Sad"),
-            _moodEmoji("😡", "Angry"),
-          ],
-        ),
-      ],
-    ),
-  );
 
   void _showFeedbackPopup(BuildContext context, String mood) {
     showDialog(
@@ -311,26 +297,6 @@ class _TimeScreenState extends State<TimeScreen> {
     );
   }
 
-  Widget _moodEmoji(String emoji, String label) => GestureDetector(
-    onTap: () => _showFeedbackPopup(context, label),
-    child: Column(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.all(10),
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8, spreadRadius: 2)],
-          ),
-          child: Text(emoji, style: const TextStyle(fontSize: 30)),
-        ),
-        const SizedBox(height: 5),
-        Text(label, style: const TextStyle(fontSize: 14)),
-      ],
-    ),
-  );
 }
 
 

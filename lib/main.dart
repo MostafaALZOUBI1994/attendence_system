@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/constants/constants.dart';
 import 'core/injection.dart';
+import 'core/local_services/local_services.dart';
 import 'features/attendence/bloc/attendence_bloc.dart';
 import 'features/attendence/presentation/pages/attendence_page.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {
-          '/': (context) => LoginScreen(),
+          '/': (context) => SplashScreen(),
           '/main': (context) => MainScreen(),
         },
       ),
@@ -60,9 +61,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () async {
+      final localService = getIt<LocalService>();
+      final empId = await localService.get(empID);
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainScreen()),
+        MaterialPageRoute(
+          builder: (_) => empId != null ? const MainScreen() : const LoginScreen(),
+        ),
       );
     });
   }
