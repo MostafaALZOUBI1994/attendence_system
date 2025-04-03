@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/constants/constants.dart';
 import 'core/injection.dart';
 import 'core/local_services/local_services.dart';
-import 'features/attendence/bloc/attendence_bloc.dart';
+import 'features/attendence/presentation/bloc/attendence_bloc.dart';
 import 'features/attendence/presentation/pages/attendence_page.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'features/profile/presentation/pages/profile_page.dart';

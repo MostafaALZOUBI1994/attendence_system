@@ -8,7 +8,6 @@ import '../../../../core/constants/constants.dart';
 
 class MoodCheckJoystick extends StatefulWidget {
   final Function(String) onCheckInWithMood;
-
   const MoodCheckJoystick({required this.onCheckInWithMood, Key? key})
       : super(key: key);
 
@@ -46,7 +45,6 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
       if (distance > _maxDragDistance) {
         _offset = _offset.scale(_maxDragDistance / distance, _maxDragDistance / distance);
       }
-
       final angle = (_offset.direction * 180 / pi + 360) % 360;
       _selectedMood = _moods
           .map((m) => {
@@ -71,13 +69,11 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
     ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
-
     resetAnimation.addListener(() {
       setState(() {
         _offset = resetAnimation.value;
       });
     });
-
     _controller.forward(from: 0.0).then((_) {
       setState(() {
         _offset = Offset.zero;
@@ -132,18 +128,11 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
                     width: 48,
                     height: 48,
                     fit: BoxFit.cover,
-                    // colorFilter: ColorFilter.mode(
-                    //   _selectedMood == mood['label']
-                    //       ? primaryColor
-                    //       : Colors.grey[400]!,
-                    //   BlendMode.srcIn,
-                    // ),
                   ),
                 ),
               ),
             );
           }).toList(),
-
           Positioned(
             left: 75 + _offset.dx,
             top: 75 + _offset.dy,
@@ -164,9 +153,9 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
                     ),
                   ],
                 ),
-                child: Center(
+                child: const Center(
                   child: Text(
-                    'Check\nIn',
+                    'Check In',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
