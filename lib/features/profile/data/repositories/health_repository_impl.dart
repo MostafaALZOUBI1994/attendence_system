@@ -2,6 +2,7 @@ import 'package:health/health.dart';
 import 'package:dartz/dartz.dart';
 import 'package:attendence_system/features/profile/domain/repositories/health_repository.dart';
 import 'package:injectable/injectable.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/health_model.dart';
 
@@ -12,20 +13,30 @@ class HealthRepositoryImpl implements HealthRepository {
   @override
   Future<Either<Failure, HealthData>> fetchHealthData() async {
     try {
+      await Permission.activityRecognition.request();
+
       final types = [
         HealthDataType.STEPS,
         HealthDataType.HEART_RATE,
         HealthDataType.ACTIVE_ENERGY_BURNED,
-        HealthDataType.SLEEP_IN_BED,
+        HealthDataType.SLEEP_ASLEEP,
       ];
 
       bool hasPermissions = await _health.requestAuthorization(types);
-      if (!hasPermissions) return const Left(InvalidInputFailure("Don't have permission"));
-
+      if (!hasPermissions) {
+        return const Left(InvalidInputFailure("Permission denied"));
+      }
       final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
+      DateTime nowLocal = DateTime.now().toLocal();
+      DateTime yesterdayLocal = nowLocal.subtract(const Duration(days: 1));
+      DateTime startOfYesterdayLocal = DateTime(
+        yesterdayLocal.year,
+        yesterdayLocal.month,
+        yesterdayLocal.day,
+      );
 
-      final healthData = await _health.getHealthDataFromTypes(types: types,startTime: startOfDay,endTime: now);
+      final healthData = await _health.getHealthDataFromTypes(
+          types: types, startTime: startOfYesterdayLocal, endTime: now);
 
       int steps = 0;
       int heartRate = 0;

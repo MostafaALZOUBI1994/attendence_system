@@ -20,13 +20,14 @@ class TimeScreen extends StatefulWidget {
   State<TimeScreen> createState() => _TimeScreenState();
 }
 
-class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateMixin {
+class _TimeScreenState extends State<TimeScreen>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final AttendenceBloc _bloc;
   Timer? _countdownTimer;
   DateTime? _expectedCheckoutTime;
   Duration _remainingTime = Duration.zero;
-  String _currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
+  final String _currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
 
   final List<ProcessStep> _processSteps = [
     ProcessStep(title: 'Off-site Check-in', icon: Icons.wifi),
@@ -39,7 +40,8 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _animationController = AnimationController(vsync: this);
-    _bloc = context.read<AttendenceBloc>()..add(const AttendenceEvent.loadData());
+    _bloc = context.read<AttendenceBloc>()
+      ..add(const AttendenceEvent.loadData());
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (_expectedCheckoutTime != null) {
@@ -61,11 +63,14 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
   }
 
   double _calculateProgress(Loaded state) {
-    if (_expectedCheckoutTime == null || state.todayStatus?.checkInTime == null) return 0;
+    if (_expectedCheckoutTime == null || state.todayStatus?.checkInTime == null)
+      return 0;
 
     try {
-      final checkIn = DateFormat('hh:mm a').parse(state.todayStatus!.checkInTime);
-      final checkOut = DateFormat('hh:mm a').parse(state.todayStatus!.expectedOutTime);
+      final checkIn =
+          DateFormat('hh:mm a').parse(state.todayStatus!.checkInTime);
+      final checkOut =
+          DateFormat('hh:mm a').parse(state.todayStatus!.expectedOutTime);
 
       final checkInDateTime = DateTime(
         DateTime.now().year,
@@ -87,7 +92,8 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
         expectedCheckout = expectedCheckout.add(const Duration(days: 1));
       }
 
-      final totalDuration = expectedCheckout.difference(checkInDateTime).inSeconds;
+      final totalDuration =
+          expectedCheckout.difference(checkInDateTime).inSeconds;
       final elapsed = DateTime.now().difference(checkInDateTime).inSeconds;
       return (elapsed / totalDuration * 100).clamp(0.0, 100.0);
     } catch (e) {
@@ -106,50 +112,50 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
       ),
       child: isWorking
           ? Stack(
-        alignment: Alignment.center,
-        children: [
-          DashedCircularProgressBar.square(
-            dimensions: 150,
-            progress: progress,
-            startAngle: 270,
-            sweepAngle: 360,
-            foregroundColor: primaryColor,
-            foregroundStrokeWidth: 6,
-            backgroundStrokeWidth: 3,
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${_remainingTime.inHours.toString().padLeft(2, '0')}:'
-                    '${(_remainingTime.inMinutes % 60).toString().padLeft(2, '0')}:'
-                    '${(_remainingTime.inSeconds % 60).toString().padLeft(2, '0')}',
-                style: const TextStyle(
-                  color: primaryColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              alignment: Alignment.center,
+              children: [
+                DashedCircularProgressBar.square(
+                  dimensions: 150,
+                  progress: progress,
+                  startAngle: 270,
+                  sweepAngle: 360,
+                  foregroundColor: primaryColor,
+                  foregroundStrokeWidth: 6,
+                  backgroundStrokeWidth: 3,
                 ),
-              ),
-              const SizedBox(height: 8),
-              const Icon(Icons.work, color: primaryColor, size: 40),
-            ],
-          ),
-        ],
-      )
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${_remainingTime.inHours.toString().padLeft(2, '0')}:'
+                      '${(_remainingTime.inMinutes % 60).toString().padLeft(2, '0')}:'
+                      '${(_remainingTime.inSeconds % 60).toString().padLeft(2, '0')}',
+                      style: const TextStyle(
+                        color: primaryColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Icon(Icons.work, color: primaryColor, size: 40),
+                  ],
+                ),
+              ],
+            )
           : Lottie.asset(
-        'assets/lottie/checkin.json',
-        height: 150,
-        controller: _animationController,
-        onLoaded: (composition) {
-          _animationController
-            ..duration = composition.duration
-            ..forward().then((_) {
-              if (mounted) {
-                _bloc.add(AttendenceEvent.stepChanged(2));
-              }
-            });
-        },
-      ),
+              'assets/lottie/checkin.json',
+              height: 150,
+              controller: _animationController,
+              onLoaded: (composition) {
+                _animationController
+                  ..duration = composition.duration
+                  ..forward().then((_) {
+                    if (mounted) {
+                      _bloc.add(const AttendenceEvent.stepChanged(2));
+                    }
+                  });
+              },
+            ),
     );
   }
 
@@ -158,7 +164,8 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Attendance System", style: TextStyle(color: Colors.white)),
+        title: const Text("Attendance System",
+            style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -169,7 +176,8 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
           // Update expected checkout time
           if (state.todayStatus?.expectedOutTime != "00:00" &&
               state.todayStatus?.expectedOutTime != null) {
-            final parsedTime = DateFormat('hh:mm a').parse(state.todayStatus!.expectedOutTime);
+            final parsedTime =
+                DateFormat('hh:mm a').parse(state.todayStatus!.expectedOutTime);
             final now = DateTime.now();
             _expectedCheckoutTime = DateTime(
               now.year,
@@ -179,7 +187,8 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
               parsedTime.minute,
             );
             if (_expectedCheckoutTime!.isBefore(now)) {
-              _expectedCheckoutTime = _expectedCheckoutTime!.add(const Duration(days: 1));
+              _expectedCheckoutTime =
+                  _expectedCheckoutTime!.add(const Duration(days: 1));
             }
           } else {
             _expectedCheckoutTime = null;
@@ -193,7 +202,8 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
                   _buildHeader(state.loginData),
                   const SizedBox(height: 10),
                   if (state.currentStepIndex == 0)
-                    _buildCard(MoodCheckJoystick(onCheckInWithMood: _handleMoodSelected)),
+                    _buildCard(MoodCheckJoystick(
+                        onCheckInWithMood: _handleMoodSelected)),
                   if (state.currentStepIndex >= 1)
                     _buildCard(_buildCheckInButton(context, state)),
                   const SizedBox(height: 10),
@@ -208,39 +218,39 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildBackground() => Stack(
-    children: [
-      Positioned(
-        top: 150,
-        left: -50,
-        child: Container(
-          width: 200,
-          height: 200,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: primaryColor.withOpacity(0.2),
+        children: [
+          Positioned(
+            top: 150,
+            left: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: primaryColor.withOpacity(0.2),
+              ),
+            ),
           ),
-        ),
-      ),
-      Positioned(
-        bottom: -100,
-        right: -100,
-        child: Container(
-          width: 300,
-          height: 300,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: primaryColor.withOpacity(0.3),
+          Positioned(
+            bottom: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: primaryColor.withOpacity(0.3),
+              ),
+            ),
           ),
-        ),
-      ),
-      Positioned(
-        top: 0,
-        left: 0,
-        right: 0,
-        child: Container(height: 100, color: primaryColor),
-      ),
-    ],
-  );
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(height: 100, color: primaryColor),
+          ),
+        ],
+      );
 
   Widget _buildHeader(LoginSuccessData userData) {
     final firstName = userData.empName.isNotEmpty
@@ -276,33 +286,34 @@ class _TimeScreenState extends State<TimeScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildTimeline(Loaded state) => Column(
-    children: [
-      const Text(
-        'Attendance Timeline',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 10),
-      ProcessTimeline(
-        currentIndex: state.currentStepIndex,
-        steps: _processSteps.map((step) {
-          if (step.title == 'Working' && state.currentStepIndex >= 2) {
-            return ProcessStep(
-              title: 'Working (${state.todayStatus?.expectedOutTime ?? ''})',
-              icon: Icons.work,
-            );
-          }
-          return step;
-        }).toList(),
-      ),
-    ],
-  );
+        children: [
+          const Text(
+            'Attendance Timeline',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          ProcessTimeline(
+            currentIndex: state.currentStepIndex,
+            steps: _processSteps.map((step) {
+              if (step.title == 'Working' && state.currentStepIndex >= 2) {
+                return ProcessStep(
+                  title:
+                      'Working (${state.todayStatus?.expectedOutTime ?? ''})',
+                  icon: Icons.work,
+                );
+              }
+              return step;
+            }).toList(),
+          ),
+        ],
+      );
 
   Widget _buildCard(Widget child) => Card(
-    elevation: 5,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: child,
-    ),
-  );
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: child,
+        ),
+      );
 }

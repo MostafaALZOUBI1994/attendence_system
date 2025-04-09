@@ -1,9 +1,6 @@
 import 'package:attendence_system/core/injection.config.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
-import 'shared_module.dart';
-
-
 
 final getIt = GetIt.instance;
 
@@ -12,6 +9,6 @@ final getIt = GetIt.instance;
   preferRelativeImports: true,
   asExtension: true,
 )
-Future<void> configureDependencies()  async {
-   await getIt.init();
+Future<void> configureDependencies() async {
+  await getIt.init();
 }

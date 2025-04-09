@@ -12,5 +12,16 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
   final FetchReport fetchReport;
 
   ReportBloc({required this.fetchReport}) : super(const ReportState.initial()) {
+    on<FetchReportEvent>((event, emit) async {
+      emit(const ReportState.loading());
+      final result = await fetchReport.get(
+        fromDate: event.fromDate,
+        toDate: event.toDate,
+      );
+      result.fold(
+            (failure) => emit(ReportState.error(failure.message)),
+            (reports) => emit(ReportState.loaded(report: reports)),
+      );
+    });
   }
 }

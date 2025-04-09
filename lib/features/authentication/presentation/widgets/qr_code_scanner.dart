@@ -6,6 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/login_bloc.dart';
 
 class QRCodeScanner extends StatefulWidget {
+  const QRCodeScanner({super.key});
+
   @override
   _QRCodeScannerState createState() => _QRCodeScannerState();
 }
@@ -13,7 +15,6 @@ class QRCodeScanner extends StatefulWidget {
 class _QRCodeScannerState extends State<QRCodeScanner> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   late QRViewController controller;
-
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,8 @@ class _QRCodeScannerState extends State<QRCodeScanner> {
             if (email != null) {
               context.read<LoginBloc>()
                 ..add(LoginEvent.qrScanned(email!))
-                ..add(LoginEvent.loginSubmitted(email: email!, password: "123"));
+                ..add(
+                    LoginEvent.loginSubmitted(email: email!, password: "123"));
               if (Navigator.canPop(context)) {
                 Navigator.pop(context);
               }

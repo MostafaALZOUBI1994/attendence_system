@@ -16,11 +16,6 @@ import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/reports/presentation/pages/reports_page.dart';
 import 'features/services/presentation/pages/services.dart';
 
-
-
-
-
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
@@ -37,9 +32,11 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => getIt<ProfileBloc>(),
         ),
+        BlocProvider(create: (context) => getIt<LoginBloc>()),
         BlocProvider(
-            create: (context) => getIt<LoginBloc>()),
-        BlocProvider( create: (context) => getIt<AttendenceBloc>()..add(AttendenceEvent.loadData()),),
+          create: (context) =>
+              getIt<AttendenceBloc>()..add(const AttendenceEvent.loadData()),
+        ),
         BlocProvider(
           create: (context) => getIt<ReportBloc>(),
         ),
@@ -48,8 +45,8 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {
-          '/': (context) => SplashScreen(),
-          '/main': (context) => MainScreen(),
+          '/': (context) => const SplashScreen(),
+          '/main': (context) => const MainScreen(),
         },
       ),
     );
@@ -69,10 +66,11 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(const Duration(seconds: 3), () async {
       final localService = getIt<LocalService>();
-      final empId = await localService.get(empID);
+      final empId = localService.get(empID);
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => empId != null ? const MainScreen() : const LoginScreen(),
+          builder: (_) =>
+              empId != null ? const MainScreen() : const LoginScreen(),
         ),
       );
     });
@@ -86,7 +84,8 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo.png', width: 150, height: 150), // Your logo
+            Image.asset('assets/logo.png',
+                width: 150, height: 150), // Your logo
             const SizedBox(height: 20),
             // const CircularProgressIndicator(
             //   valueColor: AlwaysStoppedAnimation<Color>(primarColor),
@@ -144,8 +143,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   BottomBarItem _bottomBarItem(IconData icon, String label) => BottomBarItem(
-    inActiveItem: Icon(icon, color: Colors.grey),
-    activeItem: Icon(icon, color: Colors.white),
-    itemLabel: label,
-  );
+        inActiveItem: Icon(icon, color: Colors.grey),
+        activeItem: Icon(icon, color: Colors.white),
+        itemLabel: label,
+      );
 }

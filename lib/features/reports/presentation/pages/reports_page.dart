@@ -6,8 +6,6 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/constants.dart';
 import '../bloc/report_bloc.dart';
 
-
-
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
 
@@ -18,22 +16,26 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   String _selectedFilter = "All";
 
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ReportBloc>().add(const FetchReportEvent(fromDate: '01/01/2025', toDate: '04/07/2025'));
+      context.read<ReportBloc>().add(
+            const ReportEvent.fetchReport(
+              fromDate: '01/01/2025',
+              toDate: '04/07/2025',
+            ),
+          );
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Attendance History", style: TextStyle(color: Colors.white)),
+        title: const Text("Attendance History",
+            style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -52,7 +54,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     child: BlocBuilder<ReportBloc, ReportState>(
                       builder: (context, state) {
                         if (state is ReportLoading) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         } else if (state is ReportLoaded) {
                           return ListView.builder(
                             itemCount: state.report.length,
@@ -77,26 +80,34 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildBackground() => Stack(
-    children: [
-      Positioned(top: 100, left: -50, child: _buildDecorativeCircle(200, const Color.fromRGBO(182, 138, 53, 0.2))),
-      Positioned(bottom: -80, right: -80, child: _buildDecorativeCircle(250, const Color.fromRGBO(182, 138, 53, 0.3))),
-    ],
-  );
+        children: [
+          Positioned(
+              top: 100,
+              left: -50,
+              child: _buildDecorativeCircle(
+                  200, const Color.fromRGBO(182, 138, 53, 0.2))),
+          Positioned(
+              bottom: -80,
+              right: -80,
+              child: _buildDecorativeCircle(
+                  250, const Color.fromRGBO(182, 138, 53, 0.3))),
+        ],
+      );
 
   Widget _buildDecorativeCircle(double size, Color color) => Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-  );
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+      );
 
   Widget _buildFilterChips() => Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      _buildChip("All"),
-      _buildChip("Last 7 Days"),
-      _buildChip("Last 30 Days"),
-    ],
-  );
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildChip("All"),
+          _buildChip("Last 7 Days"),
+          _buildChip("Last 30 Days"),
+        ],
+      );
 
   Widget _buildChip(String label) {
     final formatter = DateFormat('dd/MM/yyyy'); // Create date formatter
@@ -129,8 +140,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
             switch (label) {
               case "All":
-              // Use a fixed start date for "All" (modify as needed)
-                fromDate = DateTime.utc(2025, 1, 1);
+                fromDate = DateTime.utc(2025, 1, 1); // Fixed start date
                 break;
               case "Last 7 Days":
                 fromDate = now.subtract(const Duration(days: 7));
@@ -140,17 +150,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 break;
             }
 
-
+            // Format dates safely
             final formattedFromDate = fromDate != null
                 ? formatter.format(fromDate)
-                : null;
+                : formatter.format(DateTime.utc(2025, 1, 1)); // Default if null
+
             final formattedToDate = formatter.format(toDate);
+
             context.read<ReportBloc>().add(
-              FetchReportEvent(
-                fromDate: formattedFromDate ?? "",
-                toDate: formattedToDate,
-              ),
-            );
+                  ReportEvent.fetchReport(
+                    fromDate: formattedFromDate,
+                    toDate: formattedToDate,
+                  ),
+                );
           }
         },
       ),
@@ -158,31 +170,40 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildAttendanceCard(Report record) => Card(
-    margin: const EdgeInsets.symmetric(vertical: 8),
-    elevation: 5,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                DateFormat('MMMM d, yyyy').format(record.pdate),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    DateFormat('MMMM d, yyyy').format(record.pdate),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(children: [
+                    const Icon(Icons.login, color: Colors.green),
+                    const SizedBox(width: 5),
+                    Text("Check-In: ${record.checkIn}")
+                  ]),
+                  Row(children: [
+                    const Icon(Icons.logout, color: Colors.red),
+                    const SizedBox(width: 5),
+                    Text("Check-Out: ${record.checkOut}")
+                  ]),
+                ],
               ),
-              const SizedBox(height: 5),
-              Row(children: [const Icon(Icons.login, color: Colors.green), const SizedBox(width: 5), Text("Check-In: ${record.checkIn}")]),
-              Row(children: [const Icon(Icons.logout, color: Colors.red), const SizedBox(width: 5), Text("Check-Out: ${record.checkOut}")]),
+              _buildStatusChip(record.status),
             ],
           ),
-          _buildStatusChip(record.status),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 
   Widget _buildStatusChip(String status) {
     Color color;
@@ -205,4 +226,3 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 }
-

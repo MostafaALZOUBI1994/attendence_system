@@ -24,8 +24,8 @@ class ServicesBloc extends Bloc<ServicesEvent, ServicesState> {
   }
   Future<void> _onEvent(ServicesEvent event, Emitter<ServicesState> emit) async {
 
-    if (event is SubmitRequest) {
-      await _submitRequest(emit);
+    if (event is LoadData) {
+      await _loadData(emit);
     }
   }
 

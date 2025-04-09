@@ -8,8 +8,7 @@ import '../../../../core/constants/constants.dart';
 
 class MoodCheckJoystick extends StatefulWidget {
   final Function(String) onCheckInWithMood;
-  const MoodCheckJoystick({required this.onCheckInWithMood, Key? key})
-      : super(key: key);
+  const MoodCheckJoystick({required this.onCheckInWithMood, super.key});
 
   @override
   _MoodCheckJoystickState createState() => _MoodCheckJoystickState();
@@ -43,14 +42,15 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
       _offset += details.delta;
       final distance = _offset.distance;
       if (distance > _maxDragDistance) {
-        _offset = _offset.scale(_maxDragDistance / distance, _maxDragDistance / distance);
+        _offset = _offset.scale(
+            _maxDragDistance / distance, _maxDragDistance / distance);
       }
       final angle = (_offset.direction * 180 / pi + 360) % 360;
       _selectedMood = _moods
           .map((m) => {
-        'mood': m,
-        'diff': (m['angle'] - angle).abs() % 360,
-      })
+                'mood': m,
+                'diff': (m['angle'] - angle).abs() % 360,
+              })
           .reduce((a, b) => a['diff'] < b['diff'] ? a : b)['mood']['label'];
     });
   }
@@ -132,7 +132,7 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
                 ),
               ),
             );
-          }).toList(),
+          }),
           Positioned(
             left: 75 + _offset.dx,
             top: 75 + _offset.dy,

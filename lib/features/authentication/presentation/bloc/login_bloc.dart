@@ -13,7 +13,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LocalService _localService;
   LoginBloc(this._loginUseCase, this._localService)
       : super(const LoginState.initial()) {
-
     on<QrScanned>((event, emit) {
       emit(Login(email: event.email, isScanning: false));
     });
@@ -25,7 +24,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           isScanning: true,
         ));
       } else {
-        emit(Login(email: '', isScanning: true));
+        emit(const Login(email: '', isScanning: true));
       }
     });
 
@@ -43,13 +42,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       try {
         final result = await _loginUseCase.execute(event.email, event.password);
         result.fold(
-              (failure) => emit(LoginError(failure.message)),
-              (successData) async {
+          (failure) => emit(LoginError(failure.message)),
+          (successData) async {
             emit(const LoginState.success());
             await _localService.save(empID, successData.empID);
             await _localService.save(empName, successData.empName);
             await _localService.save(empNameAR, successData.empNameAR);
-           // await _localService.save(emp, successData.empID);
+            // await _localService.save(emp, successData.empID);
           },
         );
       } catch (e) {
@@ -58,4 +57,3 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     });
   }
 }
-
