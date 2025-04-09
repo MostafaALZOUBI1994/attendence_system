@@ -20,7 +20,7 @@ class HealthRepositoryImpl implements HealthRepository {
       ];
 
       bool hasPermissions = await _health.requestAuthorization(types);
-      if (!hasPermissions) return const Left(ServerFailure());
+      if (!hasPermissions) return const Left(InvalidInputFailure("Don't have permission"));
 
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
@@ -62,7 +62,7 @@ class HealthRepositoryImpl implements HealthRepository {
         sleepDuration: sleepDuration,
       ));
     } catch (e) {
-      return const Left(ServerFailure());
+      return Left(ServerFailure('An unexpected error occurred: $e'));
     }
   }
 }

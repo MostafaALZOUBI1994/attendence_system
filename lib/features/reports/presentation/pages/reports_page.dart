@@ -1,8 +1,11 @@
 import 'package:attendence_system/features/app_background.dart';
+import 'package:attendence_system/features/reports/domain/entities/report_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-
 import '../../../../core/constants/constants.dart';
+import '../bloc/report_bloc.dart';
+
 
 
 class ReportsScreen extends StatefulWidget {
@@ -15,21 +18,15 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   String _selectedFilter = "All";
 
-  final List<AttendanceRecord> _allRecords = [
-    AttendanceRecord(date: DateTime(2025, 3, 1), checkIn: "08:30 AM", checkOut: "05:00 PM", status: "On Time"),
-    AttendanceRecord(date: DateTime(2025, 3, 2), checkIn: "09:10 AM", checkOut: "05:15 PM", status: "Late"),
-    AttendanceRecord(date: DateTime(2025, 3, 3), checkIn: "--", checkOut: "--", status: "Absent"),
-  ];
 
-  List<AttendanceRecord> get _filteredRecords {
-    DateTime now = DateTime.now();
-    if (_selectedFilter == "Last 7 Days") {
-      return _allRecords.where((r) => r.date.isAfter(now.subtract(const Duration(days: 7)))).toList();
-    } else if (_selectedFilter == "Last 30 Days") {
-      return _allRecords.where((r) => r.date.isAfter(now.subtract(const Duration(days: 30)))).toList();
-    }
-    return _allRecords;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ReportBloc>().add(const FetchReportEvent(fromDate: '01/01/2025', toDate: '04/07/2025'));
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +49,21 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   _buildFilterChips(),
                   const SizedBox(height: 20),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: _filteredRecords.length,
-                      itemBuilder: (context, index) {
-                        return _buildAttendanceCard(_filteredRecords[index]);
+                    child: BlocBuilder<ReportBloc, ReportState>(
+                      builder: (context, state) {
+                        if (state is ReportLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (state is ReportLoaded) {
+                          return ListView.builder(
+                            itemCount: state.report.length,
+                            itemBuilder: (context, index) {
+                              return _buildAttendanceCard(state.report[index]);
+                            },
+                          );
+                        } else if (state is ReportError) {
+                          return Center(child: Text(state.message));
+                        }
+                        return const SizedBox(); // Initial state
                       },
                     ),
                   ),
@@ -90,29 +98,66 @@ class _ReportsScreenState extends State<ReportsScreen> {
     ],
   );
 
-  Widget _buildChip(String label) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-    child: ChoiceChip(
-      label: Text(label, style: TextStyle(color: _selectedFilter == label ? Colors.white : Colors.black)),
-      selected: _selectedFilter == label,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: _selectedFilter == label ? Colors.white : Colors.grey,
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      selectedColor: primaryColor,
-      backgroundColor: Colors.white,
-      onSelected: (selected) {
-        if (selected) {
-          setState(() => _selectedFilter = label);
-        }
-      },
-    ),
-  );
+  Widget _buildChip(String label) {
+    final formatter = DateFormat('dd/MM/yyyy'); // Create date formatter
 
-  Widget _buildAttendanceCard(AttendanceRecord record) => Card(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: ChoiceChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: _selectedFilter == label ? Colors.white : Colors.black,
+          ),
+        ),
+        selected: _selectedFilter == label,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: _selectedFilter == label ? Colors.white : Colors.grey,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        selectedColor: primaryColor,
+        backgroundColor: Colors.white,
+        onSelected: (selected) async {
+          if (selected) {
+            setState(() => _selectedFilter = label);
+            final now = DateTime.now();
+            DateTime? fromDate;
+            DateTime toDate = now;
+
+            switch (label) {
+              case "All":
+              // Use a fixed start date for "All" (modify as needed)
+                fromDate = DateTime.utc(2025, 1, 1);
+                break;
+              case "Last 7 Days":
+                fromDate = now.subtract(const Duration(days: 7));
+                break;
+              case "Last 30 Days":
+                fromDate = now.subtract(const Duration(days: 30));
+                break;
+            }
+
+
+            final formattedFromDate = fromDate != null
+                ? formatter.format(fromDate)
+                : null;
+            final formattedToDate = formatter.format(toDate);
+            context.read<ReportBloc>().add(
+              FetchReportEvent(
+                fromDate: formattedFromDate ?? "",
+                toDate: formattedToDate,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildAttendanceCard(Report record) => Card(
     margin: const EdgeInsets.symmetric(vertical: 8),
     elevation: 5,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -125,7 +170,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                DateFormat('MMMM d, yyyy').format(record.date),
+                DateFormat('MMMM d, yyyy').format(record.pdate),
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 5),
@@ -161,11 +206,3 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 }
 
-class AttendanceRecord {
-  final DateTime date;
-  final String checkIn;
-  final String checkOut;
-  final String status;
-
-  AttendanceRecord({required this.date, required this.checkIn, required this.checkOut, required this.status});
-}

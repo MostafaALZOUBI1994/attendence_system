@@ -24,7 +24,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
 
       if (response.statusCode == 200) {
         if (response.data[0]['_statusCode'] == '101') {
-          return Left(ServerFailure());
+          return Left(ServerFailure(response.data[0]['_statusMessage']));
         }
         return Right(TodayStatus(
           checkInTime: response.data[0]['In_Time'],
@@ -32,10 +32,10 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
           expectedOutTime: response.data[0]['ExpectedOutTime'],
         ));
       } else {
-        return const Left(ServerFailure());
+        return const Left(ServerFailure("'An unexpected error occurred"));
       }
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(ServerFailure('An unexpected error occurred: $e'));
     }
   }
 }

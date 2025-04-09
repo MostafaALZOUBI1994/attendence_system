@@ -22,7 +22,7 @@ class ServicesScreen extends StatelessWidget {
       body: AppBackground(
         child: Column(
           children: [
-            Expanded(child: _buildServiceGrid(context)), // Pass context here
+            Expanded(child: _buildServiceGrid(context)),
           ],
         ),
       ),

@@ -1,3 +1,4 @@
+
 abstract class Failure {
   final String message;
 
@@ -5,5 +6,14 @@ abstract class Failure {
 }
 
 class ServerFailure extends Failure {
-  const ServerFailure() : super("Server failure");
+  const ServerFailure(String message) : super(message);
+}
+
+
+class NetworkFailure extends Failure {
+  const NetworkFailure(String message) : super(message);
+}
+
+class InvalidInputFailure extends Failure {
+  const InvalidInputFailure(String message) : super(message);
 }

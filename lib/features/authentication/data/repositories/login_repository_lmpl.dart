@@ -8,16 +8,8 @@ import '../../domain/repositories/login_repository.dart';
 
 @LazySingleton(as: LoginRepository)
 class LoginRepositoryImpl implements LoginRepository {
-  late Dio _dio;
-  LoginRepositoryImpl() {
-    _dio = Dio(
-        BaseOptions(
-      baseUrl: 'https://taapi.moec.gov.ae/api/lgt/',
-          connectTimeout: const Duration(seconds: 5000),
-          receiveTimeout: const Duration(seconds: 3000),
-          contentType: 'application/json',
-    ));
-  }
+  final Dio _dio;
+  LoginRepositoryImpl(this._dio);
 
   @override
   Future<Either<Failure, LoginSuccessData>> login(String email, String password) async {
@@ -33,7 +25,7 @@ class LoginRepositoryImpl implements LoginRepository {
 
       if (response.statusCode == 200) {
         if (response.data[0]['_statusCode'] == '101') {
-          return Left(ServerFailure());
+          return Left(ServerFailure(response.data[0]['_statusMessage']));
         }
         return Right(LoginSuccessData(
           empID: response.data[0]['_employeeid'],
@@ -42,10 +34,10 @@ class LoginRepositoryImpl implements LoginRepository {
           empProfileImage: response.data[0]['_profileimg'] ?? '',
         ));
       } else {
-        return const Left(ServerFailure());
+        return const Left(ServerFailure('Failed to log in '));
       }
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(ServerFailure('An unexpected error occurred: $e'));
     }
   }
 }

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
+import 'package:attendence_system/features/attendence/presentation/bloc/attendence_event.dart';
 import 'package:attendence_system/features/authentication/presentation/bloc/login_bloc.dart';
 import 'package:attendence_system/features/authentication/presentation/pages/login_page.dart';
+import 'package:attendence_system/features/reports/presentation/bloc/report_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/constants/constants.dart';
@@ -13,6 +15,7 @@ import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/reports/presentation/pages/reports_page.dart';
 import 'features/services/presentation/pages/services.dart';
+
 
 
 
@@ -36,7 +39,10 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
             create: (context) => getIt<LoginBloc>()),
-        BlocProvider(create: (context) => getIt<AttendenceBloc>()),
+        BlocProvider( create: (context) => getIt<AttendenceBloc>()..add(AttendenceEvent.loadData()),),
+        BlocProvider(
+          create: (context) => getIt<ReportBloc>(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
