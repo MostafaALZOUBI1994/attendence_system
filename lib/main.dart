@@ -4,6 +4,7 @@ import 'package:attendence_system/features/attendence/presentation/bloc/attenden
 import 'package:attendence_system/features/authentication/presentation/bloc/login_bloc.dart';
 import 'package:attendence_system/features/authentication/presentation/pages/login_page.dart';
 import 'package:attendence_system/features/reports/presentation/bloc/report_bloc.dart';
+import 'package:attendence_system/features/services/presentation/bloc/services_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/constants/constants.dart';
@@ -39,6 +40,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => getIt<ReportBloc>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<ServicesBloc>(),
         ),
       ],
       child: MaterialApp(

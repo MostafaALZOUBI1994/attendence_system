@@ -21,11 +21,21 @@ class ServicesBloc extends Bloc<ServicesEvent, ServicesState> {
         _getAllowedHourseUseCase = getAllowedHourseUseCase,
         super(const ServicesState.initial()) {
     on<ServicesEvent>(_onEvent);
+    add(const LoadData());
   }
-  Future<void> _onEvent(ServicesEvent event, Emitter<ServicesState> emit) async {
-
-    if (event is LoadData) {
-      await _loadData(emit);
+  Future<void> _onEvent(
+      ServicesEvent event,
+      Emitter<ServicesState> emit,
+      ) async {
+    switch (event) {
+      case LoadData():
+        await _loadData(emit);
+        break;
+      case SubmitRequest():
+        _submitRequest(emit);
+        break;
+      default:
+        break;
     }
   }
 
