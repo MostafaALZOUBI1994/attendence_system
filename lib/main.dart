@@ -42,10 +42,22 @@ class MyApp extends StatelessWidget {
           create: (context) => getIt<ReportBloc>(),
         ),
         BlocProvider(
-          create: (context) => getIt<ServicesBloc>(),
+          create: (context) => getIt<ServicesBloc>()..add(const ServicesEvent.loadData()),
         ),
       ],
       child: MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch().copyWith(
+            primary: primaryColor,
+            secondary: secondaryColor,
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+          ),
+          // Other theme settings...
+        ),
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {

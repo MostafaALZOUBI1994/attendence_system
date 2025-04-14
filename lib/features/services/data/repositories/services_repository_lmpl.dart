@@ -1,4 +1,5 @@
 
+import 'package:attendence_system/core/constants/constants.dart';
 import 'package:attendence_system/core/errors/failures.dart';
 import 'package:attendence_system/features/services/domain/entities/eleave_entity.dart';
 import 'package:attendence_system/features/services/domain/entities/permission_types_entity.dart';
@@ -9,6 +10,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/local_services/local_services.dart';
 import '../../domain/repositories/services_repository.dart';
 import '../models/eleave_model.dart';
+import '../models/leave_request_params.dart';
 import '../models/permission_types_model.dart';
 
 @LazySingleton(as: ServiceRepository)
@@ -21,7 +23,8 @@ class ServicesRepositoryImpl implements ServiceRepository {
   @override
   Future<Either<Failure, EleaveEntity>> getLeaveBalance() async {
     try {
-      final response = await _dio.get('/Eleavebalance', queryParameters: {'langcode': 'en-US'});
+     final empId =  _localService.get(empID);
+      final response = await _dio.get('/Eleavebalance', queryParameters: {'langcode': 'en-US', "employeeid": empId});
       final List<dynamic> data = response.data;
       final leaveBalances =  EleaveModel.fromJson(data[0]);
       return Right( EleaveEntity(
@@ -50,5 +53,37 @@ class ServicesRepositoryImpl implements ServiceRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  Future<Either<Failure, String>> submitLeaveRequest(SubmitLeaveRequestParams params) async {
+    try {
+      final empId =  _localService.get(empID);
+      final response = await _dio.post(
+        '/EleaveInsert',
+        queryParameters: {'langcode': 'en-US'},
+        data: {
+          "employeeid": empId,
+          "datedaytype": params.datedaytype,
+          "fromtime": params.fromtime,
+          "totime": params.totime,
+          "duration": params.duration,
+          "reason": params.reason,
+          "attachment": params.attachment,
+          "userid": "NLA47014",
+          "eleavetype": params.eleavetype,
+        },
+      );
+      if (response.statusCode == 200) {
+        if (response.data['_statusCode'] == '101') {
+          return Left(ServerFailure(response.data['_statusMessage']));
+        }
+        return Right(response.data['_statusMessage'] as String);
+      } else {
+        return const Left(ServerFailure('Failed to submit E-leave'));
+      }
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
+    }
+  }
+
 }
 
