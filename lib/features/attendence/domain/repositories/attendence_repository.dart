@@ -4,4 +4,5 @@ import '../../../../core/errors/failures.dart';
 
 abstract class AttendenceRepository {
   Future<Either<Failure, TodayStatus>> getTodayStatus();
+  Future<Either<Failure, String>> checkIn();
 }

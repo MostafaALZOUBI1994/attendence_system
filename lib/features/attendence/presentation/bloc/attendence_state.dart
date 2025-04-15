@@ -12,4 +12,6 @@ class AttendenceState with _$AttendenceState {
     TodayStatus? todayStatus,
     @Default(0) int currentStepIndex,
   }) = Loaded;
+  const factory AttendenceState.error(String message) = Error;
+  const factory AttendenceState.checkInSucess(String message) = CheckInSucess;
 }

@@ -4,6 +4,8 @@ import 'package:attendence_system/features/attendence/domain/repositories/attend
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:ntp/ntp.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/local_services/local_services.dart';
 
@@ -34,6 +36,44 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
       } else {
         return const Left(ServerFailure("'An unexpected error occurred"));
       }
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> checkIn() async {
+    final String? employeeId = _localService.get(empID);
+    String time =
+    intl.DateFormat('dd/MM/yyyy HH:mm:ss').format(await NTP.now());
+    try{
+      final response = await _dio.post(
+        '/CheckIn',
+        queryParameters: {'langcode': 'en-US'},
+        data: {
+          "employeeid": employeeId,
+          "location": "DUBAI",
+          "latitude": 0.0,
+          "longitude": 0.0,
+          "checkintime": time,
+          "locStateDevice": "1",
+          "locStateApp": "1",
+          "batteryPercent": "1",
+          "cellInfo": "1",
+          "accuracy": "1",
+          "locTS": "1",
+          "spoofingEnb": "0",
+          "providerNetTime": time
+        }
+      );
+      if (response.statusCode == 200) {
+      if (response.data['_statusCode'] == '101') {
+        return Left(ServerFailure(response.data['_statusMessage']));
+      }
+      return Right(response.data['_statusMessage'] as String);
+    } else {
+      return const Left(ServerFailure('Failed to Check in'));
+    }
     } catch (e) {
       return Left(ServerFailure('An unexpected error occurred: $e'));
     }

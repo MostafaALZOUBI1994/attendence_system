@@ -1,4 +1,6 @@
 import 'package:attendence_system/core/constants/constants.dart';
+import 'package:attendence_system/features/attendence/domain/usecases/checkin_usecase.dart';
+import 'package:attendence_system/features/attendence/domain/usecases/today_status_usecase.dart';
 import 'package:attendence_system/features/authentication/domain/entities/login_success_model.dart';
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -10,10 +12,12 @@ import 'attendence_state.dart';
 @injectable
 class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
   final LocalService _localService;
-  final AttendenceRepository _attendanceRepository;
-  AttendenceBloc(this._localService, this._attendanceRepository) : super(const AttendenceState.initial()) {
+  final GetTodayStatusUseCase _getTodayStatusUseCase;
+  final CheckinUsecase _checkinUsecase;
+  AttendenceBloc(this._localService, this._getTodayStatusUseCase, this._checkinUsecase) : super(const AttendenceState.initial()) {
     on<LoadData>(_onLoadData);
     on<StepChanged>(_onStepChanged);
+    on<CheckIn>(_checkIn);
   }
 
   void _onLoadData(LoadData event, Emitter<AttendenceState> emit) async {
@@ -24,7 +28,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
         empProfileImage: _localService.get(empID) ?? ""
     );
 
-    final todayStatusResult = await _attendanceRepository.getTodayStatus();
+    final todayStatusResult = await _getTodayStatusUseCase.execute();
 
     todayStatusResult.fold(
             (failure) => emit(AttendenceState.loaded(loginData: loginData)),
@@ -52,4 +56,19 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
       );
     }
   }
+  Future<void> _checkIn(CheckIn event, Emitter<AttendenceState> emit) async {
+    try {
+      final checkIn = await _checkinUsecase.execute();
+      checkIn.fold(
+            (failure) => emit(AttendenceState.error(failure.message)),
+            (success) {
+              AttendenceEvent.stepChanged(1);
+              emit(AttendenceState.checkInSucess(success));
+              add(AttendenceEvent.loadData());
+            },
+      );
+    } catch (e) {
+      emit(AttendenceState.error(e.toString()));
+    }
+    }
 }

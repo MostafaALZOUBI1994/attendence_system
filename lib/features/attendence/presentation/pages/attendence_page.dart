@@ -59,7 +59,7 @@ class _TimeScreenState extends State<TimeScreen>
   }
 
   void _handleMoodSelected(String mood) {
-    _bloc.add(const AttendenceEvent.stepChanged(1));
+    _bloc.add( AttendenceEvent.checkIn(mood));
   }
 
   double _calculateProgress(Loaded state) {
@@ -173,7 +173,6 @@ class _TimeScreenState extends State<TimeScreen>
         builder: (context, state) {
           if (state is! Loaded) return const SizedBox();
 
-          // Update expected checkout time
           if (state.todayStatus?.expectedOutTime != "00:00" &&
               state.todayStatus?.expectedOutTime != null) {
             final parsedTime =

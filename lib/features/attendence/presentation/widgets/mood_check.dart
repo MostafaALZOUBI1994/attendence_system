@@ -8,7 +8,9 @@ import '../../../../core/constants/constants.dart';
 
 class MoodCheckJoystick extends StatefulWidget {
   final Function(String) onCheckInWithMood;
-  const MoodCheckJoystick({required this.onCheckInWithMood, super.key});
+
+  const MoodCheckJoystick({required this.onCheckInWithMood, Key? key})
+      : super(key: key);
 
   @override
   _MoodCheckJoystickState createState() => _MoodCheckJoystickState();
@@ -23,7 +25,7 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
     {'lottie': 'assets/lottie/sad.json', 'label': 'Sad', 'angle': 270.0},
     {'lottie': 'assets/lottie/angry.json', 'label': 'Angry', 'angle': 180.0},
   ];
-  String? _selectedMood;
+  String _selectedMood = 'Happy';
   Offset _offset = Offset.zero;
   final double _maxDragDistance = 60.0;
 
@@ -42,24 +44,26 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
       _offset += details.delta;
       final distance = _offset.distance;
       if (distance > _maxDragDistance) {
-        _offset = _offset.scale(
-            _maxDragDistance / distance, _maxDragDistance / distance);
+        _offset = _offset.scale(_maxDragDistance / distance, _maxDragDistance / distance);
       }
+
       final angle = (_offset.direction * 180 / pi + 360) % 360;
       _selectedMood = _moods
           .map((m) => {
-                'mood': m,
-                'diff': (m['angle'] - angle).abs() % 360,
-              })
+        'mood': m,
+        'diff': (m['angle'] - angle).abs() % 360,
+      })
           .reduce((a, b) => a['diff'] < b['diff'] ? a : b)['mood']['label'];
     });
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_selectedMood != null) {
-      widget.onCheckInWithMood(_selectedMood!);
-      _animateReset();
-    }
+    widget.onCheckInWithMood(_selectedMood);
+    _animateReset();
+  }
+
+  void _handleTap() {
+    widget.onCheckInWithMood(_selectedMood);
   }
 
   void _animateReset() {
@@ -69,17 +73,22 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
     ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
+
     resetAnimation.addListener(() {
       setState(() {
         _offset = resetAnimation.value;
       });
     });
+
     _controller.forward(from: 0.0).then((_) {
       setState(() {
         _offset = Offset.zero;
-        _selectedMood = null;
       });
     });
+  }
+
+  String _getMoodAsset(String moodLabel) {
+    return _moods.firstWhere((m) => m['label'] == moodLabel)['lottie'];
   }
 
   @override
@@ -132,13 +141,15 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
                 ),
               ),
             );
-          }),
+          }).toList(),
+
           Positioned(
             left: 75 + _offset.dx,
             top: 75 + _offset.dy,
             child: GestureDetector(
               onPanUpdate: _handleDragUpdate,
               onPanEnd: _handleDragEnd,
+              onTap: _handleTap,
               child: Container(
                 width: 70,
                 height: 70,
@@ -153,16 +164,11 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
                     ),
                   ],
                 ),
-                child: const Center(
-                  child: Text(
-                    'Check In',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                child: Lottie.asset(
+                  _getMoodAsset(_selectedMood),
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
