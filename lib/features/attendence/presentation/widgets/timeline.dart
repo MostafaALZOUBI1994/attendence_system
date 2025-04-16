@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../domain/entities/process_step.dart';
 
 class ProcessTimeline extends StatelessWidget {
   final int currentIndex;
@@ -29,13 +30,25 @@ class ProcessTimeline extends StatelessWidget {
           ),
           contentsBuilder: (context, index) => Padding(
             padding: const EdgeInsets.only(top: 15),
-            child: Text(
-              steps[index].title,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: _getColor(index),
-              ),
+            child: Column(
+              children: [
+                Text(
+                  steps[index].title,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: _getColor(index),
+                  ),
+                ),
+                Text(
+                  steps[index].time,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: _getColor(index),
+                  ),
+                ),
+              ],
             ),
           ),
           indicatorBuilder: (_, index) => _buildIndicator(index),
@@ -98,12 +111,7 @@ class ProcessTimeline extends StatelessWidget {
   }
 }
 
-class ProcessStep {
-  final String title;
-  final IconData icon;
 
-  ProcessStep({required this.title, required this.icon});
-}
 
 class _BezierPainter extends CustomPainter {
   const _BezierPainter({
@@ -158,7 +166,7 @@ class _BezierPainter extends CustomPainter {
       path = Path()
         ..moveTo(offset1.dx, offset1.dy)
         ..quadraticBezierTo(size.width, size.height / 2, size.width + radius,
-            radius) // TODO connector end & gradient
+            radius)
         ..quadraticBezierTo(size.width, size.height / 2, offset2.dx, offset2.dy)
         ..close();
 

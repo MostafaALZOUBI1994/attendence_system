@@ -125,7 +125,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const TimeScreen(),
+    TimeScreen(),
     const ServicesScreen(),
     const ReportsScreen(),
     const ProfilePage(),
