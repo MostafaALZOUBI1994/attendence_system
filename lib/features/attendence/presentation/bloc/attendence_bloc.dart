@@ -52,8 +52,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
           initialStep = 2;
         }
 
-        if (todayStatus.expectedOutTime != "00:00" &&
-            todayStatus.expectedOutTime != null) {
+        if (todayStatus.expectedOutTime != "00:00") {
           final parsedTime =
           DateFormat('hh:mm a').parse(todayStatus.expectedOutTime);
           final now = DateTime.now();
@@ -100,7 +99,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
             (success) {
           if (state is Loaded) {
             final loaded = state as Loaded;
-            emit(AttendenceState.checkInSuccess( // Use corrected name
+            emit(AttendenceState.checkInSuccess(
               message: success,
               loginData: loaded.loginData,
               todayStatus: loaded.todayStatus,
@@ -108,7 +107,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
               remainingTime: loaded.remainingTime,
               progress: loaded.progress,
             ));
-            Future.delayed(const Duration(milliseconds: 2000), () {
+            Future.delayed(const Duration(milliseconds: 1500), () {
               add(AttendenceEvent.loadData());
             });
           }

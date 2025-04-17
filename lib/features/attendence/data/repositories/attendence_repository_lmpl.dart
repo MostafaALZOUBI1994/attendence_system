@@ -20,6 +20,8 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
   Future<Either<Failure, TodayStatus>> getTodayStatus() async {
     try {
       final String? employeeId = _localService.get(empID);
+      final List<int>? lastCheckin  = _localService.getMillisList(checkIns);
+
       final response = await _dio.get(
         'EmployeeTodayTime?langcode=en-US&employeeid=$employeeId',
       );
@@ -32,6 +34,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
           checkInTime: response.data[0]['In_Time'],
           delay: response.data[0]['LateIn'],
           expectedOutTime: response.data[0]['ExpectedOutTime'],
+          offSiteCheckIns: _localService.getMillisList(checkIns) ?? [],
         ));
       } else {
         return const Left(ServerFailure("'An unexpected error occurred"));
@@ -70,6 +73,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
       if (response.data['_statusCode'] == '101') {
         return Left(ServerFailure(response.data['_statusMessage']));
       }
+      _localService.addMillis(checkIns,DateTime.now().millisecondsSinceEpoch);
       return Right(response.data['_statusMessage'] as String);
     } else {
       return const Left(ServerFailure('Failed to Check in'));

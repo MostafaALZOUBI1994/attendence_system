@@ -1,9 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../authentication/domain/entities/login_success_model.dart';
-import '../../domain/entities/process_step.dart';
 import '../../domain/entities/today_status.dart';
-import '../widgets/timeline.dart';
 part 'attendence_state.freezed.dart';
 
 
@@ -17,7 +15,6 @@ class AttendenceState with _$AttendenceState {
     @Default(0) int currentStepIndex,
     @Default(Duration.zero) Duration remainingTime,
     @Default(0.0) double progress,
-    @Default([]) List<ProcessStep> processSteps,
   }) = Loaded;
 
   const factory AttendenceState.checkInSuccess({
@@ -27,7 +24,6 @@ class AttendenceState with _$AttendenceState {
     @Default(0) int currentStepIndex,
     @Default(Duration.zero) Duration remainingTime,
     @Default(0.0) double progress,
-    @Default([]) List<ProcessStep> processSteps,
   }) = CheckInSuccess;
 
   const factory AttendenceState.error(String message) = Error;

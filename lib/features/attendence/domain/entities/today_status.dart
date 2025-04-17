@@ -1,12 +1,13 @@
 class TodayStatus {
-  final String checkInTime;
-  final String delay;
-  final String expectedOutTime;
+  final List<int> offSiteCheckIns;
+  final String   checkInTime;
+  final String   delay;
+  final String   expectedOutTime;
 
-
-  TodayStatus({
-    required this.checkInTime,
-    required this.delay,
-    required this.expectedOutTime,
+  const TodayStatus({
+    this.offSiteCheckIns   = const [],
+    this.checkInTime        = '--:--',
+    this.delay              = '--:--',
+    this.expectedOutTime    = '--:--',
   });
 }
