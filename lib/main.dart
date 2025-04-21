@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
-import 'package:attendence_system/features/attendence/presentation/bloc/attendence_event.dart';
 import 'package:attendence_system/features/authentication/presentation/bloc/login_bloc.dart';
 import 'package:attendence_system/features/authentication/presentation/pages/login_page.dart';
 import 'package:attendence_system/features/reports/presentation/bloc/report_bloc.dart';

@@ -46,7 +46,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
 
   @override
   Future<Either<Failure, String>> checkIn() async {
-    final String? employeeId = _localService.get(empID);
+    final String? employeeId =_localService.get(empID);
     String time =
     intl.DateFormat('dd/MM/yyyy HH:mm:ss').format(await NTP.now());
     try{

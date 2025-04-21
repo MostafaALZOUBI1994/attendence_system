@@ -1,17 +1,17 @@
 import 'dart:async';
+import 'dart:math';
+import 'dart:ui' as ui;
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
-
 import '../../../../core/constants/constants.dart';
 import '../../../authentication/domain/entities/login_success_model.dart';
 import '../../domain/entities/process_step.dart';
 import '../../domain/entities/today_status.dart';
 import '../bloc/attendence_bloc.dart';
-import '../bloc/attendence_event.dart';
-import '../bloc/attendence_state.dart';
+import '../widgets/analog_clock.dart';
 import '../widgets/mood_check.dart';
 import '../widgets/timeline.dart';
 
@@ -61,7 +61,7 @@ class TimeScreen extends StatelessWidget {
       required int currentStepIndex,
       required Duration remainingTime,
       required double progress,
-      TodayStatus? todayStatus,
+      required TodayStatus todayStatus,
       required bool isCheckInSuccess,
       required BuildContext context}) {
     return Stack(
@@ -71,39 +71,19 @@ class TimeScreen extends StatelessWidget {
           children: [
             _buildHeader(loginData),
             const SizedBox(height: 10),
+
+            // Step 0: Check-in options
             if (currentStepIndex == 0)
-              _buildCard(
-                MoodCheckJoystick(
-                  onCheckInWithMood: (mood) => context
-                      .read<AttendenceBloc>()
-                      .add(AttendenceEvent.checkIn(mood)),
-                ),
-              ),
+              _buildCheckInOptions(context, loginData, todayStatus),
+
+            // Step 1+: Check-in status
             if (currentStepIndex >= 1)
-              _buildCard(
-                isCheckInSuccess
-                    ? Lottie.asset(
-                        'assets/lottie/checkin.json',
-                        height: 150,
-                      )
-                    : _buildCheckInButton(
-                        context,
-                        Loaded(
-                          loginData: loginData,
-                          todayStatus: todayStatus,
-                          currentStepIndex: currentStepIndex,
-                          remainingTime: remainingTime,
-                          progress: progress,
-                        )),
-              ),
+              _buildCheckInStatus(context, loginData, todayStatus,
+                  currentStepIndex, remainingTime, progress, isCheckInSuccess),
+
             const SizedBox(height: 10),
-            _buildCard(_buildTimeline(Loaded(
-              loginData: loginData,
-              todayStatus: todayStatus,
-              currentStepIndex: currentStepIndex,
-              remainingTime: remainingTime,
-              progress: progress,
-            ))),
+            _buildTimelineCard(loginData, todayStatus, currentStepIndex,
+                remainingTime, progress),
           ],
         ),
       ],
@@ -188,7 +168,7 @@ class TimeScreen extends StatelessWidget {
         color:  primaryColor.withOpacity(0.1) ,
         shape: BoxShape.circle,
       ),
-      child:Stack(
+      child: Stack(
               alignment: Alignment.center,
               children: [
                 DashedCircularProgressBar.square(
@@ -236,28 +216,27 @@ class TimeScreen extends StatelessWidget {
               ProcessStep(
                 'Off-site Check-in',
                 Icons.wifi,
-                state.todayStatus!.offSiteCheckIns.isNotEmpty
+                state.todayStatus.offSiteCheckIns.isNotEmpty
                     ? DateFormat('hh:mm a')
-                            .format(DateTime.fromMillisecondsSinceEpoch(
-                                state.todayStatus!.offSiteCheckIns.last))
-                            .toString() ??
-                        '--:--'
+                    .format(DateTime.fromMillisecondsSinceEpoch(
+                    state.todayStatus.offSiteCheckIns.last))
+                    .toString()
                     : '--:--',
               ),
               ProcessStep(
                 'On-site Check-in',
                 Icons.fingerprint,
-                state.todayStatus?.checkInTime ?? '--:--',
+                state.todayStatus.checkInTime
               ),
               ProcessStep(
                 'Working',
                 Icons.work,
-                state.todayStatus?.expectedOutTime ?? '--:--',
+                state.todayStatus.expectedOutTime
               ),
               ProcessStep(
                 'Check-out',
                 Icons.logout,
-                state.todayStatus?.expectedOutTime ?? '--:--',
+                state.todayStatus.expectedOutTime
               ),
             ],
           ),
@@ -272,4 +251,94 @@ class TimeScreen extends StatelessWidget {
           child: child,
         ),
       );
+  Widget _buildCheckInOptions(BuildContext context, LoginSuccessData loginData,
+      TodayStatus todayStatus) {
+    return todayStatus.offSiteCheckIns.isEmpty
+        ? _buildCard(
+      MoodCheckJoystick(
+        onCheckInWithMood: (mood) =>
+            context.read<AttendenceBloc>().add(AttendenceEvent.checkIn(mood)),
+      ),
+    )
+        : _buildCard(
+      Stack(
+        alignment: Alignment.center,
+        children: [
+          AnalogAttendanceClock(
+            eventTimestamps: todayStatus.offSiteCheckIns,
+            accentColor: primaryColor,
+          ),
+          _buildCheckInButtonOverlay(context),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildCheckInButtonOverlay(BuildContext context) {
+    return Positioned.fill(
+      child: Center(
+        child: Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [
+                primaryColor.withOpacity(0.4),
+                primaryColor.withOpacity(0.8),
+              ],
+              radius: 0.6,
+            ),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.check_circle_outline, size: 60),
+            color: Colors.white,
+            onPressed: () =>
+                context.read<AttendenceBloc>().add(AttendenceEvent.checkIn("happy")),
+          ),
+        ),
+      ),
+    );
+  }
+
+// Check-in status widget
+  Widget _buildCheckInStatus(BuildContext context, LoginSuccessData loginData,
+      TodayStatus todayStatus, int currentStepIndex, Duration remainingTime,
+      double progress, bool isCheckInSuccess) {
+    return _buildCard(
+      isCheckInSuccess
+          ? Lottie.asset('assets/lottie/checkin.json', height: 150)
+          : _buildCheckInButton(
+        context,
+        Loaded(
+          loginData: loginData,
+          todayStatus: todayStatus,
+          currentStepIndex: currentStepIndex,
+          remainingTime: remainingTime,
+          progress: progress,
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildTimelineCard(LoginSuccessData loginData, TodayStatus todayStatus,
+      int currentStepIndex, Duration remainingTime, double progress) {
+    return _buildCard(
+      _buildTimeline(Loaded(
+        loginData: loginData,
+        todayStatus: todayStatus,
+        currentStepIndex: currentStepIndex,
+        remainingTime: remainingTime,
+        progress: progress,
+      )),
+    );
+  }
 }
+
+
+
+
+
+

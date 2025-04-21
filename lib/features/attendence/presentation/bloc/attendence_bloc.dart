@@ -5,11 +5,14 @@ import 'package:attendence_system/features/attendence/domain/usecases/checkin_us
 import 'package:attendence_system/features/attendence/domain/usecases/today_status_usecase.dart';
 import 'package:attendence_system/features/authentication/domain/entities/login_success_model.dart';
 import 'package:bloc/bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/local_services/local_services.dart';
-import 'attendence_event.dart';
-import 'attendence_state.dart';
+import '../../domain/entities/today_status.dart';
+part 'attendence_event.dart';
+part 'attendence_state.dart';
+part 'attendence_bloc.freezed.dart';
 
 @injectable
 class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
@@ -44,7 +47,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
 
     todayStatusResult.fold(
           (failure) {
-        emit(AttendenceState.loaded(loginData: loginData));
+        emit(AttendenceState.loaded(loginData: loginData, todayStatus: TodayStatus()));
       },
           (todayStatus) {
         int initialStep = 0;
@@ -126,38 +129,36 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
 
       double progress = 0.0;
       final loaded = state as Loaded;
-      if (loaded.todayStatus?.checkInTime != null) {
-        try {
-          final checkIn = DateFormat('hh:mm a')
-              .parse(loaded.todayStatus!.checkInTime);
-          final checkOut = DateFormat('hh:mm a')
-              .parse(loaded.todayStatus!.expectedOutTime);
-          final nowDate = DateTime.now();
-          final checkInDateTime = DateTime(
-            nowDate.year,
-            nowDate.month,
-            nowDate.day,
-            checkIn.hour,
-            checkIn.minute,
-          );
-          var expectedCheckout = DateTime(
-            nowDate.year,
-            nowDate.month,
-            nowDate.day,
-            checkOut.hour,
-            checkOut.minute,
-          );
-          if (expectedCheckout.isBefore(checkInDateTime)) {
-            expectedCheckout = expectedCheckout.add(const Duration(days: 1));
-          }
-          final totalDuration = expectedCheckout.difference(checkInDateTime).inSeconds;
-          final elapsed = now.difference(checkInDateTime).inSeconds;
-          progress = (elapsed / totalDuration * 100).clamp(0.0, 100.0);
-        } catch (e) {
-
+      try {
+        final checkIn = DateFormat('hh:mm a')
+            .parse(loaded.todayStatus.checkInTime);
+        final checkOut = DateFormat('hh:mm a')
+            .parse(loaded.todayStatus.expectedOutTime);
+        final nowDate = DateTime.now();
+        final checkInDateTime = DateTime(
+          nowDate.year,
+          nowDate.month,
+          nowDate.day,
+          checkIn.hour,
+          checkIn.minute,
+        );
+        var expectedCheckout = DateTime(
+          nowDate.year,
+          nowDate.month,
+          nowDate.day,
+          checkOut.hour,
+          checkOut.minute,
+        );
+        if (expectedCheckout.isBefore(checkInDateTime)) {
+          expectedCheckout = expectedCheckout.add(const Duration(days: 1));
         }
+        final totalDuration = expectedCheckout.difference(checkInDateTime).inSeconds;
+        final elapsed = now.difference(checkInDateTime).inSeconds;
+        progress = (elapsed / totalDuration * 100).clamp(0.0, 100.0);
+      } catch (e) {
+
       }
-      emit(loaded.copyWith(remainingTime: remaining, progress: progress));
+          emit(loaded.copyWith(remainingTime: remaining, progress: progress));
     }
   }
 

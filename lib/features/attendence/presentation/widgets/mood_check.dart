@@ -57,13 +57,13 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
     });
   }
 
-  void _handleDragEnd(DragEndDetails details) {
-    widget.onCheckInWithMood(_selectedMood);
+  Future<void> _handleDragEnd(DragEndDetails details) async {
+    await widget.onCheckInWithMood(_selectedMood);
     _animateReset();
   }
 
-  void _handleTap() {
-    widget.onCheckInWithMood(_selectedMood);
+  Future<void> _handleTap() async {
+    await widget.onCheckInWithMood(_selectedMood);
   }
 
   void _animateReset() {

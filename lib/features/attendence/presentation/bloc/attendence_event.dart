@@ -1,5 +1,4 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-part 'attendence_event.freezed.dart';
+part of 'attendence_bloc.dart';
 
 @freezed
 class AttendenceEvent with _$AttendenceEvent {
