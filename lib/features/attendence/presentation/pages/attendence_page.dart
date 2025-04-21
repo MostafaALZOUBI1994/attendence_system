@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:math';
-import 'dart:ui' as ui;
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,7 +64,8 @@ class TimeScreen extends StatelessWidget {
     return Stack(
       children: [
         _buildBackground(),
-        Column(
+        ListView(
+          shrinkWrap: true,
           children: [
             _buildHeader(loginData),
             const SizedBox(height: 10),
@@ -255,9 +253,11 @@ class TimeScreen extends StatelessWidget {
       TodayStatus todayStatus) {
     return todayStatus.offSiteCheckIns.isEmpty
         ? _buildCard(
-      MoodCheckJoystick(
-        onCheckInWithMood: (mood) =>
-            context.read<AttendenceBloc>().add(AttendenceEvent.checkIn(mood)),
+      Center(
+        child: MoodCheckJoystick(
+          onCheckInWithMood: (mood) =>
+              context.read<AttendenceBloc>().add(AttendenceEvent.checkIn(mood)),
+        ),
       ),
     )
         : _buildCard(
