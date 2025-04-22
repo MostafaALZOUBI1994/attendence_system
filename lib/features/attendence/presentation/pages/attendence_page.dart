@@ -15,7 +15,8 @@ import '../widgets/timeline.dart';
 class TimeScreen extends StatelessWidget {
   TimeScreen({Key? key}) : super(key: key);
 
-  final String _currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
+  final String _currentDate =
+      DateFormat('MMMM d, yyyy   HH:mm a').format(DateTime.now());
 
   @override
   Widget build(BuildContext context) {
@@ -162,43 +163,41 @@ class TimeScreen extends StatelessWidget {
     final remaining = state.remainingTime;
 
     return Container(
-      decoration: BoxDecoration(
-        color:  primaryColor.withOpacity(0.1) ,
-        shape: BoxShape.circle,
-      ),
-      child: Stack(
-              alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: primaryColor.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            DashedCircularProgressBar.square(
+              dimensions: 290,
+              progress: progress,
+              startAngle: 270,
+              sweepAngle: 360,
+              foregroundColor: primaryColor,
+              foregroundStrokeWidth: 6,
+              backgroundStrokeWidth: 3,
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                DashedCircularProgressBar.square(
-                  dimensions: 150,
-                  progress: progress,
-                  startAngle: 270,
-                  sweepAngle: 360,
-                  foregroundColor: primaryColor,
-                  foregroundStrokeWidth: 6,
-                  backgroundStrokeWidth: 3,
+                Text(
+                  '${remaining.inHours.toString().padLeft(2, '0')}:'
+                  '${(remaining.inMinutes % 60).toString().padLeft(2, '0')}:'
+                  '${(remaining.inSeconds % 60).toString().padLeft(2, '0')}',
+                  style: const TextStyle(
+                    color: primaryColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${remaining.inHours.toString().padLeft(2, '0')}:'
-                      '${(remaining.inMinutes % 60).toString().padLeft(2, '0')}:'
-                      '${(remaining.inSeconds % 60).toString().padLeft(2, '0')}',
-                      style: const TextStyle(
-                        color: primaryColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Icon(Icons.work, color: primaryColor, size: 40),
-                  ],
-                ),
+                const SizedBox(height: 8),
+                const Icon(Icons.work, color: primaryColor, size: 40),
               ],
-            )
-
-    );
+            ),
+          ],
+        ));
   }
 
   Widget _buildTimeline(Loaded state) => Column(
@@ -216,64 +215,60 @@ class TimeScreen extends StatelessWidget {
                 Icons.wifi,
                 state.todayStatus.offSiteCheckIns.isNotEmpty
                     ? DateFormat('hh:mm a')
-                    .format(DateTime.fromMillisecondsSinceEpoch(
-                    state.todayStatus.offSiteCheckIns.last))
-                    .toString()
+                        .format(DateTime.fromMillisecondsSinceEpoch(
+                            state.todayStatus.offSiteCheckIns.last))
+                        .toString()
                     : '--:--',
               ),
+              ProcessStep('On-site Check-in', Icons.fingerprint,
+                  state.todayStatus.checkInTime),
               ProcessStep(
-                'On-site Check-in',
-                Icons.fingerprint,
-                state.todayStatus.checkInTime
-              ),
+                  'Working', Icons.work, state.todayStatus.expectedOutTime),
               ProcessStep(
-                'Working',
-                Icons.work,
-                state.todayStatus.expectedOutTime
-              ),
-              ProcessStep(
-                'Check-out',
-                Icons.logout,
-                state.todayStatus.expectedOutTime
-              ),
+                  'Check-out', Icons.logout, state.todayStatus.expectedOutTime),
             ],
           ),
         ],
       );
 
-  Widget _buildCard(Widget child) => Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: child,
+  Widget _buildCard(Widget child) => SizedBox(
+    width: 300,
+    height: 300,
+    child: Card(
+          elevation: 5,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: child,
+          ),
         ),
-      );
+  );
+
   Widget _buildCheckInOptions(BuildContext context, LoginSuccessData loginData,
       TodayStatus todayStatus) {
     return todayStatus.offSiteCheckIns.isEmpty
         ? _buildCard(
-      Center(
-        child: MoodCheckJoystick(
-          onCheckInWithMood: (mood) =>
-              context.read<AttendenceBloc>().add(AttendenceEvent.checkIn(mood)),
-        ),
-      ),
-    )
+            Center(
+              child: MoodCheckJoystick(
+                onCheckInWithMood: (mood) => context
+                    .read<AttendenceBloc>()
+                    .add(AttendenceEvent.checkIn(mood)),
+              ),
+            ),
+          )
         : _buildCard(
-      Stack(
-        alignment: Alignment.center,
-        children: [
-          AnalogAttendanceClock(
-            eventTimestamps: todayStatus.offSiteCheckIns,
-            accentColor: primaryColor,
-          ),
-          _buildCheckInButtonOverlay(context),
-        ],
-      ),
-    );
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                AnalogAttendanceClock(
+                  eventTimestamps: todayStatus.offSiteCheckIns,
+                  accentColor: primaryColor,
+                ),
+                _buildCheckInButtonOverlay(context),
+              ],
+            ),
+          );
   }
-
 
   Widget _buildCheckInButtonOverlay(BuildContext context) {
     return Positioned.fill(
@@ -285,60 +280,69 @@ class TimeScreen extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                primaryColor.withOpacity(0.4),
-                primaryColor.withOpacity(0.8),
+                primaryColor.withOpacity(0.6),
+                primaryColor.withOpacity(0.9),
               ],
               radius: 0.6,
             ),
           ),
-          child: IconButton(
-            icon: const Icon(Icons.check_circle_outline, size: 60),
-            color: Colors.white,
-            onPressed: () =>
-                context.read<AttendenceBloc>().add(AttendenceEvent.checkIn("happy")),
+          child: GestureDetector(
+            child: const Center(
+                child: Text(
+              "Check in",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700),
+            )),
+            onTap: () => context
+                .read<AttendenceBloc>()
+                .add(AttendenceEvent.checkIn("happy")),
           ),
         ),
       ),
     );
   }
 
-// Check-in status widget
-  Widget _buildCheckInStatus(BuildContext context, LoginSuccessData loginData,
-      TodayStatus todayStatus, int currentStepIndex, Duration remainingTime,
-      double progress, bool isCheckInSuccess) {
+
+  Widget _buildCheckInStatus(
+      BuildContext context,
+      LoginSuccessData loginData,
+      TodayStatus todayStatus,
+      int currentStepIndex,
+      Duration remainingTime,
+      double progress,
+      bool isCheckInSuccess) {
     return _buildCard(
       isCheckInSuccess
           ? Lottie.asset('assets/lottie/checkin.json', height: 150)
           : _buildCheckInButton(
-        context,
-        Loaded(
-          loginData: loginData,
-          todayStatus: todayStatus,
-          currentStepIndex: currentStepIndex,
-          remainingTime: remainingTime,
-          progress: progress,
-        ),
-      ),
+              context,
+              Loaded(
+                loginData: loginData,
+                todayStatus: todayStatus,
+                currentStepIndex: currentStepIndex,
+                remainingTime: remainingTime,
+                progress: progress,
+              ),
+            ),
     );
   }
 
-
   Widget _buildTimelineCard(LoginSuccessData loginData, TodayStatus todayStatus,
       int currentStepIndex, Duration remainingTime, double progress) {
-    return _buildCard(
-      _buildTimeline(Loaded(
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: _buildTimeline(Loaded(
         loginData: loginData,
         todayStatus: todayStatus,
         currentStepIndex: currentStepIndex,
         remainingTime: remainingTime,
         progress: progress,
-      )),
+      )),)
     );
   }
 }
-
-
-
-
-
-

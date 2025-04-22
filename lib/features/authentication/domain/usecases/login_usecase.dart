@@ -1,15 +1,13 @@
+import 'package:attendence_system/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-
 import '../../../../core/errors/failures.dart';
 import '../entities/login_success_model.dart';
-import '../repositories/login_repository.dart';
-
 
 
 @injectable
 class LoginUseCase {
-  final LoginRepository _repository;
+  final AuthRepository _repository;
 
   LoginUseCase(this._repository);
 

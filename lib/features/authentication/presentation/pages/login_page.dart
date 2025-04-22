@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/constants.dart';
-import '../bloc/login_bloc.dart';
-import '../bloc/login_event.dart';
-import '../bloc/login_state.dart';
+import '../bloc/auth_bloc.dart';
 import '../widgets/qr_code_scanner.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -21,12 +19,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-      if (state is LoginSuccess) {
+      if (state is AuthSuccess) {
         Navigator.pushReplacementNamed(context, '/main');
       }
-    },
+     },
         child:  Scaffold(
           backgroundColor: Colors.white,
           body: Stack(
@@ -146,8 +144,8 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: () {
         final email = _emailController.text;
         final password = _passwordController.text;
-        context.read<LoginBloc>().add(
-          LoginEvent.loginSubmitted(email: email, password: password),
+        context.read<AuthBloc>().add(
+          AuthEvent.loginSubmitted(email: email, password: password),
         );
       },
       style: ElevatedButton.styleFrom(

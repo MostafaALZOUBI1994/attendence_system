@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
-import 'package:attendence_system/features/authentication/presentation/bloc/login_bloc.dart';
 import 'package:attendence_system/features/authentication/presentation/pages/login_page.dart';
 import 'package:attendence_system/features/reports/presentation/bloc/report_bloc.dart';
 import 'package:attendence_system/features/services/presentation/bloc/services_bloc.dart';
@@ -11,6 +10,7 @@ import 'core/injection.dart';
 import 'core/local_services/local_services.dart';
 import 'features/attendence/presentation/bloc/attendence_bloc.dart';
 import 'features/attendence/presentation/pages/attendence_page.dart';
+import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/reports/presentation/pages/reports_page.dart';
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => getIt<ProfileBloc>(),
         ),
-        BlocProvider(create: (context) => getIt<LoginBloc>()),
+        BlocProvider(create: (context) => getIt<AuthBloc>()),
         BlocProvider(
           create: (context) =>
               getIt<AttendenceBloc>()..add(const AttendenceEvent.loadData()),
@@ -61,7 +61,9 @@ class MyApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const SplashScreen(),
+          '/login': (context) => const  LoginScreen(),
           '/main': (context) => const MainScreen(),
+
         },
       ),
     );

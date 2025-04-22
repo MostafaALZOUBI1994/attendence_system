@@ -147,8 +147,13 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
             left: 75 + _offset.dx,
             top: 75 + _offset.dy,
             child: GestureDetector(
-              onPanUpdate: _handleDragUpdate,
-              onPanEnd: _handleDragEnd,
+              behavior: HitTestBehavior.translucent,
+              onVerticalDragStart: (_) => HapticFeedback.lightImpact(),
+              onVerticalDragUpdate: _handleDragUpdate,
+              onVerticalDragEnd: _handleDragEnd,
+              onHorizontalDragStart: (_) => HapticFeedback.lightImpact(),
+              onHorizontalDragUpdate: _handleDragUpdate,
+              onHorizontalDragEnd: _handleDragEnd,
               onTap: _handleTap,
               child: Container(
                 width: 70,

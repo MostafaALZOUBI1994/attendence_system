@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../authentication/presentation/bloc/auth_bloc.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
@@ -40,11 +41,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-
     super.initState();
+    context.read<AuthBloc>().add(const AuthEvent.getProfileData());
     context.read<ProfileBloc>().add(const ProfileEvent.fetchProfileData());
     _animatePerformanceScore();
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -52,15 +54,26 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: AppBackground(
-        child: Column(
-          children: [
-            _buildProfileHeader(),
-            Expanded(
-                child: SingleChildScrollView(child: _buildProfileContent(context))),
-          ],
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is UnAuthenticated) {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/login',
+                (route) => false,
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey[200],
+        body: AppBackground(
+          child: Column(
+            children: [
+              _buildProfileHeader(),
+              Expanded(
+                  child: SingleChildScrollView(
+                      child: _buildProfileContent(context))),
+            ],
+          ),
         ),
       ),
     );
@@ -79,35 +92,42 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-        const Positioned.fill(
+        Positioned.fill(
           child: Align(
             alignment: Alignment.center,
             child: SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/user_profile.jpg'),
-                    backgroundColor: Colors.white,
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    "Mostafa ALZOUBI",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+              child: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  return state.maybeWhen(
+                    success: (loginData) => Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: AssetImage('assets/user_profile.jpg'),
+                          backgroundColor: Colors.white,
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          loginData?.empName ?? "",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "Senior Mobile Developer",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  Text(
-                    "Senior Developer",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
+                    orElse: () => Center(child: CircularProgressIndicator()),
+                  );
+                },
               ),
             ),
           ),
@@ -122,7 +142,6 @@ class _ProfilePageState extends State<ProfilePage> {
         if (state is ProfileLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ProfileLoaded) {
-         // final profileData = state.profileData;
           final healthData = state.healthData;
 
           return SingleChildScrollView(
@@ -138,6 +157,24 @@ class _ProfilePageState extends State<ProfilePage> {
                 HealthCard(healthData: healthData),
                 const SizedBox(height: 10),
                 _buildStatsRow(),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<AuthBloc>().add(SignOut());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 100),
+                  ),
+                  child: const Text(
+                    "Sign out",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                )
               ],
             ),
           );
@@ -222,7 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Text(
                 label,
                 style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -244,8 +281,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (mood >= 0.3) return "Sad";
     return "Angry";
   }
-
-
 
   Widget _buildStatsRow() {
     return Row(
@@ -294,7 +329,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-
   Widget _buildPerformanceIndicator() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -323,9 +357,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 maximum: 100,
                 ranges: <GaugeRange>[
                   GaugeRange(startValue: 0, endValue: 40, color: Colors.red),
-                  GaugeRange(startValue: 40, endValue: 70, color: Colors.orange),
+                  GaugeRange(
+                      startValue: 40, endValue: 70, color: Colors.orange),
                   GaugeRange(startValue: 70, endValue: 90, color: Colors.blue),
-                  GaugeRange(startValue: 90, endValue: 100, color: Colors.green),
+                  GaugeRange(
+                      startValue: 90, endValue: 100, color: Colors.green),
                 ],
                 pointers: <GaugePointer>[
                   NeedlePointer(value: _performanceScore),
@@ -334,7 +370,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   GaugeAnnotation(
                     widget: Text(
                       "$_performanceScore%",
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     angle: 90,
                     positionFactor: 0.8,
@@ -384,4 +421,3 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 }
-

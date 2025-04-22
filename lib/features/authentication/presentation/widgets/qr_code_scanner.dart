@@ -1,9 +1,9 @@
-import 'package:attendence_system/features/authentication/presentation/bloc/login_event.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/login_bloc.dart';
+import '../bloc/auth_bloc.dart';
+
 
 class QRCodeScanner extends StatefulWidget {
   const QRCodeScanner({super.key});
@@ -33,10 +33,10 @@ class _QRCodeScannerState extends State<QRCodeScanner> {
               }
             });
             if (email != null) {
-              context.read<LoginBloc>()
-                ..add(LoginEvent.qrScanned(email!))
+              context.read<AuthBloc>()
+                ..add(AuthEvent.qrScanned(email!))
                 ..add(
-                    LoginEvent.loginSubmitted(email: email!, password: "123"));
+                    AuthEvent.loginSubmitted(email: email!, password: "123"));
               if (Navigator.canPop(context)) {
                 Navigator.pop(context);
               }
