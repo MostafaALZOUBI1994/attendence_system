@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
+import 'package:attendence_system/features/attendence/domain/usecases/checkin_usecase.dart';
 import 'package:attendence_system/features/authentication/presentation/pages/login_page.dart';
 import 'package:attendence_system/features/reports/presentation/bloc/report_bloc.dart';
 import 'package:attendence_system/features/services/presentation/bloc/services_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/constants/constants.dart';
 import 'core/injection.dart';
 import 'core/local_services/local_services.dart';
+import 'features/attendence/domain/repositories/attendence_repository.dart';
 import 'features/attendence/presentation/bloc/attendence_bloc.dart';
 import 'features/attendence/presentation/pages/attendence_page.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
@@ -16,9 +19,17 @@ import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/reports/presentation/pages/reports_page.dart';
 import 'features/services/presentation/pages/services.dart';
 
+
+const carChannel = MethodChannel('com.example.attendence_system/car');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
+  carChannel.setMethodCallHandler((call) async {
+    if (call.method == 'checkIn') {
+      await getIt<AttendenceRepository>().checkIn();
+    }
+  });
   runApp(const MyApp());
 }
 
