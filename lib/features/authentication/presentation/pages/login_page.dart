@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,9 +22,20 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-      if (state is AuthSuccess) {
-        Navigator.pushReplacementNamed(context, '/main');
-      }
+        state.maybeWhen(
+          success: (_) => Navigator.pushReplacementNamed(context, '/main'),
+          error: (message) {
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.error,
+              animType: AnimType.rightSlide,
+              title: 'Error',
+              desc: message,
+              btnOkOnPress: () {},
+            ).show();
+          },
+          orElse: () {},
+        );
      },
         child:  Scaffold(
           backgroundColor: Colors.white,
