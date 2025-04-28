@@ -2,6 +2,7 @@ import 'package:attendence_system/features/services/presentation/pages/ask_ai.da
 import 'package:attendence_system/features/services/presentation/pages/hr_request.dart';
 import 'package:attendence_system/features/services/presentation/pages/pantry.dart';
 import 'package:attendence_system/features/services/presentation/pages/team_status.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/constants.dart';
@@ -15,7 +16,7 @@ class ServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Services", style: TextStyle(color: Colors.white)),
+        title: Text("services".tr(), style: const TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -33,32 +34,32 @@ class ServicesScreen extends StatelessWidget {
     final services = [
       {
         'icon': Icons.assignment_ind,
-        'title': 'HR Support',
+        'title': 'hrSupport'.tr(),
         'route': '/hr-requests',
       },
       {
         'icon': Icons.local_cafe,
-        'title': 'Pantry',
+        'title': 'pantry'.tr(),
         'route': '/pantry-request',
       },
       {
         'icon': Icons.headset_mic,
-        'title': 'Help Desk',
+        'title': 'helpDesk'.tr(),
         'route': '/help-desk',
       },
       {
         'icon': Icons.smart_toy_outlined,
-        'title': 'Ask Bot',
+        'title': 'askBot'.tr(),
         'route': '/ask-ai',
       },
       {
         'icon': Icons.people_alt_outlined,
-        'title': 'Team Contacts',
+        'title': 'tmsContacts'.tr(),
         'route': '/team-contacts',
       },
       {
         'icon': Icons.calendar_month,
-        'title': 'Upcoming Events',
+        'title': 'upCmEvents'.tr(),
         'route': '/events',
       },
     ];

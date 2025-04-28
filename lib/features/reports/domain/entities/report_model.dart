@@ -31,6 +31,6 @@ class Report {
   factory Report.fromJson(Map<String, dynamic> json) => _$ReportFromJson(json);
 
   static DateTime _parseDate(String dateStr) {
-    return DateFormat('dd/MM/yyyy').parse(dateStr);
+    return DateFormat('dd/MM/yyyy', 'en').parse(dateStr);
   }
 }

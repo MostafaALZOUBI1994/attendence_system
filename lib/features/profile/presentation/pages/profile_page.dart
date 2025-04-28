@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:attendence_system/features/app_background.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../core/injection.dart';
+import '../../../../core/local_services/local_services.dart';
 import '../../../authentication/presentation/bloc/auth_bloc.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
@@ -59,7 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (state is UnAuthenticated) {
           Navigator.of(context).pushNamedAndRemoveUntil(
             '/login',
-                (route) => false,
+            (route) => false,
           );
         }
       },
@@ -104,12 +107,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundImage: AssetImage('assets/user_profile.jpg'),
+                          backgroundImage:
+                              AssetImage('assets/user_profile.jpg'),
                           backgroundColor: Colors.white,
                         ),
                         SizedBox(height: 12),
                         Text(
-                          loginData?.empName ?? "",
+                          getIt<LocalService>().currentLanguageCode == "ar"
+                              ? loginData.empNameAR
+                              : loginData.empName,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -170,8 +176,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 100),
                   ),
-                  child: const Text(
-                    "Sign out",
+                  child:  Text(
+                    "signOut".tr(),
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 )
@@ -259,7 +265,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Text(
                 label,
                 style:
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -341,8 +347,8 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Column(
         children: [
-          const Text(
-            "Performance Indicator",
+           Text(
+            "performance".tr(),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 18,
@@ -391,10 +397,10 @@ class _ProfilePageState extends State<ProfilePage> {
     String badge = _performanceScore >= 90
         ? "🎯 Early bird"
         : _performanceScore >= 80
-        ? "🦉 Night owl"
-        : _performanceScore >= 70
-        ? "💼 Consistent Contributor"
-        : "🚀 Needs Improvement";
+            ? "🦉 Night owl"
+            : _performanceScore >= 70
+                ? "💼 Consistent Contributor"
+                : "🚀 Needs Improvement";
 
     return Text(
       "Badge: $badge",

@@ -1,6 +1,7 @@
 import 'package:attendence_system/features/app_background.dart';
 import 'package:attendence_system/features/reports/domain/entities/report_model.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -24,7 +25,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       context.read<ReportBloc>().add(
         ReportEvent.fetchReport(
           fromDate: '01/01/2025',
-          toDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+          toDate: DateFormat('dd/MM/yyyy', 'en').format(DateTime.now()),
         ),
       );
     });
@@ -36,7 +37,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Attendance History",
+        title:  Text("rprts".tr(),
             style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -124,13 +125,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
       );
 
   Widget _buildChip(String label) {
-    final formatter = DateFormat('dd/MM/yyyy'); // Create date formatter
+    final formatter = DateFormat('dd/MM/yyyy', 'en');
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: ChoiceChip(
         label: Text(
-          label,
+          label.tr(),
           style: TextStyle(
             color: _selectedFilter == label ? Colors.white : Colors.black,
           ),
@@ -154,7 +155,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
             switch (label) {
               case "All":
-                fromDate = DateTime.utc(2025, 1, 1); // Fixed start date
+                fromDate = DateTime.utc(2025, 1, 1);
                 break;
               case "Last 7 Days":
                 fromDate = now.subtract(const Duration(days: 7));
@@ -204,12 +205,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   Row(children: [
                     const Icon(Icons.login, color: Colors.green),
                     const SizedBox(width: 5),
-                    Text("Check-In: ${record.checkIn}")
+                    Text('chkInTime'.tr(namedArgs: { 'chkinTime': record.checkIn}) )
                   ]),
                   Row(children: [
                     const Icon(Icons.logout, color: Colors.red),
                     const SizedBox(width: 5),
-                    Text("Check-Out: ${record.checkOut}")
+                    Text('chkOutTime'.tr(namedArgs: { 'chkoutTime': record.checkOut}) )
                   ]),
                 ],
               ),

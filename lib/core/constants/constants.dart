@@ -11,3 +11,4 @@ const String empName = 'EMP_NAME';
 const String empNameAR = 'EMP_NAME_AR';
 const String profileImage = 'PROFILE_IMAGE';
 const String checkIns = 'CHECK_INS';
+const String localeKey = 'locale';

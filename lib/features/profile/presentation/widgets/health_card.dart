@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -24,8 +25,8 @@ class HealthCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Employee Health",
+           Text(
+            "emphlth".tr(),
             style: TextStyle(
               color: primaryColor,
               fontSize: 18,
@@ -36,16 +37,16 @@ class HealthCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _healthMetric("Steps", healthData.steps.toString(), "assets/lottie/walking.json"),
-              _healthMetric("Heart Rate", "${healthData.heartRate} bpm", "assets/lottie/heart_pulse.json"),
+              _healthMetric("stps".tr(), healthData.steps.toString(), "assets/lottie/walking.json"),
+              _healthMetric("hrtRate".tr(), "${healthData.heartRate} bpm", "assets/lottie/heart_pulse.json"),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _healthMetric("Calories", "${healthData.caloriesBurned} kcal", "assets/lottie/calories.json"),
-              _healthMetric("Sleep", "${healthData.sleepDuration} hrs", "assets/lottie/sleep.json"),
+              _healthMetric("cal".tr(), "${healthData.caloriesBurned} kcal", "assets/lottie/calories.json"),
+              _healthMetric("sleep".tr(), "${healthData.sleepDuration} hrs", "assets/lottie/sleep.json"),
             ],
           ),
         ],

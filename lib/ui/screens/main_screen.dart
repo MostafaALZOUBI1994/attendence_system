@@ -1,5 +1,6 @@
 
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants/constants.dart';
@@ -56,6 +57,6 @@ class _MainScreenState extends State<MainScreen> {
   BottomBarItem _bottomBarItem(IconData icon, String label) => BottomBarItem(
     inActiveItem: Icon(icon, color: Colors.grey),
     activeItem: Icon(icon, color: Colors.white),
-    itemLabel: label,
+    itemLabel: label.tr(),
   );
 }

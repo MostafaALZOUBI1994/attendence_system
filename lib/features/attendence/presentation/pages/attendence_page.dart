@@ -1,5 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -17,14 +18,14 @@ class TimeScreen extends StatelessWidget {
   TimeScreen({Key? key}) : super(key: key);
 
   final String _currentDate =
-      DateFormat('MMMM d, yyyy   HH:mm a').format(DateTime.now());
+      DateFormat('MMMM d, yyyy   HH:mm a' ,'en').format(DateTime.now());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text("Attendance System",
+          title:  Text("home".tr(),
               style: TextStyle(color: Colors.white)),
           backgroundColor: primaryColor,
           iconTheme: const IconThemeData(color: Colors.white),
@@ -37,7 +38,7 @@ class TimeScreen extends StatelessWidget {
                 context: context,
                 dialogType: DialogType.success,
                 animType: AnimType.rightSlide,
-                title: 'Success',
+                title: 'Success'.tr(),
                 desc: s.message,
                 btnOkOnPress: () {},
               ).show();
@@ -47,7 +48,7 @@ class TimeScreen extends StatelessWidget {
                 context: context,
                 dialogType: DialogType.error,
                 animType: AnimType.rightSlide,
-                title: 'Oops',
+                title: 'Oops'.tr(),
                 desc: e.message,
                 btnOkOnPress: () {},
               ).show();
@@ -102,7 +103,7 @@ class TimeScreen extends StatelessWidget {
         ListView(
           shrinkWrap: true,
           children: [
-            _buildHeader(loginData),
+            _buildHeader(loginData, context),
             const SizedBox(height: 10),
 
             // Step 0: Check-in options
@@ -158,10 +159,16 @@ class TimeScreen extends StatelessWidget {
         ],
       );
 
-  Widget _buildHeader(LoginSuccessData userData) {
-    final firstName = userData.empName.isNotEmpty
-        ? userData.empName.split(' ').first
-        : 'User';
+  Widget _buildHeader(LoginSuccessData userData, BuildContext context) {
+    final lang = context.locale.languageCode;
+    final fullName = (lang == 'ar' && userData.empNameAR.isNotEmpty)
+        ? userData.empNameAR
+        : userData.empName;
+
+    final firstName = fullName.split(' ').first;
+
+
+    final greeting = 'helloName'.tr(namedArgs: {'name': firstName});
 
     return Row(
       children: [
@@ -174,8 +181,7 @@ class TimeScreen extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Hello, $firstName',
+            Text(greeting,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -236,8 +242,8 @@ class TimeScreen extends StatelessWidget {
 
   Widget _buildTimeline(Loaded state) => Column(
         children: [
-          const Text(
-            'Attendance Timeline',
+           Text(
+            'attSystem'.tr(),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
@@ -245,21 +251,21 @@ class TimeScreen extends StatelessWidget {
             currentIndex: state.currentStepIndex,
             steps: [
               ProcessStep(
-                'Off-site Check-in',
+                'offSiteCheckIns'.tr(),
                 Icons.wifi,
                 state.todayStatus.offSiteCheckIns.isNotEmpty
-                    ? DateFormat('hh:mm a')
+                    ? DateFormat('hh:mm a','en')
                         .format(DateTime.fromMillisecondsSinceEpoch(
                             state.todayStatus.offSiteCheckIns.last))
                         .toString()
                     : '--:--',
               ),
-              ProcessStep('On-site Check-in', Icons.fingerprint,
+              ProcessStep('onSiteCheckIn'.tr(), Icons.fingerprint,
                   state.todayStatus.checkInTime),
               ProcessStep(
-                  'Working', Icons.work, state.todayStatus.expectedOutTime),
+                  'working'.tr(), Icons.work, state.todayStatus.expectedOutTime),
               ProcessStep(
-                  'Check-out', Icons.logout, state.todayStatus.expectedOutTime),
+                  'chkOut'.tr(), Icons.logout, state.todayStatus.expectedOutTime),
             ],
           ),
         ],
@@ -322,9 +328,9 @@ class TimeScreen extends StatelessWidget {
             ),
           ),
           child: GestureDetector(
-            child: const Center(
+            child:  Center(
                 child: Text(
-              "Check in",
+              "chkIn".tr(),
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,

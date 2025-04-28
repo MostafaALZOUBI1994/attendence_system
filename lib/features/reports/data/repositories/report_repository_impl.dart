@@ -36,9 +36,8 @@ class ReportRepositoryImpl implements ReportRepository {
             (res) => res,
       );
 
-      // fold over the Either<Failure, Response>
+
       return await responseEither.fold(
-        // on failure, just propagate it
             (failure) => Left(failure),
             (response) {
           if (response.statusCode != 200) {

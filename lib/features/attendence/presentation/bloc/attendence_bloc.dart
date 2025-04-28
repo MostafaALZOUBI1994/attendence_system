@@ -57,7 +57,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
 
         if (todayStatus.expectedOutTime != "00:00") {
           final parsedTime =
-          DateFormat('hh:mm a').parse(todayStatus.expectedOutTime);
+          DateFormat('hh:mm a', "en").parse(todayStatus.expectedOutTime);
           final now = DateTime.now();
           _expectedCheckoutTime = DateTime(
             now.year,
@@ -137,9 +137,9 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
       double progress = 0.0;
       final loaded = state as Loaded;
       try {
-        final checkIn = DateFormat('hh:mm a')
+        final checkIn = DateFormat('hh:mm a','en')
             .parse(loaded.todayStatus.checkInTime);
-        final checkOut = DateFormat('hh:mm a')
+        final checkOut = DateFormat('hh:mm a','en')
             .parse(loaded.todayStatus.expectedOutTime);
         final nowDate = DateTime.now();
         final checkInDateTime = DateTime(
