@@ -107,12 +107,11 @@ class ServicesRepositoryImpl implements ServiceRepository {
       return await responseEither.fold(
             (failure) => Left(failure),
             (response) {
-          // check HTTP-level status
           if (response.statusCode != 200) {
             return const Left(ServerFailure('Failed to submit E-leave'));
           }
           final data = response.data as Map<String, dynamic>;
-          // check API‐level status code
+
           if (data['_statusCode'] == '101') {
             return Left(ServerFailure(data['_statusMessage'] as String));
           }

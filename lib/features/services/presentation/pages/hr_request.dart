@@ -1,12 +1,10 @@
 import 'dart:io';
 import 'package:attendence_system/features/services/domain/entities/permission_types_entity.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-
 import '../../../../core/constants/constants.dart';
 import '../../../app_background.dart';
 import '../../domain/entities/eleave_entity.dart';
@@ -102,8 +100,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
             ),
           );
         } else {
-          // For states that are not "loaded", build a base scaffold with your default content (could be the form or previous data).
-          baseContent = Scaffold(
+        baseContent = Scaffold(
             appBar: AppBar(
               title: const Text("HR Request",
                   style: TextStyle(color: Colors.white)),
@@ -176,31 +173,42 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
 
   Widget _buildRequestToggle() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton(
-          onPressed: () => setState(() => _isLeaveRequest = true),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _isLeaveRequest ? primaryColor : Colors.grey.shade300,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => setState(() => _isLeaveRequest = true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _isLeaveRequest ? primaryColor : Colors.grey.shade300,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+            ),
+            child: const Text(
+              "Leave Request",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
           ),
-          child: const Text("Leave Request",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
-        ElevatedButton(
-          onPressed: () => setState(() => _isLeaveRequest = false),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: !_isLeaveRequest ? primaryColor : Colors.grey.shade300,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        const SizedBox(width: 8),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => setState(() => _isLeaveRequest = false),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: !_isLeaveRequest ? primaryColor : Colors.grey.shade300,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+            ),
+            child: const Text(
+              "Attendance Correction",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
           ),
-          child: const Text("Attendance Correction",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
       ],
     );
   }
+
 
   Widget _buildForm(List<PermissionTypesEntity> leaveTypes) {
     return Card(
