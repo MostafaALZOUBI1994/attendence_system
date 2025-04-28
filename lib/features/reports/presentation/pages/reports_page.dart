@@ -1,5 +1,6 @@
 import 'package:attendence_system/features/app_background.dart';
 import 'package:attendence_system/features/reports/domain/entities/report_model.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -21,13 +22,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ReportBloc>().add(
-            const ReportEvent.fetchReport(
-              fromDate: '01/01/2025',
-              toDate: '04/07/2025',
-            ),
-          );
+        ReportEvent.fetchReport(
+          fromDate: '01/01/2025',
+          toDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+        ),
+      );
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   _buildFilterChips(),
                   const SizedBox(height: 20),
                   Expanded(
-                    child: BlocBuilder<ReportBloc, ReportState>(
+                    child: BlocConsumer<ReportBloc, ReportState>(
+                      listener: (context, state) {
+                        if (state is ReportError) {
+                          AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.error,
+                            animType: AnimType.rightSlide,
+                            title: 'Oops',
+                            desc: state.message,
+                            btnOkOnPress: () {},
+                          ).show();
+                        }
+                      },
                       builder: (context, state) {
                         if (state is ReportLoading) {
                           return const Center(
@@ -60,13 +74,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           return ListView.builder(
                             itemCount: state.report.length,
                             itemBuilder: (context, index) {
-                              return _buildAttendanceCard(state.report[index]);
+                              return _buildAttendanceCard(
+                                  state.report[index]);
                             },
                           );
-                        } else if (state is ReportError) {
-                          return Center(child: Text(state.message));
                         }
-                        return const SizedBox(); // Initial state
+                        // for both initial and error states, just show nothing (dialog handled above)
+                        return const SizedBox.shrink();
                       },
                     ),
                   ),

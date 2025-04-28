@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,37 +22,70 @@ class TimeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Attendance System",
-            style: TextStyle(color: Colors.white)),
-        backgroundColor: primaryColor,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: BlocBuilder<AttendenceBloc, AttendenceState>(
-        builder: (context, state) {
-          return state.maybeMap(
-            loaded: (loadedData) => _buildMainContent(
-                loginData: loadedData.loginData,
-                currentStepIndex: loadedData.currentStepIndex,
-                remainingTime: loadedData.remainingTime,
-                progress: loadedData.progress,
-                todayStatus: loadedData.todayStatus,
-                isCheckInSuccess: false,
-                context: context),
-            checkInSuccess: (successData) => _buildMainContent(
-                loginData: successData.loginData,
-                currentStepIndex: successData.currentStepIndex,
-                remainingTime: successData.remainingTime,
-                progress: successData.progress,
-                todayStatus: successData.todayStatus,
-                isCheckInSuccess: true,
-                context: context),
-            orElse: () => const SizedBox(),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text("Attendance System",
+              style: TextStyle(color: Colors.white)),
+          backgroundColor: primaryColor,
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: BlocConsumer<AttendenceBloc, AttendenceState>(
+            listener: (context, state) {
+          state.maybeMap(
+            checkInSuccess: (s) {
+              AwesomeDialog(
+                context: context,
+                dialogType: DialogType.success,
+                animType: AnimType.rightSlide,
+                title: 'Success',
+                desc: s.message,
+                btnOkOnPress: () {},
+              ).show();
+            },
+            error: (e) {
+              AwesomeDialog(
+                context: context,
+                dialogType: DialogType.error,
+                animType: AnimType.rightSlide,
+                title: 'Oops',
+                desc: e.message,
+                btnOkOnPress: () {},
+              ).show();
+            },
+            orElse: () {},
           );
-        },
-      ),
-    );
+        }, builder: (context, state) {
+          return state.maybeMap(
+            loaded: (l) => _buildMainContent(
+              loginData: l.loginData,
+              currentStepIndex: l.currentStepIndex,
+              remainingTime: l.remainingTime,
+              progress: l.progress,
+              todayStatus: l.todayStatus,
+              isCheckInSuccess: false,
+              context: context,
+            ),
+            checkInSuccess: (s) => _buildMainContent(
+              loginData: s.loginData,
+              currentStepIndex: s.currentStepIndex,
+              remainingTime: s.remainingTime,
+              progress: s.progress,
+              todayStatus: s.todayStatus,
+              isCheckInSuccess: true,
+              context: context,
+            ),
+            error: (e) => _buildMainContent(
+              loginData: e.loginData,
+              currentStepIndex: e.currentStepIndex,
+              remainingTime: e.remainingTime,
+              progress: e.progress,
+              todayStatus: e.todayStatus,
+              isCheckInSuccess: false,
+              context: context,
+            ),
+            orElse: () => const SizedBox.shrink(),
+          );
+        }));
   }
 
   Widget _buildMainContent(
@@ -232,17 +266,18 @@ class TimeScreen extends StatelessWidget {
       );
 
   Widget _buildCard(Widget child) => SizedBox(
-    width: 300,
-    height: 300,
-    child: Card(
+        width: 300,
+        height: 300,
+        child: Card(
           elevation: 5,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: child,
           ),
         ),
-  );
+      );
 
   Widget _buildCheckInOptions(BuildContext context, LoginSuccessData loginData,
       TodayStatus todayStatus) {
@@ -304,7 +339,6 @@ class TimeScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildCheckInStatus(
       BuildContext context,
       LoginSuccessData loginData,
@@ -332,17 +366,17 @@ class TimeScreen extends StatelessWidget {
   Widget _buildTimelineCard(LoginSuccessData loginData, TodayStatus todayStatus,
       int currentStepIndex, Duration remainingTime, double progress) {
     return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: _buildTimeline(Loaded(
-        loginData: loginData,
-        todayStatus: todayStatus,
-        currentStepIndex: currentStepIndex,
-        remainingTime: remainingTime,
-        progress: progress,
-      )),)
-    );
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: _buildTimeline(Loaded(
+            loginData: loginData,
+            todayStatus: todayStatus,
+            currentStepIndex: currentStepIndex,
+            remainingTime: remainingTime,
+            progress: progress,
+          )),
+        ));
   }
 }

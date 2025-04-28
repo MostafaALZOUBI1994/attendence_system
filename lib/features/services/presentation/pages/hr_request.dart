@@ -39,7 +39,6 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
       listener: (context, state) {
         state.maybeWhen(
           error: (message) {
-            // Show error dialog as an overlay (AwesomeDialog naturally overlays the UI)
             AwesomeDialog(
               context: context,
               dialogType: DialogType.error,
@@ -75,9 +74,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
         );
       },
       builder: (context, state) {
-        // Start building the core content. We'll overlay a progress indicator if needed.
-        // In this example, we assume that the "loaded" state contains our form data (leaveTypes and leaveBalance).
-        Widget baseContent;
+       Widget baseContent;
         if (state is LoadSuccess) {
           if (_selectedType.isEmpty && state.leaveTypes.isNotEmpty) {
             _selectedType = state.leaveTypes.first.permissionCode;

@@ -95,31 +95,38 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
   }
 
   Future<void> _onCheckIn(CheckIn event, Emitter<AttendenceState> emit) async {
-    try {
-      final checkIn = await _checkinUsecase.execute();
-      checkIn.fold(
-            (failure) => emit(AttendenceState.error(failure.message)),
-            (success) {
-          if (state is Loaded) {
-            final loaded = state as Loaded;
-            emit(AttendenceState.checkInSuccess(
-              message: success,
-              loginData: loaded.loginData,
-              todayStatus: loaded.todayStatus,
-              currentStepIndex: loaded.currentStepIndex + 1,
-              remainingTime: loaded.remainingTime,
-              progress: loaded.progress,
-            ));
-            Future.delayed(const Duration(milliseconds: 1500), () {
-              add(AttendenceEvent.loadData());
-            });
-          }
-        },
-      );
-    } catch (e) {
-      emit(AttendenceState.error(e.toString()));
-    }
+    if (state is! Loaded) return;
+    final loaded = state as Loaded;
+
+    final result = await _checkinUsecase.execute();
+    result.fold(
+          (failure) {
+        emit(AttendenceState.error(
+          message: failure.message,
+          loginData: loaded.loginData,
+          todayStatus: loaded.todayStatus,
+          currentStepIndex: loaded.currentStepIndex,
+          remainingTime: loaded.remainingTime,
+          progress: loaded.progress,
+        ));
+      },
+          (successMessage) {
+        emit(AttendenceState.checkInSuccess(
+          message: successMessage,
+          loginData: loaded.loginData,
+          todayStatus: loaded.todayStatus,
+          currentStepIndex: loaded.currentStepIndex + 1,
+          remainingTime: loaded.remainingTime,
+          progress: loaded.progress,
+        ));
+
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          add(const AttendenceEvent.loadData());
+        });
+      },
+    );
   }
+
 
 
   void _onTick(Tick event, Emitter<AttendenceState> emit) {

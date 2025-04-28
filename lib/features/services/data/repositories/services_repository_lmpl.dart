@@ -1,12 +1,11 @@
-
 import 'package:attendence_system/core/constants/constants.dart';
 import 'package:attendence_system/core/errors/failures.dart';
+import 'package:attendence_system/core/network/dio_extensions.dart';
 import 'package:attendence_system/features/services/domain/entities/eleave_entity.dart';
 import 'package:attendence_system/features/services/domain/entities/permission_types_entity.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-
 import '../../../../core/local_services/local_services.dart';
 import '../../domain/repositories/services_repository.dart';
 import '../models/eleave_model.dart';
@@ -23,65 +22,105 @@ class ServicesRepositoryImpl implements ServiceRepository {
   @override
   Future<Either<Failure, EleaveEntity>> getLeaveBalance() async {
     try {
-     final empId =  _localService.get(empID);
-      final response = await _dio.get('/Eleavebalance', queryParameters: {'langcode': 'en-US', "employeeid": empId});
-      final List<dynamic> data = response.data;
-      final leaveBalances =  EleaveModel.fromJson(data[0]);
-      return Right( EleaveEntity(
-        noOfHrsAllowed: leaveBalances.noOfHrsAllowed,
-        noOfHrsAvailable: leaveBalances.noOfHrsAvailable,
-        noOfHrsUtilized: leaveBalances.noOfHrsUtilized,
-        noOfHrsPending: leaveBalances.noOfHrsPending,
-      ));
+      final empId = _localService.get(empID);
+
+      final responseEither = await _dio.safe(
+            () => _dio.get(
+          '/Eleavebalance',
+          queryParameters: { 'employeeid': empId},
+        ),
+            (res) => res,
+      );
+
+      return await responseEither.fold(
+            (failure) => Left(failure),
+            (response) {
+          final data = response.data as List<dynamic>;
+          final model = EleaveModel.fromJson(data[0] as Map<String, dynamic>);
+          final entity = EleaveEntity(
+            noOfHrsAllowed: model.noOfHrsAllowed,
+            noOfHrsAvailable: model.noOfHrsAvailable,
+            noOfHrsUtilized: model.noOfHrsUtilized,
+            noOfHrsPending: model.noOfHrsPending,
+          );
+          return Right(entity);
+        },
+      );
     } catch (e) {
-      return Left(ServerFailure("An unexpected error occurred: $e"));
+      return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
   @override
   Future<Either<Failure, List<PermissionTypesEntity>>> getPermissionTypes() async {
     try {
-      final response = await _dio.get('/PermissionTypes', queryParameters: {'langcode': 'en-US'});
-      final List<dynamic> data = response.data;
-      final permissionTypes = data.map((json) => PermissionTypesModel.fromJson(json)).toList();
-      return Right(permissionTypes.map((model) => PermissionTypesEntity(
-        permissionCode: model.permissionCode,
-        permissionNameEN: model.permissionNameEN,
-        permissionNameAR: model.permissionNameAR,
-      )).toList());
+      final responseEither = await _dio.safe(
+            () => _dio.get(
+          '/PermissionTypes',
+        ),
+            (res) => res,
+      );
+
+      return await responseEither.fold(
+            (failure) => Left(failure),
+            (response) {
+          final rawList = response.data as List<dynamic>;
+          final entities = rawList
+              .map((json) => PermissionTypesModel.fromJson(json as Map<String, dynamic>))
+              .map((model) => PermissionTypesEntity(
+            permissionCode: model.permissionCode,
+            permissionNameEN: model.permissionNameEN,
+            permissionNameAR: model.permissionNameAR,
+          ))
+              .toList();
+          return Right(entities);
+        },
+      );
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
+  @override
   Future<Either<Failure, String>> submitLeaveRequest(SubmitLeaveRequestParams params) async {
     try {
-      final empId =  _localService.get(empID);
-      final response = await _dio.post(
-        '/EleaveInsert',
-        queryParameters: {'langcode': 'en-US'},
-        data: {
-          "employeeid": empId,
-          "datedaytype": params.datedaytype,
-          "fromtime": params.fromtime,
-          "totime": params.totime,
-          "duration": params.duration,
-          "reason": params.reason,
-          "attachment": params.attachment,
-          "userid": "NLA47014",
-          "eleavetype": params.eleavetype,
+      final empId = _localService.get(empID);
+
+      final responseEither = await _dio.safe(
+            () => _dio.post(
+          '/EleaveInsert',
+          data: {
+            'employeeid': empId,
+            'datedaytype': params.datedaytype,
+            'fromtime': params.fromtime,
+            'totime': params.totime,
+            'duration': params.duration,
+            'reason': params.reason,
+            'attachment': params.attachment,
+            'userid': 'NLA47014',
+            'eleavetype': params.eleavetype,
+          },
+        ),
+            (res) => res,
+      );
+
+      return await responseEither.fold(
+            (failure) => Left(failure),
+            (response) {
+          // check HTTP-level status
+          if (response.statusCode != 200) {
+            return const Left(ServerFailure('Failed to submit E-leave'));
+          }
+          final data = response.data as Map<String, dynamic>;
+          // check API‐level status code
+          if (data['_statusCode'] == '101') {
+            return Left(ServerFailure(data['_statusMessage'] as String));
+          }
+          return Right(data['_statusMessage'] as String);
         },
       );
-      if (response.statusCode == 200) {
-        if (response.data['_statusCode'] == '101') {
-          return Left(ServerFailure(response.data['_statusMessage']));
-        }
-        return Right(response.data['_statusMessage'] as String);
-      } else {
-        return const Left(ServerFailure('Failed to submit E-leave'));
-      }
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred: $e'));
+      return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 

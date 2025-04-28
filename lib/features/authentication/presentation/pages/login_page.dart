@@ -32,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
               title: 'Error',
               desc: message,
               btnOkOnPress: () {},
+              btnOkColor: primaryColor
             ).show();
           },
           orElse: () {},

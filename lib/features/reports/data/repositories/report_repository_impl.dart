@@ -1,3 +1,4 @@
+import 'package:attendence_system/core/network/dio_extensions.dart';
 import 'package:attendence_system/features/reports/domain/entities/report_model.dart';
 import 'package:dio/dio.dart';
 import 'package:dartz/dartz.dart';
@@ -23,24 +24,36 @@ class ReportRepositoryImpl implements ReportRepository {
     try {
       final String? employeeId = _localService.get(empID);
 
-      Response response = await _dio.get(
-        'AttendanceReport',
-        queryParameters: {
-          'langcode': 'en-US',
-          'employeeid': employeeId,
-          'fromdate': fromDate,
-          'todate': toDate,
-        },
+      final responseEither = await _dio.safe(
+            () => _dio.get(
+          'AttendanceReport',
+          queryParameters: {
+            'employeeid': employeeId,
+            'fromdate': fromDate,
+            'todate': toDate,
+          },
+        ),
+            (res) => res,
       );
 
-      if (response.statusCode != 200) {
-        return Left(ServerFailure(response.data[0]["_statusMessage"]));
-      }
+      // fold over the Either<Failure, Response>
+      return await responseEither.fold(
+        // on failure, just propagate it
+            (failure) => Left(failure),
+            (response) {
+          if (response.statusCode != 200) {
 
-      final List<dynamic> data = response.data;
-      final reports = data.map((e) => Report.fromJson(e)).toList();
+            final msg = (response.data is List && response.data.isNotEmpty)
+                ? response.data[0]["_statusMessage"]
+                : 'Failed to fetch reports';
+            return Left(ServerFailure(msg));
+          }
 
-      return Right(reports);
+          final List<dynamic> raw = response.data as List<dynamic>;
+          final reports = raw.map((e) => Report.fromJson(e)).toList();
+          return Right(reports);
+        },
+      );
     } catch (e) {
       return Left(ServerFailure("An unexpected error occurred: $e"));
     }

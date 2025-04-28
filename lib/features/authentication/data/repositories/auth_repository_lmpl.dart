@@ -1,4 +1,5 @@
 import 'package:attendence_system/core/local_services/local_services.dart';
+import 'package:attendence_system/core/network/dio_extensions.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -17,38 +18,49 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._dio, this._localService);
 
   @override
-  Future<Either<Failure, LoginSuccessData>> login(String email, String password) async {
-    try {
-      final response = await _dio.post(
-        'login?langcode=en-US',
+  Future<Either<Failure, LoginSuccessData>> login(
+      String email, String password) async {
+    final responseEither = await _dio.safe(
+          () => _dio.post(
+        'login',
         data: {
-          "username": email,
-          "password": password,
-          "imei": "123"
+          'username': email,
+          'password': password,
+          'imei': '123',
         },
-      );
+      ),
+          (res) => res,
+    );
 
-      if (response.statusCode == 200) {
-        if (response.data[0]['_statusCode'] == '101') {
-          return Left(ServerFailure(response.data[0]['_statusMessage']));
+    return await responseEither.fold(
+          (failure) async => Left(failure),
+
+          (response) async {
+        if (response.statusCode != 200) {
+          return const Left(ServerFailure('Failed to log in'));
         }
+
+        final item = response.data[0] as Map<String, dynamic>;
+
+        if (item['_statusCode'] == '101') {
+          return Left(ServerFailure(item['_statusMessage']));
+        }
+
         final data = LoginSuccessData(
-          empID: response.data[0]['_employeeid'],
-          empName: response.data[0]['_employeename'],
-          empNameAR: response.data[0]['_employeenameAr'],
-          empProfileImage: response.data[0]['_profileimg'] ?? '',
+          empID: item['_employeeid'] as String,
+          empName: item['_employeename'] as String,
+          empNameAR: item['_employeenameAr'] as String,
+          empProfileImage: (item['_profileimg'] as String?) ?? '',
         );
+
         await _localService.save(empID, data.empID);
         await _localService.save(empName, data.empName);
         await _localService.save(empNameAR, data.empNameAR);
         await _localService.save(profileImage, data.empProfileImage);
+
         return Right(data);
-      } else {
-        return const Left(ServerFailure('Failed to log in '));
-      }
-    } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred: $e'));
-    }
+      },
+    );
   }
 
   @override
