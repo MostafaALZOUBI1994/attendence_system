@@ -38,7 +38,7 @@ class TimeScreen extends StatelessWidget {
                 context: context,
                 dialogType: DialogType.success,
                 animType: AnimType.rightSlide,
-                title: 'Success'.tr(),
+                title: 'success'.tr(),
                 desc: s.message,
                 btnOkOnPress: () {},
               ).show();
@@ -48,7 +48,7 @@ class TimeScreen extends StatelessWidget {
                 context: context,
                 dialogType: DialogType.error,
                 animType: AnimType.rightSlide,
-                title: 'Oops'.tr(),
+                title: 'oops'.tr(),
                 desc: e.message,
                 btnOkOnPress: () {},
               ).show();

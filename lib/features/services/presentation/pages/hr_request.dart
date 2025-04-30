@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'package:attendence_system/features/services/domain/entities/permission_types_entity.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../core/injection.dart';
+import '../../../../core/local_services/local_services.dart';
 import '../../../app_background.dart';
 import '../../domain/entities/eleave_entity.dart';
 import '../bloc/services_bloc.dart';
@@ -41,7 +44,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
               context: context,
               dialogType: DialogType.error,
               animType: AnimType.rightSlide,
-              title: 'Error',
+              title: 'oops'.tr(),
               desc: message,
               btnOkOnPress: () {},
             ).show();
@@ -51,7 +54,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
               context: context,
               dialogType: DialogType.success,
               animType: AnimType.rightSlide,
-              title: 'Success',
+              title: 'success'.tr(),
               desc: message,
               btnOkOnPress: () {
                 context.read<ServicesBloc>().add(const LoadData());
@@ -63,7 +66,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
               context: context,
               dialogType: DialogType.error,
               animType: AnimType.rightSlide,
-              title: 'Error',
+              title: 'oops'.tr(),
               desc: message,
               btnOkOnPress: () {},
             ).show();
@@ -72,15 +75,14 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
         );
       },
       builder: (context, state) {
-       Widget baseContent;
+        Widget baseContent;
         if (state is LoadSuccess) {
           if (_selectedType.isEmpty && state.leaveTypes.isNotEmpty) {
             _selectedType = state.leaveTypes.first.permissionCode;
           }
           baseContent = Scaffold(
             appBar: AppBar(
-              title: const Text("HR Request",
-                  style: TextStyle(color: Colors.white)),
+              title: Text("hrReq".tr(), style: TextStyle(color: Colors.white)),
               backgroundColor: primaryColor,
               iconTheme: const IconThemeData(color: Colors.white),
             ),
@@ -100,22 +102,18 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
             ),
           );
         } else {
-        baseContent = Scaffold(
+          baseContent = Scaffold(
             appBar: AppBar(
-              title: const Text("HR Request",
-                  style: TextStyle(color: Colors.white)),
+              title: Text("hrReq".tr(), style: TextStyle(color: Colors.white)),
               backgroundColor: primaryColor,
               iconTheme: const IconThemeData(color: Colors.white),
             ),
             body: AppBackground(
-              child: Center(
-                child: Text("Please wait..."),
-              ),
+              child: Center(child: CircularProgressIndicator()),
             ),
           );
         }
 
-        // Now, if the state is loading, we overlay a modal barrier with a CircularProgressIndicator.
         return Stack(
           children: [
             baseContent,
@@ -132,7 +130,6 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     );
   }
 
-
   Widget _buildHeader(EleaveEntity leaveBalance) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -145,7 +142,8 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
       ),
       child: Column(
         children: [
-          const Text("Leave Balance", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text("levBal".tr(),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 15),
           CircularPercentIndicator(
             radius: 90,
@@ -157,9 +155,10 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
               children: [
                 Text(
                   leaveBalance.noOfHrsAvailable,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const Text("Monthly Allowance", style: TextStyle(color: Colors.grey)),
+                //  const Text("Monthly Allowance", style: TextStyle(color: Colors.grey)),
               ],
             ),
             progressColor: primaryColor,
@@ -178,13 +177,16 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
           child: ElevatedButton(
             onPressed: () => setState(() => _isLeaveRequest = true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isLeaveRequest ? primaryColor : Colors.grey.shade300,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              backgroundColor:
+                  _isLeaveRequest ? primaryColor : Colors.grey.shade300,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
               padding: const EdgeInsets.symmetric(vertical: 10),
             ),
-            child: const Text(
-              "Leave Request",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            child: Text(
+              "levReq".tr(),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
@@ -194,13 +196,16 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
           child: ElevatedButton(
             onPressed: () => setState(() => _isLeaveRequest = false),
             style: ElevatedButton.styleFrom(
-              backgroundColor: !_isLeaveRequest ? primaryColor : Colors.grey.shade300,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              backgroundColor:
+                  !_isLeaveRequest ? primaryColor : Colors.grey.shade300,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
               padding: const EdgeInsets.symmetric(vertical: 10),
             ),
-            child: const Text(
-              "Attendance Correction",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            child: Text(
+              "attCorr".tr(),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
@@ -208,7 +213,6 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
       ],
     );
   }
-
 
   Widget _buildForm(List<PermissionTypesEntity> leaveTypes) {
     return Card(
@@ -219,33 +223,31 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDropdownField(leaveTypes),
-              const SizedBox(height: 20),
-              _buildDateTimeRow(),
-              const SizedBox(height: 20),
-              _buildInputField(
-                label: _isLeaveRequest ? "Reason" : "Correction Reason",
-                controller: _reasonController,
-                hint: "Enter your reason...",
-                validator: (value) =>
-                (value == null || value.trim().isEmpty) ? "Please enter a reason" : null,
-                maxLines: 3, icon: Icons.access_time_filled_rounded,
-              ),
-              const SizedBox(height: 20),
-              _buildAttachmentSection(),
-              const SizedBox(height: 20),
-              _buildSubmitButton(),
-
-            ]
-          ),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            _buildDropdownField(leaveTypes),
+            const SizedBox(height: 20),
+            _buildDateTimeRow(),
+            const SizedBox(height: 20),
+            _buildInputField(
+              label: _isLeaveRequest ? "res".tr() : "crrRes".tr(),
+              controller: _reasonController,
+              hint: "entRes".tr(),
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? "plsEntRes".tr()
+                  : null,
+              maxLines: 3,
+              icon: Icons.access_time_filled_rounded,
+            ),
+            const SizedBox(height: 20),
+            _buildAttachmentSection(),
+            const SizedBox(height: 20),
+            _buildSubmitButton(),
+          ]),
         ),
       ),
     );
   }
-
 
   Widget _buildInputField({
     required String label,
@@ -277,21 +279,24 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
   }
 
   Widget _buildDropdownField(List<PermissionTypesEntity> leaveTypes) {
+    final localeSvc = getIt<LocalService>();
+    final isArabic = localeSvc.currentLanguageCode == 'ar';
     return DropdownButtonFormField<String>(
       value: _selectedType,
       items: leaveTypes
           .map((type) => DropdownMenuItem(
-        value: type.permissionCode,
-        child: Text(type.permissionNameEN),
-      ))
+                value: type.permissionCode,
+                child: Text(
+                    isArabic ? type.permissionNameAR : type.permissionNameEN),
+              ))
           .toList(),
       onChanged: (value) => setState(() => _selectedType = value!),
       decoration: InputDecoration(
-        labelText: "Leave Type",
+        labelText: "levType".tr(),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
       validator: (value) =>
-      value == null || value.isEmpty ? "Please select a leave type" : null,
+          value == null || value.isEmpty ? "plsSelectType".tr() : null,
     );
   }
 
@@ -328,7 +333,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Attachments", style: TextStyle(fontWeight: FontWeight.bold)),
+        Text("attachments".tr(), style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: _pickAttachment,
@@ -342,7 +347,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    _attachment?.path.split('/').last ?? "No file chosen",
+                    _attachment?.path.split('/').last ?? "noFileChs".tr(),
                     style: const TextStyle(fontSize: 14),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -372,8 +377,9 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
         padding: const EdgeInsets.symmetric(vertical: 15),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
-      child: const Center(
-        child: Text("Submit Request", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      child: Center(
+        child: Text("subReq".tr(),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -383,18 +389,19 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
       final duration = _calculateDuration();
 
       context.read<ServicesBloc>().add(
-        ServicesEvent.submitRequest(
-          dateDayType: "Tomorrow",
-          fromTime: _formatTimeOfDay(_fromTime),
-          toTime: _formatTimeOfDay(_toTime),
-          duration: duration,
-          reason: _reasonController.text,
-          attachment: _attachment?.path ?? "",
-          eLeaveType: _selectedType,
-        ),
-      );
+            ServicesEvent.submitRequest(
+              dateDayType: "Tomorrow",
+              fromTime: _formatTimeOfDay(_fromTime),
+              toTime: _formatTimeOfDay(_toTime),
+              duration: duration,
+              reason: _reasonController.text,
+              attachment: _attachment?.path ?? "",
+              eLeaveType: _selectedType,
+            ),
+          );
     }
   }
+
   String _calculateDuration() {
     double from = toDouble(_fromTime);
     double to = toDouble(_toTime);
@@ -407,14 +414,15 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
 
     return "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}";
   }
+
   String _formatTimeOfDay(TimeOfDay time) {
     final hour = time.hourOfPeriod;
     final minute = time.minute;
     final period = time.period == DayPeriod.am ? 'AM' : 'PM';
     return '$hour:${minute.toString().padLeft(2, '0')} $period';
   }
-  double toDouble(TimeOfDay myTime) =>
-      myTime.hour + myTime.minute / 60.0;
+
+  double toDouble(TimeOfDay myTime) => myTime.hour + myTime.minute / 60.0;
 
   double _calculateRemainingHours(EleaveEntity leaveBalance) {
     try {
@@ -427,6 +435,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
       return 0.0; // Handle invalid format
     }
   }
+
   double _parseTimeString(String timeString) {
     final parts = timeString.split(':');
     final hours = double.parse(parts[0]);

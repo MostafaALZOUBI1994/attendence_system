@@ -35,5 +35,20 @@
   "stps": "Steps",
   "hrtRate": "Heart Rate",
   "cal": "Calories",
-  "sleep": "Sleep"
+  "sleep": "Sleep",
+  "hrReq": "HR Request",
+  "levBal": "Hours Balance",
+  "levReq": "Leave Request",
+  "attCorr": "Attendance Correction",
+  "res" : "Reason",
+  "crrRes" : "Correction Reason",
+  "entRes": "Enter your reason...",
+  "plsEntRes": "Please enter a reason",
+  "levType": "Leave Type",
+  "plsSelectType": "Please select a leave type",
+  "attachments": "Attachments",
+  "noFileChs": "No file chosen",
+  "subReq": "Submit Request",
+  "wlcmBck": "Welcome Back!",
+  "lgnAcc": "Login to your account"
 }

@@ -2,7 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-
+import 'dart:ui' as ui;
 import '../constants/constants.dart';
 
 @singleton
@@ -48,26 +48,33 @@ class LocalService {
   }
 
   Future<void> saveLocale(Locale locale) async {
-    final localeString = '${locale.languageCode}_${locale.countryCode ?? ''}';
+    final localeString = '${locale.languageCode}-${locale.countryCode ?? ''}';
     await save(localeKey, localeString);
-    Intl.defaultLocale = localeString; // Update Intl default
+    Intl.defaultLocale = locale.toString();
   }
+
+
 
   Locale getSavedLocale() {
-    final localeString = get(localeKey);
-    if (localeString == null || localeString.isEmpty) {
-      return const Locale('en', 'US');
+    final localeString = _preferences.getString(localeKey);
+
+    if (localeString != null && localeString.isNotEmpty) {
+      final parts = localeString.split('-');
+      if (parts.length == 2) {
+        return Locale(parts[0], parts[1]);
+      }
+      return Locale(parts[0]);
     }
-    final parts = localeString.split('_');
-    if (parts.length == 2) {
-      return Locale(parts[0], parts[1]);
-    }
-    return Locale(parts[0]);
+
+    final device = ui.PlatformDispatcher.instance.locale;
+    final Locale chosen = (device.languageCode == 'ar')
+        ? const Locale('ar', 'AE')
+        : const Locale('en', 'US');
+
+    saveLocale(chosen);
+    return chosen;
   }
 
-  /// Get just the language code ("en", "ar", etc.)
-  String get currentLanguageCode {
-    final loc = getSavedLocale();
-    return loc.languageCode;
-  }
+
+  String get currentLanguageCode => getSavedLocale().languageCode;
 }

@@ -28,7 +28,7 @@ Future<void> main() async {
     }
   });
   final savedLocale = getIt<LocalService>().getSavedLocale();
-  Intl.defaultLocale = '${savedLocale.languageCode}_${savedLocale.countryCode ?? ''}';
+  Intl.defaultLocale = '${savedLocale.languageCode}-${savedLocale.countryCode ?? ''}';
   runApp(
     EasyLocalization(
       supportedLocales: const [

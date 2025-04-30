@@ -1,3 +1,4 @@
+import 'package:attendence_system/core/constants/constants.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,11 +11,10 @@ abstract class SharedModule {
   @preResolve
   Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
 
-  @preResolve
   @lazySingleton
   Future<Dio> get dio async {
     final sp = await prefs;
-    final lang = sp.getString('langcode') ?? 'en-US';
+    final lang  =  sp.getString(localeKey) ?? 'en-US';
     return Dio(
     BaseOptions(
       baseUrl: 'https://taapi.moec.gov.ae/api/lgt/',

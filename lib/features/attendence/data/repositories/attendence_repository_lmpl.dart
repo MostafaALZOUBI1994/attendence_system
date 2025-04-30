@@ -62,7 +62,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
   Future<Either<Failure, String>> checkIn() async {
     try {
       final String? employeeId = _localService.get(empID);
-      final String time = intl.DateFormat('dd/MM/yyyy HH:mm:ss')
+      final String time = intl.DateFormat('dd/MM/yyyy HH:mm:ss', 'en')
           .format(await NTP.now());
       final responseEither = await _dio.safe(
             () => _dio.post(

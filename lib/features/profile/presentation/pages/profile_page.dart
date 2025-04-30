@@ -81,66 +81,136 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+  Widget _buildLangButton() {
+    final localeSvc = getIt<LocalService>();
+    final isArabic = localeSvc.currentLanguageCode == 'ar';
+
+    Future<void> _toggleLocale() async {
+      final newLocale = isArabic
+          ? const Locale('en', 'US')
+          : const Locale('ar', 'AE');
+      await context.setLocale(newLocale);
+      await localeSvc.saveLocale(newLocale);
+    }
+
+    // If we're in Arabic show the UK flag (to switch to EN), else show UAE flag.
+    final flagEmoji = isArabic ? '🇬🇧' : '🇦🇪';
+
+    return GestureDetector(
+      onTap: _toggleLocale,
+      child: CircleAvatar(
+        radius: 18,
+        backgroundColor: Colors.white,
+        child: Text(flagEmoji, style: const TextStyle(fontSize: 20)),
+      ),
+    );
+  }
+
+
+
 
   Widget _buildProfileHeader() {
-    return Stack(
-      children: [
-        Container(
-          height: 270,
-          decoration: const BoxDecoration(
-            color: primaryColor,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(40),
-              bottomRight: Radius.circular(40),
-            ),
-          ),
+    final localeSvc = getIt<LocalService>();
+    final isArabic = localeSvc.currentLanguageCode == 'ar';
+
+    return Container(
+      height: 300,
+      decoration: const BoxDecoration(
+        color: primaryColor,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(40),
+          bottomRight: Radius.circular(40),
         ),
-        Positioned.fill(
-          child: Align(
-            alignment: Alignment.center,
-            child: SafeArea(
-              child: BlocBuilder<AuthBloc, AuthState>(
-                builder: (context, state) {
-                  return state.maybeWhen(
-                    success: (loginData) => Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      final newLocale = isArabic
+                          ? const Locale('en', 'US')
+                          : const Locale('ar', 'AE');
+                      await context.setLocale(newLocale);
+                      await localeSvc.saveLocale(newLocale);
+                    },
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.white,
+                      child: Text(
+                        isArabic ? '🇬🇧' : '🇦🇪',
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
+                  ),
+
+                  InkWell(
+                    onTap: (){
+                      context.read<AuthBloc>().add(SignOut());
+                    },
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.white,
+                      child: const Icon(Icons.logout, color: primaryColor, size: 28),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Avatar, Name & Title
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                return state.maybeWhen(
+                  success: (loginData) {
+                    final name = isArabic
+                        ? loginData.empNameAR
+                        : loginData.empName;
+                    return Column(
                       children: [
                         CircleAvatar(
                           radius: 50,
                           backgroundImage:
-                              AssetImage('assets/user_profile.jpg'),
+                          AssetImage('assets/user_profile.jpg'),
                           backgroundColor: Colors.white,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
-                          getIt<LocalService>().currentLanguageCode == "ar"
-                              ? loginData.empNameAR
-                              : loginData.empName,
-                          style: TextStyle(
+                          name,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Text(
-                          "Senior Mobile Developer",
-                          style: TextStyle(
+                          'seniorDev'.tr(), // add this key to your JSON
+                          style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 16,
                           ),
                         ),
                       ],
-                    ),
-                    orElse: () => Center(child: CircularProgressIndicator()),
-                  );
-                },
-              ),
+                    );
+                  },
+                  orElse: () =>
+                  const Center(child: CircularProgressIndicator(color: Colors.white)),
+                );
+              },
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
+
 
   Widget _buildProfileContent(BuildContext context) {
     return BlocBuilder<ProfileBloc, ProfileState>(
@@ -163,24 +233,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 HealthCard(healthData: healthData),
                 const SizedBox(height: 10),
                 _buildStatsRow(),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    context.read<AuthBloc>().add(SignOut());
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 100),
-                  ),
-                  child:  Text(
-                    "signOut".tr(),
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                )
               ],
             ),
           );

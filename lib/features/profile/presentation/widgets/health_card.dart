@@ -55,21 +55,23 @@ class HealthCard extends StatelessWidget {
   }
 
   Widget _healthMetric(String title, String value, String animatedImage) {
-    return Column(
-      children: [
-        Lottie.asset(animatedImage,width: 40,height: 40),
-        //Icon(icon, color: primaryColor, size: 40),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ],
+    return Container(
+      width: 150,
+      child: Column(
+        children: [
+          Lottie.asset(animatedImage,width: 40,height: 40),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 }

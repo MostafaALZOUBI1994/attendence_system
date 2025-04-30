@@ -32,13 +32,13 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: _pages[_currentIndex],
       bottomNavigationBar: AnimatedNotchBottomBar(
-        showLabel: true,
+        showLabel: false,
         notchColor: primaryColor,
         bottomBarItems: [
-          _bottomBarItem(Icons.home, "Home"),
-          _bottomBarItem(Icons.build, "Service"),
-          _bottomBarItem(Icons.list_alt, "Reports"),
-          _bottomBarItem(Icons.person, "Profile"),
+          _bottomBarItem(Icons.home, "home".tr()),
+          _bottomBarItem(Icons.build, "services".tr()),
+          _bottomBarItem(Icons.list_alt, "reports".tr()),
+          _bottomBarItem(Icons.person, "profile".tr()),
         ],
         onTap: (index) => setState(() => _currentIndex = index),
         notchBottomBarController: _controller,
@@ -57,6 +57,6 @@ class _MainScreenState extends State<MainScreen> {
   BottomBarItem _bottomBarItem(IconData icon, String label) => BottomBarItem(
     inActiveItem: Icon(icon, color: Colors.grey),
     activeItem: Icon(icon, color: Colors.white),
-    itemLabel: label.tr(),
+    itemLabel: label,
   );
 }

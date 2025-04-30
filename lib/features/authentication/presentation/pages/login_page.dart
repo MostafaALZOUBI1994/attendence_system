@@ -1,4 +1,5 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
               context: context,
               dialogType: DialogType.error,
               animType: AnimType.rightSlide,
-              title: 'Error',
+                title: 'Oops'.tr(),
               desc: message,
               btnOkOnPress: () {},
               btnOkColor: primaryColor
@@ -88,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Image.asset("assets/ministry_logo.png"),
             Text(
-              "Welcome Back!",
+              "wlcmBck".tr(),
               style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -97,25 +98,25 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              "Login to your account",
+              "lgnAcc".tr(),
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 color: Colors.grey[600],
               ),
             ),
             const SizedBox(height: 30),
-            _buildTextField(_emailController, "Email", Icons.email, false),
+            _buildTextField(_emailController, "email".tr(), Icons.email, false),
             const SizedBox(height: 15),
-            _buildTextField(_passwordController, "Password", Icons.lock, true),
+            _buildTextField(_passwordController, "password".tr(), Icons.lock, true),
             const SizedBox(height: 20),
             _buildLoginButton(),
             const SizedBox(height: 10),
-          _buildQRLoginButton(),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () {},
-              child: const Text("Forgot Password?", style: TextStyle(color: primaryColor)),
-            ),
+        //  _buildQRLoginButton(),
+        //    const SizedBox(height: 10),
+            // TextButton(
+            //   onPressed: () {},
+            //   child: const Text("Forgot Password?", style: TextStyle(color: primaryColor)),
+            // ),
           ],
         ),
       ),
@@ -168,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
       ),
-      child: const Text("Login", style: TextStyle(color: Colors.white, fontSize: 16)),
+      child:  Text("login".tr(), style: TextStyle(color: Colors.white, fontSize: 16)),
     );
   }
 
