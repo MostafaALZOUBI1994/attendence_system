@@ -280,7 +280,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
 
   Widget _buildDropdownField(List<PermissionTypesEntity> leaveTypes) {
     final localeSvc = getIt<LocalService>();
-    final isArabic = localeSvc.currentLanguageCode == 'ar';
+    final isArabic = localeSvc.getSavedLocale().languageCode == 'ar';
     return DropdownButtonFormField<String>(
       value: _selectedType,
       items: leaveTypes

@@ -313,22 +313,25 @@ class TimeScreen extends StatelessWidget {
 
   Widget _buildCheckInButtonOverlay(BuildContext context) {
     return Positioned.fill(
-      child: Center(
-        child: Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(
-              colors: [
-                primaryColor.withOpacity(0.6),
-                primaryColor.withOpacity(0.9),
-              ],
-              radius: 0.6,
+      child: GestureDetector(
+        onTap: () => context
+            .read<AttendenceBloc>()
+            .add(AttendenceEvent.checkIn("happy")),
+        child: Center(
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  primaryColor.withOpacity(0.6),
+                  primaryColor.withOpacity(0.9),
+                ],
+                radius: 0.6,
+              ),
             ),
-          ),
-          child: GestureDetector(
-            child:  Center(
+            child: Center(
                 child: Text(
               "chkIn".tr(),
               style: TextStyle(
@@ -336,9 +339,6 @@ class TimeScreen extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.w700),
             )),
-            onTap: () => context
-                .read<AttendenceBloc>()
-                .add(AttendenceEvent.checkIn("happy")),
           ),
         ),
       ),

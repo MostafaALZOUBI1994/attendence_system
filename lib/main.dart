@@ -28,15 +28,16 @@ Future<void> main() async {
     }
   });
   final savedLocale = getIt<LocalService>().getSavedLocale();
-  Intl.defaultLocale = '${savedLocale.languageCode}-${savedLocale.countryCode ?? ''}';
+  Intl.defaultLocale = savedLocale.languageCode;
   runApp(
     EasyLocalization(
+      useOnlyLangCode: true,
       supportedLocales: const [
-        Locale('en', 'US'),
-        Locale('ar', 'AE'),
+        Locale('en'),
+        Locale('ar'),
       ],
       path: 'assets/translations',
-      fallbackLocale: const Locale('en', 'US'),
+      fallbackLocale: const Locale('en'),
       startLocale: savedLocale,
       child: const MyApp(),
     ),

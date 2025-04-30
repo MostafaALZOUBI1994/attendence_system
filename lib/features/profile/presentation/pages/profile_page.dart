@@ -81,37 +81,13 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-  Widget _buildLangButton() {
-    final localeSvc = getIt<LocalService>();
-    final isArabic = localeSvc.currentLanguageCode == 'ar';
-
-    Future<void> _toggleLocale() async {
-      final newLocale = isArabic
-          ? const Locale('en', 'US')
-          : const Locale('ar', 'AE');
-      await context.setLocale(newLocale);
-      await localeSvc.saveLocale(newLocale);
-    }
-
-    // If we're in Arabic show the UK flag (to switch to EN), else show UAE flag.
-    final flagEmoji = isArabic ? '🇬🇧' : '🇦🇪';
-
-    return GestureDetector(
-      onTap: _toggleLocale,
-      child: CircleAvatar(
-        radius: 18,
-        backgroundColor: Colors.white,
-        child: Text(flagEmoji, style: const TextStyle(fontSize: 20)),
-      ),
-    );
-  }
 
 
 
 
   Widget _buildProfileHeader() {
     final localeSvc = getIt<LocalService>();
-    final isArabic = localeSvc.currentLanguageCode == 'ar';
+    final isArabic = localeSvc.getSavedLocale().languageCode == 'ar';
 
     return Container(
       height: 300,
@@ -132,9 +108,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   GestureDetector(
                     onTap: () async {
+
                       final newLocale = isArabic
-                          ? const Locale('en', 'US')
-                          : const Locale('ar', 'AE');
+                          ? const Locale('en')
+                          : const Locale('ar');
                       await context.setLocale(newLocale);
                       await localeSvc.saveLocale(newLocale);
                     },
@@ -164,7 +141,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 8),
 
-            // Avatar, Name & Title
             BlocBuilder<AuthBloc, AuthState>(
               builder: (context, state) {
                 return state.maybeWhen(
@@ -191,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'seniorDev'.tr(), // add this key to your JSON
+                          'seniorDev',
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 16,

@@ -14,7 +14,7 @@ abstract class SharedModule {
   @lazySingleton
   Future<Dio> get dio async {
     final sp = await prefs;
-    final lang  =  sp.getString(localeKey) ?? 'en-US';
+    final lang  =  sp.getString(localeKey) ?? 'en_US';
     return Dio(
     BaseOptions(
       baseUrl: 'https://taapi.moec.gov.ae/api/lgt/',

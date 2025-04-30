@@ -33,14 +33,34 @@ class LocalService {
   }
 
   List<int>? getMillisList(String key) {
-    final stringList = _preferences.getStringList(key);
-    if (stringList == null) return null;
-    return stringList
-        .map((s) => int.tryParse(s))
-        .where((i) => i != null)
-        .cast<int>()
-        .toList();
+    final prefs = _preferences;
+    final stored = prefs.getStringList(key);
+    if (stored == null) return null;
+
+
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+    final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59, 999).millisecondsSinceEpoch;
+
+    final todayStrings = <String>[];
+    final todayMillis = <int>[];
+
+    for (var s in stored) {
+      final ms = int.tryParse(s);
+      if (ms != null && ms >= startOfToday && ms <= endOfToday) {
+        todayStrings.add(s);
+        todayMillis.add(ms);
+      }
+    }
+
+    if (todayStrings.length != stored.length) {
+      prefs.setStringList(key, todayStrings);
+    }
+
+    return todayMillis;
   }
+
+
 
   Future<bool> saveMillisList(String key, List<int> millisList) async {
     final stringList = millisList.map((ms) => ms.toString()).toList(growable: false);
@@ -48,33 +68,20 @@ class LocalService {
   }
 
   Future<void> saveLocale(Locale locale) async {
-    final localeString = '${locale.languageCode}-${locale.countryCode ?? ''}';
-    await save(localeKey, localeString);
-    Intl.defaultLocale = locale.toString();
+    // only save “en” or “ar”
+    await save(localeKey, locale.languageCode);
+    Intl.defaultLocale = locale.languageCode;
   }
 
-
-
   Locale getSavedLocale() {
-    final localeString = _preferences.getString(localeKey);
-
-    if (localeString != null && localeString.isNotEmpty) {
-      final parts = localeString.split('-');
-      if (parts.length == 2) {
-        return Locale(parts[0], parts[1]);
-      }
-      return Locale(parts[0]);
+    final code = _preferences.getString(localeKey);
+    if (code != null && (code == 'en' || code == 'ar')) {
+      return Locale(code);
     }
-
-    final device = ui.PlatformDispatcher.instance.locale;
-    final Locale chosen = (device.languageCode == 'ar')
-        ? const Locale('ar', 'AE')
-        : const Locale('en', 'US');
-
+    // fallback from device
+    final deviceLang = ui.PlatformDispatcher.instance.locale.languageCode;
+    final chosen = (deviceLang == 'ar') ? const Locale('ar') : const Locale('en');
     saveLocale(chosen);
     return chosen;
   }
-
-
-  String get currentLanguageCode => getSavedLocale().languageCode;
 }
