@@ -1,23 +1,15 @@
+import 'package:attendence_system/features/services/presentation/pages/base_screen.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../core/constants/constants.dart';
-import '../../../app_background.dart';
+
 
 class TeamContactScreen extends StatelessWidget {
   const TeamContactScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Team Contacts',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: primaryColor,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: AppBackground(
+    return  BaseScreen(
+        titleKey: 'Team Contacts',
         child: Column(
           children: [
             _buildContactLegend(),
@@ -33,7 +25,6 @@ class TeamContactScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -92,7 +83,7 @@ class TeamContactScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         side: BorderSide(color: lightGray.withOpacity(0.3), width: 2),
       ),
-      color: Colors.white,
+      color: Colors.white.withOpacity(0.8),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -114,7 +105,7 @@ class TeamContactScreen extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 member['email']!,
-                style: const TextStyle(fontSize: 12, color: lightGray),
+                style: const TextStyle(fontSize: 12, color: secondaryColor),
               ),
             ],
           ),
@@ -126,7 +117,7 @@ class TeamContactScreen extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 'Ext: ${member['extension']}',
-                style: const TextStyle(fontSize: 12, color: lightGray),
+                style: const TextStyle(fontSize: 12, color: secondaryColor),
               ),
             ],
           ),

@@ -67,7 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, bool>> signOut() async {
     try {
       await _localService.clearAll();
-      Restart.restartApp();
+      await Restart.restartApp();
       return Right(true);
     } catch (e) {
       return Left(ServerFailure('signout failed $e'));

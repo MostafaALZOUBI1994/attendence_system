@@ -69,6 +69,7 @@ dependencies:
   restart_app: ^1.3.2
   flutter_carplay: ^1.0.3
   easy_localization: ^3.0.7+1
+  slide_countdown: ^2.0.2
 
 
 dev_dependencies:

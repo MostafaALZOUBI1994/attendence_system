@@ -1,10 +1,11 @@
+import 'dart:math';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:slide_countdown/slide_countdown.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../authentication/domain/entities/login_success_model.dart';
 import '../../domain/entities/process_step.dart';
@@ -22,71 +23,63 @@ class TimeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title:  Text("home".tr(),
-              style: TextStyle(color: Colors.white)),
-          backgroundColor: primaryColor,
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
-        body: BlocConsumer<AttendenceBloc, AttendenceState>(
-            listener: (context, state) {
-          state.maybeMap(
-            checkInSuccess: (s) {
-              AwesomeDialog(
+    return  BlocConsumer<AttendenceBloc, AttendenceState>(
+              listener: (context, state) {
+            state.maybeMap(
+              checkInSuccess: (s) {
+                AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.success,
+                  animType: AnimType.rightSlide,
+                  title: 'success'.tr(),
+                  desc: s.message,
+                  btnOkOnPress: () {},
+                ).show();
+              },
+              error: (e) {
+                AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.error,
+                  animType: AnimType.rightSlide,
+                  title: 'oops'.tr(),
+                  desc: e.message,
+                  btnOkOnPress: () {},
+                ).show();
+              },
+              orElse: () {},
+            );
+          }, builder: (context, state) {
+            return state.maybeMap(
+              loaded: (l) => _buildMainContent(
+                loginData: l.loginData,
+                currentStepIndex: l.currentStepIndex,
+                remainingTime: l.remainingTime,
+                progress: l.progress,
+                todayStatus: l.todayStatus,
+                isCheckInSuccess: false,
                 context: context,
-                dialogType: DialogType.success,
-                animType: AnimType.rightSlide,
-                title: 'success'.tr(),
-                desc: s.message,
-                btnOkOnPress: () {},
-              ).show();
-            },
-            error: (e) {
-              AwesomeDialog(
+              ),
+              checkInSuccess: (s) => _buildMainContent(
+                loginData: s.loginData,
+                currentStepIndex: s.currentStepIndex,
+                remainingTime: s.remainingTime,
+                progress: s.progress,
+                todayStatus: s.todayStatus,
+                isCheckInSuccess: true,
                 context: context,
-                dialogType: DialogType.error,
-                animType: AnimType.rightSlide,
-                title: 'oops'.tr(),
-                desc: e.message,
-                btnOkOnPress: () {},
-              ).show();
-            },
-            orElse: () {},
-          );
-        }, builder: (context, state) {
-          return state.maybeMap(
-            loaded: (l) => _buildMainContent(
-              loginData: l.loginData,
-              currentStepIndex: l.currentStepIndex,
-              remainingTime: l.remainingTime,
-              progress: l.progress,
-              todayStatus: l.todayStatus,
-              isCheckInSuccess: false,
-              context: context,
-            ),
-            checkInSuccess: (s) => _buildMainContent(
-              loginData: s.loginData,
-              currentStepIndex: s.currentStepIndex,
-              remainingTime: s.remainingTime,
-              progress: s.progress,
-              todayStatus: s.todayStatus,
-              isCheckInSuccess: true,
-              context: context,
-            ),
-            error: (e) => _buildMainContent(
-              loginData: e.loginData,
-              currentStepIndex: e.currentStepIndex,
-              remainingTime: e.remainingTime,
-              progress: e.progress,
-              todayStatus: e.todayStatus,
-              isCheckInSuccess: false,
-              context: context,
-            ),
-            orElse: () => const SizedBox.shrink(),
-          );
-        }));
+              ),
+              error: (e) => _buildMainContent(
+                loginData: e.loginData,
+                currentStepIndex: e.currentStepIndex,
+                remainingTime: e.remainingTime,
+                progress: e.progress,
+                todayStatus: e.todayStatus,
+                isCheckInSuccess: false,
+                context: context,
+              ),
+              orElse: () => const SizedBox.shrink(),
+            );
+          });
   }
 
   Widget _buildMainContent(
@@ -99,7 +92,6 @@ class TimeScreen extends StatelessWidget {
       required BuildContext context}) {
     return Stack(
       children: [
-        _buildBackground(),
         ListView(
           shrinkWrap: true,
           children: [
@@ -124,40 +116,6 @@ class TimeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBackground() => Stack(
-        children: [
-          Positioned(
-            top: 150,
-            left: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: primaryColor.withOpacity(0.2),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: primaryColor.withOpacity(0.3),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(height: 100, color: primaryColor),
-          ),
-        ],
-      );
 
   Widget _buildHeader(LoginSuccessData userData, BuildContext context) {
     final lang = context.locale.languageCode;
@@ -194,6 +152,13 @@ class TimeScreen extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(width: 25),
+        Lottie.asset(
+          "assets/lottie/sunny.json",
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+        ),
       ],
     );
   }
@@ -210,32 +175,70 @@ class TimeScreen extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            DashedCircularProgressBar.square(
-              dimensions: 290,
-              progress: progress,
-              startAngle: 270,
-              sweepAngle: 360,
-              foregroundColor: primaryColor,
-              foregroundStrokeWidth: 6,
-              backgroundStrokeWidth: 3,
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '${remaining.inHours.toString().padLeft(2, '0')}:'
-                  '${(remaining.inMinutes % 60).toString().padLeft(2, '0')}:'
-                  '${(remaining.inSeconds % 60).toString().padLeft(2, '0')}',
-                  style: const TextStyle(
-                    color: primaryColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+            Center(
+              child: Container(
+                // 1) Outer gradient ring
+                width: 266,  // 250 + 2*8px border
+                height: 266,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: primaryGradient,
+                ),
+                padding: const EdgeInsets.all(8), // border thickness
+                child: Container(
+                  // 2) Inner white face with shadows
+                  width: 250,
+                  height: 250,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 12,
+                        offset: const Offset(4, 4),
+                      ),
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.7),
+                        blurRadius: 12,
+                        offset: const Offset(-4, -4),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      // clock ticks
+                      CustomPaint(
+                        size: const Size(250, 250),
+                        painter: ClockTicksPainter(),
+                      ),
+                      // digital timer + icon
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SlideCountdown(duration: remaining, decoration: const BoxDecoration(
+                              color: Colors.transparent,
+                            ),style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                            ),
+                              separatorStyle: TextStyle(
+                                color: primaryColor,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w600,
+                              ),),
+                            const SizedBox(height: 8),
+                            Icon(Icons.work, color: primaryColor, size: 40),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Icon(Icons.work, color: primaryColor, size: 40),
-              ],
-            ),
+              ),
+            )
           ],
         ));
   }
@@ -275,6 +278,7 @@ class TimeScreen extends StatelessWidget {
         width: 300,
         height: 300,
         child: Card(
+          color: Colors.white.withOpacity(0.7),
           elevation: 5,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -373,6 +377,7 @@ class TimeScreen extends StatelessWidget {
       int currentStepIndex, Duration remainingTime, double progress) {
     return Card(
         elevation: 5,
+        color: Colors.white.withOpacity(0.7),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -386,3 +391,34 @@ class TimeScreen extends StatelessWidget {
         ));
   }
 }
+
+
+class ClockTicksPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 8;
+    final tickPaint = Paint()..color = Colors.black..strokeWidth = 2;
+
+    for (int i = 0; i < 60; i++) {
+      final angle = 2 * pi * i / 60;
+      final isHour = i % 5 == 0;
+      final length = isHour ? 15.0 : 7.0;
+      final start = Offset(
+        center.dx + (radius - length) * cos(angle),
+        center.dy + (radius - length) * sin(angle),
+      );
+      final end = Offset(
+        center.dx + radius * cos(angle),
+        center.dy + radius * sin(angle),
+      );
+      canvas.drawLine(start, end, tickPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+
+

@@ -1,3 +1,4 @@
+import 'package:attendence_system/features/services/presentation/pages/base_screen.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -39,86 +40,54 @@ class _LoginScreenState extends State<LoginScreen> {
           orElse: () {},
         );
      },
-        child:  Scaffold(
-          backgroundColor: Colors.white,
-          body: Stack(
-            children: [
-              _buildBackground(),
-              _buildLoginForm(),
-            ],
-          ),
+        child:  BaseScreen(
+          titleKey: "",
+          child: _buildLoginForm(),
         )
     );
   }
 
-  Widget _buildBackground() {
-    return Stack(
-      children: [
-        Positioned(
-          top: -50,
-          left: -50,
-          child: _buildDecorativeCircle(250, primaryColor.withOpacity(0.2)),
-        ),
-        Positioned(
-          bottom: -100,
-          right: -100,
-          child: _buildDecorativeCircle(300, primaryColor.withOpacity(0.3)),
-        ),
- 
-      ],
-    );
-  }
 
-  Widget _buildDecorativeCircle(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
-    );
-  }
+
+
 
   Widget _buildLoginForm() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset("assets/ministry_logo.png"),
-            Text(
-              "wlcmBck".tr(),
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: primaryColor,
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: Column(
+        children: [
+          SizedBox(height: 40,),
+          Image.asset("assets/ministry_logo.png"),
+          Text(
+            "wlcmBck".tr(),
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
             ),
-            const SizedBox(height: 10),
-            Text(
-              "lgnAcc".tr(),
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "lgnAcc".tr(),
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: Colors.grey[600],
             ),
-            const SizedBox(height: 30),
-            _buildTextField(_emailController, "email".tr(), Icons.email, false),
-            const SizedBox(height: 15),
-            _buildTextField(_passwordController, "password".tr(), Icons.lock, true),
-            const SizedBox(height: 20),
-            _buildLoginButton(),
-            const SizedBox(height: 10),
-        //  _buildQRLoginButton(),
-        //    const SizedBox(height: 10),
-            // TextButton(
-            //   onPressed: () {},
-            //   child: const Text("Forgot Password?", style: TextStyle(color: primaryColor)),
-            // ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 30),
+          _buildTextField(_emailController, "email".tr(), Icons.email, false),
+          const SizedBox(height: 15),
+          _buildTextField(_passwordController, "password".tr(), Icons.lock, true),
+          const SizedBox(height: 20),
+          _buildLoginButton(),
+          const SizedBox(height: 10),
+      //  _buildQRLoginButton(),
+      //    const SizedBox(height: 10),
+          // TextButton(
+          //   onPressed: () {},
+          //   child: const Text("Forgot Password?", style: TextStyle(color: primaryColor)),
+          // ),
+        ],
       ),
     );
   }

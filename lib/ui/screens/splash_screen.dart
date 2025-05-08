@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import '../../core/constants/constants.dart';
 import '../../core/injection.dart';
 import '../../core/local_services/local_services.dart';
-import '../../features/authentication/presentation/pages/login_page.dart';
-import 'main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,11 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(const Duration(seconds: 3), () async {
       final localService = getIt<LocalService>();
       final empId = localService.get(empID);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) =>
-          empId != null ? const MainScreen() : const LoginScreen(),
-        ),
+
+      // Use named route instead of direct widget
+      Navigator.of(context).pushReplacementNamed(
+        empId != null ? '/main' : '/login',
       );
     });
   }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:attendence_system/features/app_background.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,17 +65,17 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         }
       },
-      child: Scaffold(
-        backgroundColor: Colors.grey[200],
-        body: AppBackground(
-          child: Column(
-            children: [
-              _buildProfileHeader(),
-              Expanded(
-                  child: SingleChildScrollView(
-                      child: _buildProfileContent(context))),
-            ],
-          ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          spacing: 8,
+          children: [
+            _buildProfileHeader(),
+            Expanded(
+                child: SingleChildScrollView(
+                    child: _buildProfileContent(context))),
+            SizedBox(height: 80,)
+          ],
         ),
       ),
     );
@@ -89,101 +88,86 @@ class _ProfilePageState extends State<ProfilePage> {
     final localeSvc = getIt<LocalService>();
     final isArabic = localeSvc.getSavedLocale().languageCode == 'ar';
 
-    return Container(
-      height: 300,
-      decoration: const BoxDecoration(
-        color: primaryColor,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
-        ),
-      ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  final newLocale = isArabic
+                      ? const Locale('en')
+                      : const Locale('ar');
+                  await context.setLocale(newLocale);
+                  await localeSvc.saveLocale(newLocale);
+                },
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    isArabic ? '🇬🇧' : '🇦🇪',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ),
+              ),
 
-                      final newLocale = isArabic
-                          ? const Locale('en')
-                          : const Locale('ar');
-                      await context.setLocale(newLocale);
-                      await localeSvc.saveLocale(newLocale);
-                    },
-                    child: CircleAvatar(
-                      radius: 18,
+              InkWell(
+                onTap: (){
+                  context.read<AuthBloc>().add(SignOut());
+                },
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.logout, color: primaryColor, size: 28),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            return state.maybeWhen(
+              success: (loginData) {
+                final name = isArabic
+                    ? loginData.empNameAR
+                    : loginData.empName;
+                return Column(
+                  children: [
+                    const CircleAvatar(
+                      radius: 50,
+                      backgroundImage:
+                      AssetImage('assets/user_profile.jpg'),
                       backgroundColor: Colors.white,
-                      child: Text(
-                        isArabic ? '🇬🇧' : '🇦🇪',
-                        style: const TextStyle(fontSize: 20),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-
-                  InkWell(
-                    onTap: (){
-                      context.read<AuthBloc>().add(SignOut());
-                    },
-                    child: CircleAvatar(
-                      radius: 18,
-                      backgroundColor: Colors.white,
-                      child: const Icon(Icons.logout, color: primaryColor, size: 28),
+                    const SizedBox(height: 4),
+                    Text(
+                      'seniorDev',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                return state.maybeWhen(
-                  success: (loginData) {
-                    final name = isArabic
-                        ? loginData.empNameAR
-                        : loginData.empName;
-                    return Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundImage:
-                          AssetImage('assets/user_profile.jpg'),
-                          backgroundColor: Colors.white,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'seniorDev',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                  orElse: () =>
-                  const Center(child: CircularProgressIndicator(color: Colors.white)),
+                  ],
                 );
               },
-            ),
-          ],
+              orElse: () =>
+              const Center(child: CircularProgressIndicator(color: Colors.white)),
+            );
+          },
         ),
-      ),
+      ],
     );
   }
 
@@ -195,22 +179,15 @@ class _ProfilePageState extends State<ProfilePage> {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ProfileLoaded) {
           final healthData = state.healthData;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildHappinessCard(),
-                const SizedBox(height: 10),
-                _buildPerformanceIndicator(),
-                const SizedBox(height: 10),
-                const AccessCard(),
-                const SizedBox(height: 10),
-                HealthCard(healthData: healthData),
-                const SizedBox(height: 10),
-                _buildStatsRow(),
-              ],
-            ),
+          return Column(
+            spacing: 15,
+            children: [
+              _buildHappinessCard(),
+              _buildPerformanceIndicator(),
+              const AccessCard(),
+              HealthCard(healthData: healthData),
+              _buildStatsRow(),
+            ],
           );
         } else if (state is ProfileError) {
           return Text(state.message);
@@ -227,7 +204,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withOpacity(0.8),
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 2),
@@ -332,7 +309,7 @@ class _ProfilePageState extends State<ProfilePage> {
         margin: const EdgeInsets.symmetric(horizontal: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.8),
           borderRadius: BorderRadius.circular(15),
           boxShadow: const [
             BoxShadow(color: Colors.black12, blurRadius: 4),
@@ -367,7 +344,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withOpacity(0.8),
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 2),

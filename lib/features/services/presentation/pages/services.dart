@@ -4,9 +4,7 @@ import 'package:attendence_system/features/services/presentation/pages/pantry.da
 import 'package:attendence_system/features/services/presentation/pages/team_status.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../core/constants/constants.dart';
-import '../../../app_background.dart';
 import 'events.dart';
 
 class ServicesScreen extends StatelessWidget {
@@ -14,20 +12,11 @@ class ServicesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("services".tr(), style: const TextStyle(color: Colors.white)),
-        backgroundColor: primaryColor,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: AppBackground(
-        child: Column(
-          children: [
-            Expanded(child: _buildServiceGrid(context)),
-          ],
-        ),
-      ),
-    );
+    return  Column(
+        children: [
+          Expanded(child: _buildServiceGrid(context)),
+        ],
+      );
   }
 
   Widget _buildServiceGrid(BuildContext context) {
@@ -93,7 +82,7 @@ class ServicesScreen extends StatelessWidget {
       onTap: () => _navigateTo(context, routeName),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.8),
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
             BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 2),

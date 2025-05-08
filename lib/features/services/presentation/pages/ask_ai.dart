@@ -1,4 +1,4 @@
-import 'package:attendence_system/features/app_background.dart';
+import 'package:attendence_system/features/services/presentation/pages/base_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/constants.dart';
@@ -39,52 +39,23 @@ class _AskAIScreenState extends State<AskAIScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AppBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Custom App Bar
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                 color: primaryColor,
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      "Ask AI",
-                      style: GoogleFonts.lato(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(
-                child: ListView.builder(
-                  reverse: true,
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) {
-                    final message = _messages[_messages.length - 1 - index];
-                    return _buildMessageBubble(message['text'], message['isUser']);
-                  },
-                ),
-              ),
-
-              _buildInputField(),
-            ],
+    return BaseScreen(
+      titleKey: 'Ask ai',
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              reverse: true,
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[_messages.length - 1 - index];
+                return _buildMessageBubble(message['text'], message['isUser']);
+              },
+            ),
           ),
-        ),
+
+          _buildInputField(),
+        ],
       ),
     );
   }
@@ -125,7 +96,7 @@ class _AskAIScreenState extends State<AskAIScreen> {
 
   Widget _buildInputField() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.only(left:16, right:  16,top: 16),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
@@ -137,38 +108,41 @@ class _AskAIScreenState extends State<AskAIScreen> {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: "Type your question...",
-                hintStyle: GoogleFonts.lato(color: Colors.grey[600]),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide.none,
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  hintText: "Type your question...",
+                  hintStyle: GoogleFonts.lato(color: Colors.grey[600]),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: veryLightGray,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
-                filled: true,
-                fillColor: veryLightGray,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          InkWell(
-            onTap: _sendMessage,
-            borderRadius: BorderRadius.circular(30),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: primaryColor
+            const SizedBox(width: 10),
+            InkWell(
+              onTap: _sendMessage,
+              borderRadius: BorderRadius.circular(30),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: primaryColor
+                ),
+                child: const Icon(Icons.send, color: Colors.white, size: 22),
               ),
-              child: const Icon(Icons.send, color: Colors.white, size: 22),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,3 @@
-import 'package:attendence_system/features/app_background.dart';
 import 'package:attendence_system/features/reports/domain/entities/report_model.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -34,80 +33,54 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title:  Text("rprts".tr(),
-            style: TextStyle(color: Colors.white)),
-        backgroundColor: primaryColor,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: AppBackground(
-        child: Stack(
-          children: [
-            _buildBackground(),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildFilterChips(),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: BlocConsumer<ReportBloc, ReportState>(
-                      listener: (context, state) {
-                        if (state is ReportError) {
-                          AwesomeDialog(
-                            context: context,
-                            dialogType: DialogType.error,
-                            animType: AnimType.rightSlide,
-                            title: 'Oops',
-                            desc: state.message,
-                            btnOkOnPress: () {},
-                          ).show();
-                        }
-                      },
-                      builder: (context, state) {
-                        if (state is ReportLoading) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (state is ReportLoaded) {
-                          return ListView.builder(
-                            itemCount: state.report.length,
-                            itemBuilder: (context, index) {
-                              return _buildAttendanceCard(
-                                  state.report[index]);
-                            },
-                          );
-                        }
-                        // for both initial and error states, just show nothing (dialog handled above)
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                ],
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildFilterChips(),
+              const SizedBox(height: 20),
+              Expanded(
+                child: BlocConsumer<ReportBloc, ReportState>(
+                  listener: (context, state) {
+                    if (state is ReportError) {
+                      AwesomeDialog(
+                        context: context,
+                        dialogType: DialogType.error,
+                        animType: AnimType.rightSlide,
+                        title: 'Oops',
+                        desc: state.message,
+                        btnOkOnPress: () {},
+                      ).show();
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is ReportLoading) {
+                      return const Center(
+                          child: CircularProgressIndicator());
+                    } else if (state is ReportLoaded) {
+                      return ListView.builder(
+                        itemCount: state.report.length,
+                        itemBuilder: (context, index) {
+                          return _buildAttendanceCard(
+                              state.report[index]);
+                        },
+                      );
+                    }
+                    // for both initial and error states, just show nothing (dialog handled above)
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildBackground() => Stack(
-        children: [
-          Positioned(
-              top: 100,
-              left: -50,
-              child: _buildDecorativeCircle(
-                  200, const Color.fromRGBO(182, 138, 53, 0.2))),
-          Positioned(
-              bottom: -80,
-              right: -80,
-              child: _buildDecorativeCircle(
-                  250, const Color.fromRGBO(182, 138, 53, 0.3))),
-        ],
-      );
 
   Widget _buildDecorativeCircle(double size, Color color) => Container(
         width: size,
@@ -187,6 +160,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildAttendanceCard(Report record) => Card(
         margin: const EdgeInsets.symmetric(vertical: 8),
         elevation: 5,
+        color: Colors.white.withOpacity(0.8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),

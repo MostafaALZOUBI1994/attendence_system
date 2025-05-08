@@ -1,11 +1,21 @@
 import 'dart:ui';
 
-const Color primaryColor = Color.fromRGBO(182, 138, 53, 1.0);
+import 'package:flutter/cupertino.dart';
+
+const Color primaryColor =  Color(0xFFB8860B);
 const Color secondaryColor = Color.fromRGBO(65, 64, 66, 1.0);
 const Color lightGray = Color.fromRGBO(198, 198, 198, 1.0);
 const Color veryLightGray = Color.fromRGBO(225, 225, 225, 1.0);
 const String baseUrl = 'https://taapi.moec.gov.ae/api/lgt/';
-
+const LinearGradient primaryGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [
+    Color(0xFFFFD700), // Light gold
+    Color(0xFFB8860B), // Darker gold
+    Color(0xFFB8860B), //
+  ],
+);
 const String empID = 'EMP_ID';
 const String empName = 'EMP_NAME';
 const String empNameAR = 'EMP_NAME_AR';

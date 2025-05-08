@@ -1,4 +1,3 @@
-
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -30,27 +29,53 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: AnimatedNotchBottomBar(
-        showLabel: false,
-        notchColor: primaryColor,
-        bottomBarItems: [
-          _bottomBarItem(Icons.home, "home".tr()),
-          _bottomBarItem(Icons.build, "services".tr()),
-          _bottomBarItem(Icons.list_alt, "reports".tr()),
-          _bottomBarItem(Icons.person, "profile".tr()),
+      extendBody: true,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            "assets/c1.png",
+            fit: BoxFit.cover,
+          ),
+          Positioned.fill(
+            child: Container(color: Colors.black.withOpacity(0.7)),
+          ),
+
+          // 3) Soft light overlay
+          Positioned.fill(
+            child: Container(
+              color: Colors.white.withOpacity(0.25),
+            ),
+          ),
+          // your actual UI:
+          SafeArea(top: true,
+              bottom: false,  child:  _pages[_currentIndex]),
         ],
-        onTap: (index) => setState(() => _currentIndex = index),
-        notchBottomBarController: _controller,
-        color: veryLightGray,
-        kBottomRadius: 28.0,
-        elevation: 100,
-        shadowElevation: 5,
-        showShadow: true,
-        removeMargins: true,
-        bottomBarHeight: 82.0,
-        kIconSize: 20,
       ),
+      bottomNavigationBar: SizedBox(
+        height: 70 + MediaQuery.of(context).padding.bottom,
+        child: AnimatedNotchBottomBar(
+          showLabel: true,
+          notchColor: primaryColor.withOpacity(0.7),
+          color: veryLightGray.withOpacity(1.0),
+          bottomBarItems: [
+            _bottomBarItem(Icons.home, "home".tr()),
+            _bottomBarItem(Icons.build, "services".tr()),
+            _bottomBarItem(Icons.list_alt, "reports".tr()),
+            _bottomBarItem(Icons.person, "profile".tr()),
+          ],
+          onTap: (index) => setState(() => _currentIndex = index),
+          notchBottomBarController: _controller,
+          removeMargins: true,
+          kBottomRadius: 60.0,
+          elevation: 0,
+          shadowElevation: 0,
+          showShadow: false,
+          bottomBarHeight: 42.0,
+          kIconSize: 20,
+        ),
+      ),
+
     );
   }
 

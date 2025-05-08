@@ -62,24 +62,38 @@ class ProcessTimeline extends StatelessWidget {
   Color _getColor(int index) => index <= currentIndex ? primaryColor : Colors.grey;
 
   Widget _buildIndicator(int index) {
-    return Stack(
-      children: [
-        CustomPaint(
-          size: const Size(30, 30),
-          painter: _BezierPainter(
-            color: _getColor(index),
-            drawStart: index > 0,
-            drawEnd: index < currentIndex,
+    final color = _getColor(index);
+
+    return SizedBox(
+      width: 30,
+      height: 30,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // 1) gradient ring
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: primaryGradient,
+            ),
           ),
-        ),
-        DotIndicator(
-          size: 30,
-          color: _getColor(index),
-          child: _buildIndicatorChild(index),
-        ),
-      ],
+          // 2) inner solid dot
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color, // either gold or grey
+            ),
+            child: _buildIndicatorChild(index),
+          ),
+        ],
+      ),
     );
   }
+
 
   Widget? _buildIndicatorChild(int index) {
     if (index == currentIndex) {
@@ -97,18 +111,18 @@ class ProcessTimeline extends StatelessWidget {
 
   Widget _buildConnector(int index, ConnectorType type) {
     if (index == 0) return const SizedBox.shrink();
-    final colors = [
-      Color.lerp(_getColor(index-1), _getColor(index), 0.5)!,
-      _getColor(index)
-    ];
+    final prev = _getColor(index - 1), curr = _getColor(index);
     return DecoratedLineConnector(
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: type == ConnectorType.start
-            ? colors.reversed.toList()
-            : colors),
+        gradient: LinearGradient(
+          colors: type == ConnectorType.start
+              ? [curr, Color.lerp(prev, curr, 0.5)!]
+              : [Color.lerp(prev, curr, 0.5)!, curr],
+        ),
       ),
     );
   }
+
 }
 
 
