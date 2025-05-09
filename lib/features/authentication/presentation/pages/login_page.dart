@@ -71,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
             "lgnAcc".tr(),
             style: GoogleFonts.poppins(
               fontSize: 16,
-              color: Colors.grey[600],
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 30),
@@ -97,12 +97,12 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: controller,
       obscureText: isPassword ? _isObscured : false,
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: primaryColor),
+        prefixIcon: Icon(icon, color: primaryColor.withOpacity(0.8)),
         suffixIcon: isPassword
             ? IconButton(
           icon: Icon(
             _isObscured ? Icons.visibility_off : Icons.visibility,
-            color: primaryColor,
+            color: primaryColor.withOpacity(0.8),
           ),
           onPressed: () {
             setState(() {
@@ -113,10 +113,18 @@ class _LoginScreenState extends State<LoginScreen> {
             : null,
         hintText: hint,
         filled: true,
-        fillColor: Colors.grey[200],
+        fillColor: Colors.grey[200]?.withOpacity(0.8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: primaryColor.withOpacity(0.5)), // Reduced opacity border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: primaryColor.withOpacity(0.5)), // Reduced opacity border when enabled
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide(color: primaryColor.withOpacity(0.8), width: 2), // Slightly more opaque when focused
         ),
       ),
     );
@@ -132,9 +140,10 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: primaryColor,
+        backgroundColor: primaryColor.withOpacity(0.8), // Reduced opacity button background
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
+          side: BorderSide(color: primaryColor.withOpacity(0.8)), // Reduced opacity border
         ),
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
       ),

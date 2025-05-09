@@ -1,8 +1,10 @@
 import 'dart:math';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:ui' as ui;
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:slide_countdown/slide_countdown.dart';
@@ -177,8 +179,7 @@ class TimeScreen extends StatelessWidget {
           children: [
             Center(
               child: Container(
-                // 1) Outer gradient ring
-                width: 266,  // 250 + 2*8px border
+                width: 266,
                 height: 266,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -186,7 +187,6 @@ class TimeScreen extends StatelessWidget {
                 ),
                 padding: const EdgeInsets.all(8), // border thickness
                 child: Container(
-                  // 2) Inner white face with shadows
                   width: 250,
                   height: 250,
                   decoration: BoxDecoration(
@@ -207,28 +207,30 @@ class TimeScreen extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      // clock ticks
+
                       CustomPaint(
                         size: const Size(250, 250),
                         painter: ClockTicksPainter(),
                       ),
-                      // digital timer + icon
                       Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SlideCountdown(duration: remaining, decoration: const BoxDecoration(
-                              color: Colors.transparent,
-                            ),style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                            ),
-                              separatorStyle: TextStyle(
+                            Directionality(
+                              textDirection: ui.TextDirection.ltr,
+                              child: SlideCountdown(duration: remaining, decoration: const BoxDecoration(
+                                color: Colors.transparent,
+                              ),style: TextStyle(
                                 color: primaryColor,
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
-                              ),),
+                              ),
+                                separatorStyle: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                ),),
+                            ),
                             const SizedBox(height: 8),
                             Icon(Icons.work, color: primaryColor, size: 40),
                           ],
@@ -291,6 +293,13 @@ class TimeScreen extends StatelessWidget {
 
   Widget _buildCheckInOptions(BuildContext context, LoginSuccessData loginData,
       TodayStatus todayStatus) {
+    final last = todayStatus.offSiteCheckIns.isNotEmpty
+        ? DateTime.fromMillisecondsSinceEpoch(todayStatus.offSiteCheckIns.last)
+        : DateTime.now();
+    final endTime = last.add(const Duration(minutes: 30));
+    final now = DateTime.now();
+    final rawRem = endTime.difference(now);
+    final remaining = rawRem.isNegative ? Duration.zero : rawRem;
     return todayStatus.offSiteCheckIns.isEmpty
         ? _buildCard(
             Center(
@@ -302,48 +311,94 @@ class TimeScreen extends StatelessWidget {
             ),
           )
         : _buildCard(
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                AnalogAttendanceClock(
-                  eventTimestamps: todayStatus.offSiteCheckIns,
-                  accentColor: primaryColor,
+      Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          AnalogAttendanceClock(
+            eventTimestamps: todayStatus.offSiteCheckIns,
+            ringGradient: primaryGradient,
+          ),
+
+
+          Positioned(
+            child: _buildCheckInButtonOverlay(context),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: SizedBox(
+              width: 80,
+              height: 80,
+              child: DashedCircularProgressBar(
+                seekColor: primaryColor,
+                foregroundColor: primaryColor,
+                backgroundColor: lightGray,
+                progress: () {
+                  final now = DateTime.now();
+                  final total = endTime.difference(last).inSeconds;
+                  final passed = now.difference(last).inSeconds;
+                  return (total / passed)*100;
+                }(),
+                width: 10,
+                height: 10,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SlideCountdown(
+                        duration: () {
+                          final now = DateTime.now();
+                          final diff = endTime.difference(now);
+                          return diff.isNegative ? Duration.zero : diff;
+                        }(),
+                        decoration: const BoxDecoration(color: Colors.transparent),
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        separatorStyle: TextStyle(
+                          color: primaryColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Icon(Icons.timer, color: primaryColor, size: 20),
+                    ],
+                  ),
                 ),
-                _buildCheckInButtonOverlay(context),
-              ],
+              ),
             ),
+          ),
+
+        ],
+      ),
           );
   }
 
   Widget _buildCheckInButtonOverlay(BuildContext context) {
-    return Positioned.fill(
-      child: GestureDetector(
-        onTap: () => context
-            .read<AttendenceBloc>()
-            .add(AttendenceEvent.checkIn("happy")),
-        child: Center(
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  primaryColor.withOpacity(0.6),
-                  primaryColor.withOpacity(0.9),
-                ],
-                radius: 0.6,
-              ),
-            ),
-            child: Center(
-                child: Text(
-              "chkIn".tr(),
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700),
-            )),
+    return GestureDetector(
+      onTap: () => context
+          .read<AttendenceBloc>()
+          .add(AttendenceEvent.checkIn("happy")),
+      child: Center(
+        child: Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: primaryGradient
           ),
+          child: Center(
+              child: Text(
+            "chkIn".tr(),
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700),
+          )),
         ),
       ),
     );

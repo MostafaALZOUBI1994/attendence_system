@@ -13,62 +13,8 @@ import '../../domain/entities/eleave_entity.dart';
 import '../bloc/services_bloc.dart';
 import '../widgets/date_picker.dart';
 import '../widgets/time_picker.dart';
+import 'base_screen.dart';
 
-class BaseScreen extends StatelessWidget {
-  final String titleKey;
-  final Widget child;
-
-  const BaseScreen({
-    Key? key,
-    required this.titleKey,
-    required this.child,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              'assets/c1.png',
-              fit: BoxFit.cover,
-            ),
-            Container(color: Colors.black.withOpacity(0.7)),
-            Container(color: Colors.white.withOpacity(0.25)),
-            Scaffold(
-              extendBody: true,
-              extendBodyBehindAppBar: true,
-              backgroundColor: Colors.transparent,
-              appBar: AppBar(
-                title: Text(titleKey.tr(), style: const TextStyle(color: Colors.white)),
-                backgroundColor: Colors.transparent,
-                iconTheme: const IconThemeData(color: Colors.white),
-              ),
-              body: SafeArea(
-                top: true,
-                bottom: false,
-                child: child,
-              ),
-            ),
-          ],
-        ),
-        // loading overlay
-        BlocSelector<ServicesBloc, ServicesState, bool>(
-          selector: (state) => state.maybeWhen(loading: () => true, orElse: () => false),
-          builder: (context, isLoading) {
-            if (!isLoading) return const SizedBox.shrink();
-            return Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(child: CircularProgressIndicator()),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
 
 class HRRequestScreen extends StatefulWidget {
   const HRRequestScreen({Key? key}) : super(key: key);
@@ -160,7 +106,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withOpacity(0.6),
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 12, spreadRadius: 2)],
       ),
@@ -211,7 +157,7 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
   Widget _buildForm(List<PermissionTypesEntity> types) => Card(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     elevation: 4,
-    color: Colors.white,
+    color: Colors.white.withOpacity(0.9),
     child: Padding(
       padding: const EdgeInsets.all(20),
       child: Form(

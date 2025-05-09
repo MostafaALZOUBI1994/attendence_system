@@ -16,6 +16,16 @@ const LinearGradient primaryGradient = LinearGradient(
     Color(0xFFB8860B), //
   ],
 );
+const LinearGradient secondryGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [
+    Color(0xB3FFD700), // Light gold with 70% opacity
+    Color(0xB3B8860B), // Darker gold with 70% opacity
+    Color(0xB3B8860B), // Darker gold with 70% opacity
+  ],
+);
+
 const String empID = 'EMP_ID';
 const String empName = 'EMP_NAME';
 const String empNameAR = 'EMP_NAME_AR';

@@ -41,13 +41,12 @@ class _MainScreenState extends State<MainScreen> {
             child: Container(color: Colors.black.withOpacity(0.7)),
           ),
 
-          // 3) Soft light overlay
+
           Positioned.fill(
             child: Container(
               color: Colors.white.withOpacity(0.25),
             ),
           ),
-          // your actual UI:
           SafeArea(top: true,
               bottom: false,  child:  _pages[_currentIndex]),
         ],
@@ -58,6 +57,10 @@ class _MainScreenState extends State<MainScreen> {
           showLabel: true,
           notchColor: primaryColor.withOpacity(0.7),
           color: veryLightGray.withOpacity(1.0),
+          itemLabelStyle: const TextStyle(
+            fontSize: 10.0,
+            fontWeight: FontWeight.w500,
+          ),
           bottomBarItems: [
             _bottomBarItem(Icons.home, "home".tr()),
             _bottomBarItem(Icons.build, "services".tr()),
