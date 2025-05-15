@@ -138,10 +138,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 break;
             }
 
-            // Format dates safely
+
             final formattedFromDate = fromDate != null
                 ? formatter.format(fromDate)
-                : formatter.format(DateTime.utc(2025, 1, 1)); // Default if null
+                : formatter.format(DateTime.utc(2025, 1, 1));
 
             final formattedToDate = formatter.format(toDate);
 
@@ -197,7 +197,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildStatusChip(String status) {
     Color color;
     switch (status) {
-      case "On Time":
+      case "PRESENT":
         color = Colors.green;
         break;
       case "Late":

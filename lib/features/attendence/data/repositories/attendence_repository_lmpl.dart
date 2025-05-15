@@ -8,19 +8,22 @@ import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:ntp/ntp.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/injection.dart';
 import '../../../../core/local_services/local_services.dart';
+import '../../../authentication/data/datasources/employee_local_data_source.dart';
 
 @LazySingleton(as: AttendenceRepository)
 class AttendenceRepositoryImpl implements AttendenceRepository {
   final Dio _dio;
   final LocalService _localService;
 
+
   AttendenceRepositoryImpl(this._dio, this._localService);
 
   @override
   Future<Either<Failure, TodayStatus>> getTodayStatus() async {
     try {
-      final String? employeeId = _localService.get(empID);
+      final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
 
 
       final responseEither = await _dio.safe(
@@ -49,6 +52,8 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
             checkInTime: item['In_Time'] as String,
             delay: item['LateIn'] as String,
             expectedOutTime: item['ExpectedOutTime'] as String,
+            outTime: item['OutTime'] as String,
+            punchInOffice: item['PunchInOfficeTime'] as String,
             offSiteCheckIns: _localService.getMillisList(checkIns) ?? [],
           );
           return Right(status);
@@ -61,7 +66,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
   @override
   Future<Either<Failure, String>> checkIn() async {
     try {
-      final String? employeeId = _localService.get(empID);
+      final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
       final String time = intl.DateFormat('dd/MM/yyyy HH:mm:ss', 'en')
           .format(await NTP.now());
       final responseEither = await _dio.safe(

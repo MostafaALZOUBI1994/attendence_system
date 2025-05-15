@@ -1,64 +1,55 @@
-import 'package:attendence_system/core/local_services/local_services.dart';
+import 'dart:convert';
+
 import 'package:attendence_system/core/network/dio_extensions.dart';
+import 'package:attendence_system/features/authentication/data/mappers/employee_mapper.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:restart_app/restart_app.dart';
-
-import '../../../../core/constants/constants.dart';
 import '../../../../core/errors/failures.dart';
-import '../../domain/entities/login_success_model.dart';
+import '../../domain/entities/employee.dart';
 import '../../domain/repositories/auth_repository.dart';
-
+import '../datasources/employee_local_data_source.dart';
+import '../models/employee_model.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final Dio _dio;
-  final LocalService _localService;
-  AuthRepositoryImpl(this._dio, this._localService);
+  final EmployeeLocalDataSource _localDs;
+
+  AuthRepositoryImpl(this._dio, this._localDs);
 
   @override
-  Future<Either<Failure, LoginSuccessData>> login(
-      String email, String password) async {
+  Future<Either<Failure, Employee>> login(String email, String password) async {
     final responseEither = await _dio.safe(
           () => _dio.post(
-        'login',
-        data: {
-          'username': email,
-          'password': password,
-          'imei': '123',
-        },
+        'GetEmployeeDetailsAD',
+        data: {'username': email, 'password': password, 'imei': '123'},
       ),
           (res) => res,
     );
 
-    return await responseEither.fold(
-          (failure) async => Left(failure),
-
+    return responseEither.fold(
+          (failure) => Left(failure),
           (response) async {
         if (response.statusCode != 200) {
           return const Left(ServerFailure('Failed to log in'));
         }
 
-        final item = response.data[0] as Map<String, dynamic>;
+        final details = response.data['EmployeeDeatils'] as Map<String, dynamic>;
 
-        if (item['_statusCode'] == '101') {
-          return Left(ServerFailure(item['_statusMessage']));
+        if (details['_statusCode'] == '101') {
+          return Left(ServerFailure(details['_statusMessage'] as String));
         }
 
-        final data = LoginSuccessData(
-          empID: item['_employeeid'] as String,
-          empName: item['_employeename'] as String,
-          empNameAR: item['_employeenameAr'] as String,
-          empProfileImage: (item['_profileimg'] as String?) ?? '',
-        );
+        // parse your full JSON into the model
+        final model = EmployeeModel.fromJson(details);
 
-        await _localService.save(empID, data.empID);
-        await _localService.save(empName, data.empName);
-        await _localService.save(empNameAR, data.empNameAR);
-        await _localService.save(profileImage, data.empProfileImage);
+        // cache the entire model
+        await _localDs.cacheEmployee(model);
 
-        return Right(data);
+        // map to domain entity and return
+        return Right(model.toEntity());
       },
     );
   }
@@ -66,27 +57,25 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, bool>> signOut() async {
     try {
-      await _localService.clearAll();
+      await _localDs.cacheEmployee(EmployeeModel(
+          "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","",""));
       await Restart.restartApp();
-      return Right(true);
+      return const Right(true);
     } catch (e) {
-      return Left(ServerFailure('signout failed $e'));
+      return Left(ServerFailure('Sign out failed: $e'));
     }
-
   }
 
   @override
-  Future<Either<Failure, LoginSuccessData>> getProfileData() async {
+  Future<Either<Failure, Employee>> getProfileData() async {
     try {
-      final data = LoginSuccessData(
-        empID: await _localService.get(empID) ?? "",
-        empName: await _localService.get(empName) ?? "",
-        empNameAR: await _localService.get(empNameAR) ?? "",
-        empProfileImage: await _localService.get(profileImage) ?? "",
-      );
-      return Right(data);
-    }catch(e){
-      return Left(ServerFailure('load profile data failed $e'));
+      final model = await _localDs.getProfile();
+      if (model == null) {
+        return const Left(ServerFailure('No cached profile found'));
+      }
+      return Right(model.toEntity());
+    } catch (e) {
+      return Left(ServerFailure('Load profile data failed: $e'));
     }
   }
 }

@@ -4,7 +4,9 @@ import 'package:attendence_system/features/services/presentation/pages/pantry.da
 import 'package:attendence_system/features/services/presentation/pages/team_status.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/constants.dart';
+import '../bloc/services_bloc.dart';
 import 'events.dart';
 
 class ServicesScreen extends StatelessWidget {
@@ -12,6 +14,9 @@ class ServicesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future.microtask(() {
+      context.read<ServicesBloc>().add(const ServicesEvent.loadData());
+    });
     return  Column(
         children: [
           Expanded(child: _buildServiceGrid(context)),

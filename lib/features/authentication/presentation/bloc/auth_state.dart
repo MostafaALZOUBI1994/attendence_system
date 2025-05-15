@@ -8,7 +8,7 @@ class AuthState with _$AuthState {
     required String email,
     @Default(false) bool isScanning,
   }) = Login;
-  const factory AuthState.success(LoginSuccessData data) = AuthSuccess;
+  const factory AuthState.success(Employee data) = AuthSuccess;
   const factory AuthState.unauthenticated() = UnAuthenticated;
   const factory AuthState.error(String message) = AuthError;
 }

@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:slide_countdown/slide_countdown.dart';
 import '../../../../core/constants/constants.dart';
-import '../../../authentication/domain/entities/login_success_model.dart';
+import '../../../authentication/domain/entities/employee.dart';
 import '../../domain/entities/process_step.dart';
 import '../../domain/entities/today_status.dart';
 import '../bloc/attendence_bloc.dart';
@@ -53,7 +53,7 @@ class TimeScreen extends StatelessWidget {
           }, builder: (context, state) {
             return state.maybeMap(
               loaded: (l) => _buildMainContent(
-                loginData: l.loginData,
+                employee: l.employee,
                 currentStepIndex: l.currentStepIndex,
                 remainingTime: l.remainingTime,
                 progress: l.progress,
@@ -62,7 +62,7 @@ class TimeScreen extends StatelessWidget {
                 context: context,
               ),
               checkInSuccess: (s) => _buildMainContent(
-                loginData: s.loginData,
+                employee: s.employee,
                 currentStepIndex: s.currentStepIndex,
                 remainingTime: s.remainingTime,
                 progress: s.progress,
@@ -71,7 +71,7 @@ class TimeScreen extends StatelessWidget {
                 context: context,
               ),
               error: (e) => _buildMainContent(
-                loginData: e.loginData,
+                employee: e.employee,
                 currentStepIndex: e.currentStepIndex,
                 remainingTime: e.remainingTime,
                 progress: e.progress,
@@ -85,7 +85,7 @@ class TimeScreen extends StatelessWidget {
   }
 
   Widget _buildMainContent(
-      {required LoginSuccessData loginData,
+      {required Employee employee,
       required int currentStepIndex,
       required Duration remainingTime,
       required double progress,
@@ -97,20 +97,20 @@ class TimeScreen extends StatelessWidget {
         ListView(
           shrinkWrap: true,
           children: [
-            _buildHeader(loginData, context),
+            _buildHeader(employee, context),
             const SizedBox(height: 10),
 
             // Step 0: Check-in options
             if (currentStepIndex == 0)
-              _buildCheckInOptions(context, loginData, todayStatus),
+              _buildCheckInOptions(context, employee, todayStatus),
 
             // Step 1+: Check-in status
             if (currentStepIndex >= 1)
-              _buildCheckInStatus(context, loginData, todayStatus,
+              _buildCheckInStatus(context, employee, todayStatus,
                   currentStepIndex, remainingTime, progress, isCheckInSuccess),
 
             const SizedBox(height: 10),
-            _buildTimelineCard(loginData, todayStatus, currentStepIndex,
+            _buildTimelineCard(employee, todayStatus, currentStepIndex,
                 remainingTime, progress),
           ],
         ),
@@ -119,11 +119,11 @@ class TimeScreen extends StatelessWidget {
   }
 
 
-  Widget _buildHeader(LoginSuccessData userData, BuildContext context) {
+  Widget _buildHeader(Employee employee, BuildContext context) {
     final lang = context.locale.languageCode;
-    final fullName = (lang == 'ar' && userData.empNameAR.isNotEmpty)
-        ? userData.empNameAR
-        : userData.empName;
+    final fullName = (lang == 'ar' && employee.employeeNameInAr.isNotEmpty)
+        ? employee.employeeNameInAr
+        : employee.employeeNameInEn;
 
     final firstName = fullName.split(' ').first;
 
@@ -266,7 +266,7 @@ class TimeScreen extends StatelessWidget {
                     : '--:--',
               ),
               ProcessStep('onSiteCheckIn'.tr(), Icons.fingerprint,
-                  state.todayStatus.checkInTime),
+                  state.todayStatus.punchInOffice),
               ProcessStep(
                   'working'.tr(), Icons.work, state.todayStatus.expectedOutTime),
               ProcessStep(
@@ -291,7 +291,7 @@ class TimeScreen extends StatelessWidget {
         ),
       );
 
-  Widget _buildCheckInOptions(BuildContext context, LoginSuccessData loginData,
+  Widget _buildCheckInOptions(BuildContext context, Employee loginData,
       TodayStatus todayStatus) {
     final last = todayStatus.offSiteCheckIns.isNotEmpty
         ? DateTime.fromMillisecondsSinceEpoch(todayStatus.offSiteCheckIns.last)
@@ -346,22 +346,25 @@ class TimeScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SlideCountdown(
-                        duration: () {
-                          final now = DateTime.now();
-                          final diff = endTime.difference(now);
-                          return diff.isNegative ? Duration.zero : diff;
-                        }(),
-                        decoration: const BoxDecoration(color: Colors.transparent),
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        separatorStyle: TextStyle(
-                          color: primaryColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      Directionality(
+                        textDirection: ui.TextDirection.ltr,
+                        child: SlideCountdown(
+                          duration: () {
+                            final now = DateTime.now();
+                            final diff = endTime.difference(now);
+                            return diff.isNegative ? Duration.zero : diff;
+                          }(),
+                          decoration: const BoxDecoration(color: Colors.transparent),
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          separatorStyle: TextStyle(
+                            color: primaryColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -406,7 +409,7 @@ class TimeScreen extends StatelessWidget {
 
   Widget _buildCheckInStatus(
       BuildContext context,
-      LoginSuccessData loginData,
+      Employee employee,
       TodayStatus todayStatus,
       int currentStepIndex,
       Duration remainingTime,
@@ -418,7 +421,7 @@ class TimeScreen extends StatelessWidget {
           : _buildCheckInButton(
               context,
               Loaded(
-                loginData: loginData,
+                employee: employee,
                 todayStatus: todayStatus,
                 currentStepIndex: currentStepIndex,
                 remainingTime: remainingTime,
@@ -428,7 +431,7 @@ class TimeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineCard(LoginSuccessData loginData, TodayStatus todayStatus,
+  Widget _buildTimelineCard(Employee employee, TodayStatus todayStatus,
       int currentStepIndex, Duration remainingTime, double progress) {
     return Card(
         elevation: 5,
@@ -437,7 +440,7 @@ class TimeScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: _buildTimeline(Loaded(
-            loginData: loginData,
+            employee: employee,
             todayStatus: todayStatus,
             currentStepIndex: currentStepIndex,
             remainingTime: remainingTime,

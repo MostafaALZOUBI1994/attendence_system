@@ -1,14 +1,14 @@
 import 'dart:async';
-
-import 'package:attendence_system/core/constants/constants.dart';
 import 'package:attendence_system/features/attendence/domain/usecases/checkin_usecase.dart';
 import 'package:attendence_system/features/attendence/domain/usecases/today_status_usecase.dart';
-import 'package:attendence_system/features/authentication/domain/entities/login_success_model.dart';
+import 'package:attendence_system/features/authentication/data/mappers/employee_mapper.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/local_services/local_services.dart';
+import '../../../authentication/data/datasources/employee_local_data_source.dart';
+import '../../../authentication/domain/entities/employee.dart';
 import '../../domain/entities/today_status.dart';
 part 'attendence_event.dart';
 part 'attendence_state.dart';
@@ -16,7 +16,7 @@ part 'attendence_bloc.freezed.dart';
 
 @injectable
 class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
-  final LocalService _localService;
+  final EmployeeLocalDataSource _employeeLocalDs;
   final GetTodayStatusUseCase _getTodayStatusUseCase;
   final CheckinUsecase _checkinUsecase;
 
@@ -24,9 +24,9 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
   DateTime? _expectedCheckoutTime;
 
   AttendenceBloc(
-      this._localService,
       this._getTodayStatusUseCase,
       this._checkinUsecase,
+      this._employeeLocalDs,
       ) : super(const AttendenceState.initial()) {
     on<LoadData>(_onLoadData);
     on<StepChanged>(_onStepChanged);
@@ -36,18 +36,20 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
 
   Future<void> _onLoadData(
       LoadData event, Emitter<AttendenceState> emit) async {
-    final loginData = LoginSuccessData(
-      empID: _localService.get(empID) ?? "",
-      empName: _localService.get(empName) ?? "",
-      empNameAR: _localService.get(empNameAR) ?? "",
-      empProfileImage: _localService.get(empID) ?? "",
-    );
+    final model = await _employeeLocalDs.getProfile();
+    if (model == null) {
+      // no cached user
+      return emit(const AttendenceState.error(message: "No cached employee found", employee: Employee(
+          "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","",""), todayStatus: TodayStatus()));
+    }
+    final employee = model.toEntity();
+
 
     final todayStatusResult = await _getTodayStatusUseCase.execute();
 
     todayStatusResult.fold(
           (failure) {
-        emit(AttendenceState.loaded(loginData: loginData, todayStatus: TodayStatus()));
+        emit(AttendenceState.loaded(employee: employee, todayStatus: TodayStatus()));
       },
           (todayStatus) {
         int initialStep = 0;
@@ -74,7 +76,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
         }
 
         emit(AttendenceState.loaded(
-          loginData: loginData,
+          employee: employee,
           todayStatus: todayStatus,
           currentStepIndex: initialStep,
           remainingTime: _expectedCheckoutTime != null
@@ -103,7 +105,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
           (failure) {
         emit(AttendenceState.error(
           message: failure.message,
-          loginData: loaded.loginData,
+          employee: loaded.employee,
           todayStatus: loaded.todayStatus,
           currentStepIndex: loaded.currentStepIndex,
           remainingTime: loaded.remainingTime,
@@ -113,7 +115,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
           (successMessage) {
         emit(AttendenceState.checkInSuccess(
           message: successMessage,
-          loginData: loaded.loginData,
+          employee: loaded.employee,
           todayStatus: loaded.todayStatus,
           currentStepIndex: loaded.currentStepIndex + 1,
           remainingTime: loaded.remainingTime,

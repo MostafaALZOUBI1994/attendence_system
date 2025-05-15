@@ -130,10 +130,17 @@ class _ProfilePageState extends State<ProfilePage> {
         BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             return state.maybeWhen(
-              success: (loginData) {
+              success: (employee) {
                 final name = isArabic
-                    ? loginData.empNameAR
-                    : loginData.empName;
+                    ? employee.employeeNameInAr
+                    : employee.employeeNameInEn;
+                final role = isArabic
+                    ? employee.employeeTitleInAr
+                    : employee.employeeNameInEn;
+                final department = isArabic
+                    ? employee.departmentInAr
+                    : employee.departmentInEn;
+                final directManager = employee.directManager.split(',').first.replaceFirst('CN=', '').trim();
                 return Column(
                   children: [
                     const CircleAvatar(
@@ -153,7 +160,23 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'seniorDev',
+                      role,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      directManager,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      department,
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 16,

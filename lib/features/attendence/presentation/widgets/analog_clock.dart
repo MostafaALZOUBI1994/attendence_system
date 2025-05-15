@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import '../../../../core/constants/constants.dart';
 
-/// Draws hour numbers around the clock face.
 class _HourNumberPainter extends CustomPainter {
   final Color numberColor;
   _HourNumberPainter({required this.numberColor});

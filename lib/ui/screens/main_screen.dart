@@ -1,11 +1,18 @@
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/constants/constants.dart';
+import '../../core/injection.dart';
+import '../../features/attendence/presentation/bloc/attendence_bloc.dart';
 import '../../features/attendence/presentation/pages/attendence_page.dart';
+import '../../features/authentication/presentation/bloc/auth_bloc.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/reports/presentation/bloc/report_bloc.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
+import '../../features/services/presentation/bloc/services_bloc.dart';
 import '../../features/services/presentation/pages/services.dart';
 
 class MainScreen extends StatefulWidget {
@@ -28,7 +35,25 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => getIt<ProfileBloc>(),
+        ),
+        BlocProvider(create: (context) => getIt<AuthBloc>()),
+        BlocProvider(
+          create: (context) =>
+          getIt<AttendenceBloc>()..add(const AttendenceEvent.loadData()),
+        ),
+        BlocProvider(
+          create: (context) => getIt<ReportBloc>(),
+        ),
+        BlocProvider(
+          create: (context) =>
+          getIt<ServicesBloc>()..add(const ServicesEvent.loadData()),
+        ),
+      ],
+  child: Scaffold(
       extendBody: true,
       body: Stack(
         fit: StackFit.expand,
@@ -79,7 +104,8 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
 
-    );
+    ),
+);
   }
 
   BottomBarItem _bottomBarItem(IconData icon, String label) => BottomBarItem(

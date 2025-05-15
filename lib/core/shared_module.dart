@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'local_services/local_services.dart';
 import 'network/error_mapping_interceptor.dart';
 
 
@@ -10,27 +11,19 @@ import 'network/error_mapping_interceptor.dart';
 abstract class SharedModule {
   @preResolve
   Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
+}
 
+@module
+abstract class NetworkModule {
   @lazySingleton
-  Future<Dio> get dio async {
-    final sp = await prefs;
-    var lang  =  sp.getString(localeKey) ?? 'en-US';
-    if (lang == "ar") {
-      lang = "ar-AE";
-    } else {
-      lang = "en-US";
-    }
-    return Dio(
-    BaseOptions(
-      baseUrl: 'https://taapi.moec.gov.ae/api/lgt/',
-      connectTimeout: const Duration(seconds: 5000),
-      receiveTimeout: const Duration(seconds: 3000),
+  Dio dio(LocalService localService) {
+    final langCode = localService.get(localeKey) == 'ar' ? 'ar-AE' : 'en-US';
+    return Dio(BaseOptions(
+      baseUrl: 'http://10.111.27.4:8082/api/lgt/',
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 3),
       contentType: 'application/json',
-      queryParameters: {
-        'langcode': lang,
-      },
-    ),
-  )
-    ..interceptors.add(ErrorMappingInterceptor());
+      queryParameters: {'langcode': langCode},
+    ))..interceptors.add(ErrorMappingInterceptor());
   }
 }

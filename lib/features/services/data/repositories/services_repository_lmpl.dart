@@ -6,7 +6,9 @@ import 'package:attendence_system/features/services/domain/entities/permission_t
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/injection.dart';
 import '../../../../core/local_services/local_services.dart';
+import '../../../authentication/data/datasources/employee_local_data_source.dart';
 import '../../domain/repositories/services_repository.dart';
 import '../models/eleave_model.dart';
 import '../models/leave_request_params.dart';
@@ -22,12 +24,12 @@ class ServicesRepositoryImpl implements ServiceRepository {
   @override
   Future<Either<Failure, EleaveEntity>> getLeaveBalance() async {
     try {
-      final empId = _localService.get(empID);
+      final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
 
       final responseEither = await _dio.safe(
             () => _dio.get(
           '/Eleavebalance',
-          queryParameters: { 'employeeid': empId},
+          queryParameters: { 'employeeid': employeeId},
         ),
             (res) => res,
       );
@@ -84,13 +86,13 @@ class ServicesRepositoryImpl implements ServiceRepository {
   @override
   Future<Either<Failure, String>> submitLeaveRequest(SubmitLeaveRequestParams params) async {
     try {
-      final empId = _localService.get(empID);
+      final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
 
       final responseEither = await _dio.safe(
             () => _dio.post(
           '/EleaveInsert',
           data: {
-            'employeeid': empId,
+            'employeeid': employeeId,
             'datedaytype': params.datedaytype,
             'fromtime': params.fromtime,
             'totime': params.totime,

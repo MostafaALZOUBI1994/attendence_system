@@ -11,3 +11,15 @@ String formatDate(DateTime dateTime) {
 String formatDay(DateTime dateTime) {
   return DateFormat('EEEE').format(dateTime);
 }
+
+String formatToArabic(String dateString) {
+  final DateTime parsedDate = DateFormat('EEEE, MMMM d, y', 'en').parse(dateString);
+
+  return DateFormat('EEEE، d MMMM، y', 'ar').format(parsedDate);
+}
+
+String formatToEnglish(String dateString) {
+  final DateTime parsedDate = DateFormat('EEEE, MMMM d, y', 'en').parse(dateString);
+
+  return DateFormat('EEEE، d MMMM، y', 'en').format(parsedDate);
+}

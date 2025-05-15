@@ -3,18 +3,17 @@ import 'package:attendence_system/features/reports/domain/entities/report_model.
 import 'package:dio/dio.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/constants/constants.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../../core/local_services/local_services.dart';
+import '../../../../core/injection.dart';
+import '../../../authentication/data/datasources/employee_local_data_source.dart';
 import '../../domain/repositories/report_repository.dart';
 
 
 @LazySingleton(as: ReportRepository)
 class ReportRepositoryImpl implements ReportRepository {
   final Dio _dio;
-  final LocalService _localService;
 
-  ReportRepositoryImpl(this._dio, this._localService);
+  ReportRepositoryImpl(this._dio);
 
   @override
   Future<Either<Failure, List<Report>>> fetchReport({
@@ -22,11 +21,11 @@ class ReportRepositoryImpl implements ReportRepository {
     required String toDate,
   }) async {
     try {
-      final String? employeeId = _localService.get(empID);
+      final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
 
       final responseEither = await _dio.safe(
             () => _dio.get(
-          'AttendanceReport',
+          'AttendanceReport_New',
           queryParameters: {
             'employeeid': employeeId,
             'fromdate': fromDate,

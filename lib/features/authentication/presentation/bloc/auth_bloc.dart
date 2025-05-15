@@ -3,7 +3,7 @@ import 'package:attendence_system/features/authentication/domain/usecases/sign_o
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/entities/login_success_model.dart';
+import '../../domain/entities/employee.dart';
 import '../../domain/usecases/load_profile_data_usecase.dart';
 
 part 'auth_event.dart';
@@ -51,7 +51,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final result = await _loginUseCase.execute(event.email, event.password);
         result.fold(
           (failure) => emit(AuthError(failure.message)),
-          (successData) => emit( AuthState.success(successData)),
+          (successData) => emit(AuthState.success(successData)),
         );
       } catch (e) {
         emit(AuthError('Unexpected error: $e'));
@@ -64,8 +64,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final result = await _signOutUseCase.execute();
         result.fold(
           (failure) => emit(AuthError(failure.message)),
-          (successData) => emit(AuthState.success(LoginSuccessData(
-              empID: '', empName: '', empNameAR: '', empProfileImage: ''))),
+          (successData) => emit(const AuthState.success(Employee(
+              "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","",""))),
         );
         emit(const AuthState.unauthenticated());
       } catch (e) {

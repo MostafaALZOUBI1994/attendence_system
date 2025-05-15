@@ -19,6 +19,12 @@ class Report {
   @JsonKey(name: 'status')
   final String status;
 
+  @JsonKey(name: 'lateIn')
+  final String lateIn;
+
+  @JsonKey(name: 'early_out')
+  final String earlyOut;
+
 
   Report({
     required this.employeeId,
@@ -26,6 +32,8 @@ class Report {
     required this.checkIn,
     required this.checkOut,
     required this.status,
+    required this.lateIn,
+    required this.earlyOut,
   });
 
   factory Report.fromJson(Map<String, dynamic> json) => _$ReportFromJson(json);

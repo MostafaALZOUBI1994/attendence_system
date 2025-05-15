@@ -2,7 +2,7 @@ import 'package:attendence_system/features/authentication/domain/repositories/au
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';
-import '../entities/login_success_model.dart';
+import '../entities/employee.dart';
 
 
 @injectable
@@ -11,7 +11,7 @@ class LoginUseCase {
 
   LoginUseCase(this._repository);
 
-  Future<Either<Failure, LoginSuccessData>> execute(String phone, String password) {
+  Future<Either<Failure, Employee>> execute(String phone, String password) {
     return _repository.login(phone, password);
   }
 }

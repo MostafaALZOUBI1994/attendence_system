@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/failures.dart';
-import '../entities/login_success_model.dart';
+import '../entities/employee.dart';
 import '../repositories/auth_repository.dart';
 
 @injectable
@@ -11,7 +11,7 @@ class LoadProfileDataUsecase {
 
   LoadProfileDataUsecase(this._repository);
 
-  Future<Either<Failure, LoginSuccessData>> execute() {
+  Future<Either<Failure, Employee>> execute() {
     return _repository.getProfileData();
   }
 }

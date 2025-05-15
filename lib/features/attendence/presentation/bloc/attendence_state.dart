@@ -6,7 +6,7 @@ class AttendenceState with _$AttendenceState {
   const factory AttendenceState.initial() = Initial;
 
   const factory AttendenceState.loaded({
-    required LoginSuccessData loginData,
+    required Employee employee,
     required TodayStatus todayStatus,
     @Default(0) int currentStepIndex,
     @Default(Duration.zero) Duration remainingTime,
@@ -15,7 +15,7 @@ class AttendenceState with _$AttendenceState {
 
   const factory AttendenceState.checkInSuccess({
     required String message,
-    required LoginSuccessData loginData,
+    required Employee employee,
     required TodayStatus todayStatus,
     @Default(0) int currentStepIndex,
     @Default(Duration.zero) Duration remainingTime,
@@ -24,7 +24,7 @@ class AttendenceState with _$AttendenceState {
 
   const factory AttendenceState.error({
     required String message,
-    required LoginSuccessData loginData,
+    required Employee employee,
     required TodayStatus todayStatus,
     @Default(0) int currentStepIndex,
     @Default(Duration.zero) Duration remainingTime,
