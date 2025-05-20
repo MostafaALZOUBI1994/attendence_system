@@ -67,16 +67,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Future<void> _goNextAfterDelay() async {
     final localDs = getIt<EmployeeLocalDataSource>();
     final model = await localDs.getProfile();
-    final employee = model!.toEntity();
+    final employee = model?.toEntity();
 
     await Future.delayed(const Duration(seconds: 3));
 
+    if (employee != null) {
     if (employee.id.isNotEmpty) {
       Navigator.of(context).pushReplacementNamed(
         '/main',
         arguments: employee,
       );
     } else {
+      Navigator.of(context).pushReplacementNamed('/login');
+    } } else {
       Navigator.of(context).pushReplacementNamed('/login');
     }
   }

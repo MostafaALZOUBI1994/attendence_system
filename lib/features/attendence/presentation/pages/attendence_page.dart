@@ -166,7 +166,6 @@ class TimeScreen extends StatelessWidget {
   }
 
   Widget _buildCheckInButton(BuildContext context, Loaded state) {
-    final progress = state.progress;
     final remaining = state.remainingTime;
 
     return Container(
@@ -209,7 +208,7 @@ class TimeScreen extends StatelessWidget {
                     children: [
 
                       CustomPaint(
-                        size: const Size(250, 250),
+                        size:  Size(250, 250),
                         painter: ClockTicksPainter(),
                       ),
                       Center(
@@ -291,12 +290,12 @@ class TimeScreen extends StatelessWidget {
         ),
       );
 
-  Widget _buildCheckInOptions(BuildContext context, Employee loginData,
+  Widget _buildCheckInOptions(BuildContext context, Employee employee,
       TodayStatus todayStatus) {
     final last = todayStatus.offSiteCheckIns.isNotEmpty
         ? DateTime.fromMillisecondsSinceEpoch(todayStatus.offSiteCheckIns.last)
         : DateTime.now();
-    final endTime = last.add(const Duration(minutes: 30));
+    final endTime = last.add(Duration(minutes: int.parse(employee.gracePeriod)));
     final now = DateTime.now();
     final rawRem = endTime.difference(now);
     final remaining = rawRem.isNegative ? Duration.zero : rawRem;

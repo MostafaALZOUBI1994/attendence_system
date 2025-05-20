@@ -77,7 +77,7 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       bottomNavigationBar: SizedBox(
-        height: 70 + MediaQuery.of(context).padding.bottom,
+        height: 90 + MediaQuery.of(context).padding.bottom,
         child: AnimatedNotchBottomBar(
           showLabel: true,
           notchColor: primaryColor.withOpacity(0.7),
@@ -108,9 +108,11 @@ class _MainScreenState extends State<MainScreen> {
 );
   }
 
-  BottomBarItem _bottomBarItem(IconData icon, String label) => BottomBarItem(
+  BottomBarItem _bottomBarItem(IconData icon, String label) {
+    return BottomBarItem(
     inActiveItem: Icon(icon, color: Colors.grey),
     activeItem: Icon(icon, color: Colors.white),
     itemLabel: label,
   );
+  }
 }
