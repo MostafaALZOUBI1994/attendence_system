@@ -1,5 +1,5 @@
-import 'package:attendence_system/core/network/dio_extensions.dart';
-import 'package:attendence_system/features/reports/domain/entities/report_model.dart';
+import 'package:moet_hub/core/network/dio_extensions.dart';
+import 'package:moet_hub/features/reports/domain/entities/report_model.dart';
 import 'package:dio/dio.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';

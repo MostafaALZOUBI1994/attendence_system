@@ -1,4 +1,4 @@
-import 'package:attendence_system/core/constants/constants.dart';
+import 'package:moet_hub/core/constants/constants.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,7 +19,7 @@ abstract class NetworkModule {
   Dio dio(LocalService localService) {
     final langCode = localService.get(localeKey) == 'ar' ? 'ar-AE' : 'en-US';
     return Dio(BaseOptions(
-      baseUrl: 'http://10.111.27.4:8082/api/lgt/',
+      baseUrl: 'https://taapi.moec.gov.ae/api/lgt/',
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 3),
       contentType: 'application/json',

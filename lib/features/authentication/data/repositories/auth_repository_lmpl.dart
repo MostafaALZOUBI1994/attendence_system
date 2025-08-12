@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:attendence_system/core/network/dio_extensions.dart';
-import 'package:attendence_system/features/authentication/data/mappers/employee_mapper.dart';
+import 'package:moet_hub/core/network/dio_extensions.dart';
+import 'package:moet_hub/features/authentication/data/mappers/employee_mapper.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';

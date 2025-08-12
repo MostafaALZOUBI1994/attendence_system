@@ -1,4 +1,4 @@
-import 'package:attendence_system/features/services/presentation/pages/base_screen.dart';
+import 'package:moet_hub/features/services/presentation/pages/base_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/constants.dart';
 
@@ -98,7 +98,7 @@ class EventsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mostafa ALZOUBI',
+                    'John Doe',
                     style: TextStyle(
                       color: secondaryColor,
                       fontWeight: FontWeight.bold,

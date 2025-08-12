@@ -77,7 +77,7 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       bottomNavigationBar: SizedBox(
-        height: 90 + MediaQuery.of(context).padding.bottom,
+        height: 80 + MediaQuery.of(context).padding.bottom,
         child: AnimatedNotchBottomBar(
           showLabel: true,
           notchColor: primaryColor.withOpacity(0.7),
@@ -99,7 +99,7 @@ class _MainScreenState extends State<MainScreen> {
           elevation: 0,
           shadowElevation: 0,
           showShadow: false,
-          bottomBarHeight: 42.0,
+          bottomBarHeight: 90.0,
           kIconSize: 20,
         ),
       ),

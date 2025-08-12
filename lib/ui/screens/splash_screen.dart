@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:attendence_system/features/authentication/data/mappers/employee_mapper.dart';
+import 'package:moet_hub/features/authentication/data/mappers/employee_mapper.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants/constants.dart';
@@ -157,8 +158,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   position: _slideAnimation,
                   child: FadeTransition(
                     opacity: _textFadeAnimation,
-                    child: const Text(
-                      "Welcome to MOEC Employee App",
+                    child:  Text(
+                      "wlc".tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 20,

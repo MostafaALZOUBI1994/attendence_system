@@ -1,6 +1,6 @@
 import 'package:health/health.dart';
 import 'package:dartz/dartz.dart';
-import 'package:attendence_system/features/profile/domain/repositories/health_repository.dart';
+import 'package:moet_hub/features/profile/domain/repositories/health_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/errors/failures.dart';

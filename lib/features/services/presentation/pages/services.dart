@@ -1,7 +1,7 @@
-import 'package:attendence_system/features/services/presentation/pages/ask_ai.dart';
-import 'package:attendence_system/features/services/presentation/pages/hr_request.dart';
-import 'package:attendence_system/features/services/presentation/pages/pantry.dart';
-import 'package:attendence_system/features/services/presentation/pages/team_status.dart';
+import 'package:moet_hub/features/services/presentation/pages/ask_ai.dart';
+import 'package:moet_hub/features/services/presentation/pages/hr_request.dart';
+import 'package:moet_hub/features/services/presentation/pages/pantry.dart';
+import 'package:moet_hub/features/services/presentation/pages/team_status.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,11 +36,11 @@ class ServicesScreen extends StatelessWidget {
         'title': 'pantry'.tr(),
         'route': '/pantry-request',
       },
-      {
-        'icon': Icons.headset_mic,
-        'title': 'helpDesk'.tr(),
-        'route': '/help-desk',
-      },
+      // {
+      //   'icon': Icons.headset_mic,
+      //   'title': 'helpDesk'.tr(),
+      //   'route': '/help-desk',
+      // },
       {
         'icon': Icons.smart_toy_outlined,
         'title': 'askBot'.tr(),

@@ -1,4 +1,4 @@
-import 'package:attendence_system/features/authentication/domain/repositories/auth_repository.dart';
+import 'package:moet_hub/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';

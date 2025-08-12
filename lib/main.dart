@@ -1,13 +1,16 @@
 import 'dart:async';
-import 'package:attendence_system/features/authentication/presentation/pages/login_page.dart';
-import 'package:attendence_system/features/reports/presentation/bloc/report_bloc.dart';
-import 'package:attendence_system/features/services/presentation/bloc/services_bloc.dart';
-import 'package:attendence_system/ui/screens/main_screen.dart';
-import 'package:attendence_system/ui/screens/splash_screen.dart';
+import 'package:moet_hub/features/authentication/presentation/pages/login_page.dart';
+import 'package:moet_hub/features/reports/presentation/bloc/report_bloc.dart';
+import 'package:moet_hub/features/services/presentation/bloc/services_bloc.dart';
+import 'package:moet_hub/ui/screens/carplay_screen.dart';
+import 'package:moet_hub/ui/screens/main_screen.dart';
+import 'package:moet_hub/ui/screens/splash_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_carplay/carplay_worker.dart';
+import 'package:flutter_carplay/flutter_carplay.dart';
 import 'core/constants/constants.dart';
 import 'core/injection.dart';
 import 'core/local_services/local_services.dart';
@@ -16,12 +19,13 @@ import 'features/attendence/presentation/bloc/attendence_bloc.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 
-const carChannel = MethodChannel('com.example.attendence_system/car');
+const carChannel = MethodChannel('ae.gov.moet.moethub/car');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
   await EasyLocalization.ensureInitialized();
+  CarPlayService.init();
   carChannel.setMethodCallHandler((call) async {
     if (call.method == 'checkIn') {
       await getIt<AttendenceRepository>().checkIn();
@@ -94,3 +98,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+

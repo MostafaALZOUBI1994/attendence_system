@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:attendence_system/features/services/domain/entities/permission_types_entity.dart';
+import 'package:moet_hub/features/services/domain/entities/permission_types_entity.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

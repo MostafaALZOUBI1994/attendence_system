@@ -1,4 +1,4 @@
-import 'package:attendence_system/features/services/presentation/pages/base_screen.dart';
+import 'package:moet_hub/features/services/presentation/pages/base_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/constants.dart';

@@ -196,29 +196,49 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
   Widget _buildProfileContent(BuildContext context) {
-    return BlocBuilder<ProfileBloc, ProfileState>(
-      builder: (context, state) {
-        if (state is ProfileLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is ProfileLoaded) {
-          final healthData = state.healthData;
-          return Column(
-            spacing: 15,
-            children: [
-              _buildHappinessCard(),
-              _buildPerformanceIndicator(),
-              const AccessCard(),
-              HealthCard(healthData: healthData),
-              _buildStatsRow(),
-            ],
-          );
-        } else if (state is ProfileError) {
-          return Text(state.message);
-        }
-        return const SizedBox.shrink();
+    final localeSvc = getIt<LocalService>();
+    final isArabic = localeSvc.getSavedLocale().languageCode == 'ar';
+
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        return BlocBuilder<ProfileBloc, ProfileState>(
+          builder: (context, profileState) {
+            if (profileState is ProfileLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (profileState is ProfileLoaded) {
+              // Use maybeWhen to safely get employee from authState
+              final employee = authState.maybeWhen(
+                success: (data) => data,
+                orElse: () => null,
+              );
+
+              final healthData = profileState.healthData;
+
+              if (employee == null) {
+                // Not authenticated, or employee not loaded
+                return const SizedBox.shrink();
+              }
+
+              return Column(
+                spacing: 15,
+                children: [
+                  _buildHappinessCard(),
+                  _buildPerformanceIndicator(),
+                  AccessCard(employee: employee, isArabic: isArabic),
+                  HealthCard(healthData: healthData),
+                  _buildStatsRow(),
+                ],
+              );
+            } else if (profileState is ProfileError) {
+              return Text(profileState.message);
+            }
+            return const SizedBox.shrink();
+          },
+        );
       },
     );
   }
+
 
   Widget _buildHappinessCard() {
     final averageMood = _averageMood;

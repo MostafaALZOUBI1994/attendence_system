@@ -1,7 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.NFC"/>
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Permissions for new android API (Health Connect) -->
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
     <uses-permission android:name="android.permission.health.WRITE_STEPS"/>
     <uses-permission android:name="android.permission.health.READ_WEIGHT"/>
@@ -26,7 +25,7 @@
     <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY"/>
     <uses-feature android:name="android.hardware.nfc" android:required="true"/>
     <application
-        android:label="attendence_system"
+        android:label="MOET Hub"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -78,7 +77,7 @@
             />
 
         <service
-            android:name="com.example.attendence_system.CarHomeService"
+            android:name=".CarHomeService"
             android:exported="true"
             android:stopWithTask="false">
             <intent-filter>

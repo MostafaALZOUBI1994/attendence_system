@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:attendence_system/features/attendence/domain/usecases/checkin_usecase.dart';
-import 'package:attendence_system/features/attendence/domain/usecases/today_status_usecase.dart';
-import 'package:attendence_system/features/authentication/data/mappers/employee_mapper.dart';
+import 'package:moet_hub/features/attendence/domain/usecases/checkin_usecase.dart';
+import 'package:moet_hub/features/attendence/domain/usecases/today_status_usecase.dart';
+import 'package:moet_hub/features/authentication/data/mappers/employee_mapper.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';

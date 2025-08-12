@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../authentication/domain/entities/employee.dart';
 
 class AccessCard extends StatefulWidget {
-  const AccessCard({super.key});
+  final Employee employee;
+  final bool isArabic;
+  const AccessCard({super.key, required this.employee, required this.isArabic});
 
   @override
   State<AccessCard> createState() => _AccessCardState();
@@ -103,6 +106,12 @@ class _AccessCardState extends State<AccessCard>
   }
 
   Widget _buildFront() {
+    final name = widget.isArabic
+        ? widget.employee.employeeNameInAr
+        : widget.employee.employeeNameInEn;
+    final role = widget.isArabic
+        ? widget.employee.employeeTitleInAr
+        : widget.employee.employeeTitleInEn;
     return _buildCard(
       child: Column(
         children: [
@@ -114,30 +123,30 @@ class _AccessCardState extends State<AccessCard>
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Expanded(
+               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      "مصطفى موسى الزعبي",
+                      widget.employee.employeeNameInAr,
                       style: TextStyle(color: primaryColor, fontSize: 10),
                     ),
                     Text(
-                      "مبرمج",
+                      role,
                       style: TextStyle(color: Colors.grey, fontSize: 10),
                     ),
                     SizedBox(height: 15),
                     Text(
-                      "MOSTAFA MOUSA AL ZOUBI",
+                      widget.employee.employeeNameInEn,
                       style: TextStyle(color: primaryColor, fontSize: 10),
                     ),
                     Text(
-                      "Programmer",
+                      widget.employee.employeeTitleInEn,
                       style: TextStyle(color: Colors.grey, fontSize: 10),
                     ),
                     SizedBox(height: 15),
                     Text(
-                      "الرقم الوظيفي : 581795",
+                      widget.employee.id,
                       style: TextStyle(color: Colors.black, fontSize: 10),
                     ),
                   ],

@@ -1,8 +1,8 @@
-import 'package:attendence_system/core/constants/constants.dart';
-import 'package:attendence_system/core/errors/failures.dart';
-import 'package:attendence_system/core/network/dio_extensions.dart';
-import 'package:attendence_system/features/services/domain/entities/eleave_entity.dart';
-import 'package:attendence_system/features/services/domain/entities/permission_types_entity.dart';
+import 'package:moet_hub/core/constants/constants.dart';
+import 'package:moet_hub/core/errors/failures.dart';
+import 'package:moet_hub/core/network/dio_extensions.dart';
+import 'package:moet_hub/features/services/domain/entities/eleave_entity.dart';
+import 'package:moet_hub/features/services/domain/entities/permission_types_entity.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';

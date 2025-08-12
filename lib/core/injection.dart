@@ -1,4 +1,4 @@
-import 'package:attendence_system/core/injection.config.dart';
+import 'package:moet_hub/core/injection.config.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 

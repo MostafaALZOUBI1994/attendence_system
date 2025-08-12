@@ -1,6 +1,6 @@
 
 
-import 'package:attendence_system/features/attendence/domain/repositories/attendence_repository.dart';
+import 'package:moet_hub/features/attendence/domain/repositories/attendence_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';

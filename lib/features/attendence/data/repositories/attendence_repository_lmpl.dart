@@ -1,7 +1,7 @@
-import 'package:attendence_system/core/constants/constants.dart';
-import 'package:attendence_system/core/network/dio_extensions.dart';
-import 'package:attendence_system/features/attendence/domain/entities/today_status.dart';
-import 'package:attendence_system/features/attendence/domain/repositories/attendence_repository.dart';
+import 'package:moet_hub/core/constants/constants.dart';
+import 'package:moet_hub/core/network/dio_extensions.dart';
+import 'package:moet_hub/features/attendence/domain/entities/today_status.dart';
+import 'package:moet_hub/features/attendence/domain/repositories/attendence_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';

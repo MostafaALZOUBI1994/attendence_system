@@ -1,4 +1,4 @@
-import 'package:attendence_system/features/reports/domain/entities/report_model.dart';
+import 'package:moet_hub/features/reports/domain/entities/report_model.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';

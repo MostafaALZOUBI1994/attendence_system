@@ -1,5 +1,5 @@
-import 'package:attendence_system/features/authentication/domain/usecases/login_usecase.dart';
-import 'package:attendence_system/features/authentication/domain/usecases/sign_out_usecase.dart';
+import 'package:moet_hub/features/authentication/domain/usecases/login_usecase.dart';
+import 'package:moet_hub/features/authentication/domain/usecases/sign_out_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';

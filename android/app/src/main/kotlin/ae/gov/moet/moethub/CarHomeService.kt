@@ -1,6 +1,7 @@
-package com.example.attendence_system
+package ae.gov.moet.moethub
 
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import androidx.car.app.CarAppService
 import androidx.car.app.Session
 import androidx.car.app.validation.HostValidator
@@ -9,30 +10,32 @@ import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugins.GeneratedPluginRegistrant
 
 class CarHomeService : CarAppService() {
-    companion object {
-        const val CHANNEL = "com.example.attendence_system/car"
-    }
+
+    companion object { const val CHANNEL = "ae.gov.moet.moethub/car" }
 
     private lateinit var flutterEngine: FlutterEngine
 
     override fun onCreate() {
         super.onCreate()
-        // 1) Spin up a headless FlutterEngine
+        // Headless Flutter engine for MethodChannel calls
         flutterEngine = FlutterEngine(this).apply {
-            // Register ALL your plugins (so MethodChannel on this engine works)
             GeneratedPluginRegistrant.registerWith(this)
-            // Start running Dart code
             dartExecutor.executeDartEntrypoint(
                 DartExecutor.DartEntrypoint.createDefault()
             )
         }
     }
 
-    // 2) Allow DHU as a valid host (dev mode)
-    override fun createHostValidator(): HostValidator =
-        HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
+    override fun createHostValidator(): HostValidator {
+        return if ((applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
+        } else {
+            HostValidator.Builder(applicationContext)
+                .addAllowedHosts(R.array.hosts_allowlist_sample)
+                .build()
+        }
+    }
 
-    // 3) Launch your single-screen session
     override fun onCreateSession(): Session = object : Session() {
         override fun onCreateScreen(intent: Intent) =
             CheckInScreen(carContext, flutterEngine)

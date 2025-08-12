@@ -1,4 +1,4 @@
-import 'package:attendence_system/features/services/presentation/pages/base_screen.dart';
+import 'package:moet_hub/features/services/presentation/pages/base_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/constants.dart';
 
@@ -66,14 +66,16 @@ class TeamContactScreen extends StatelessWidget {
   Widget _buildTeamMemberCard(int index) {
     // Sample data for demonstration purposes
     final List<Map<String, String>> teamMembers = [
-      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
-      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
-      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
-      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
-      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
-      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
-      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'},
-      {'name': 'Mostafa ALZOUBI', 'email': 'MALZoubi@economy.ae', 'extension': '1234'}
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
+      {'name': 'John Doe', 'email': 'JohnDoe@economy.ae', 'extension': '1234'},
     ];
 
     final member = teamMembers[index];

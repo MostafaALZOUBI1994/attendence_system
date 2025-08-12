@@ -1,7 +1,7 @@
-import 'package:attendence_system/features/services/domain/entities/eleave_entity.dart';
-import 'package:attendence_system/features/services/domain/entities/permission_types_entity.dart';
-import 'package:attendence_system/features/services/domain/usecases/get_allowed_hours.dart';
-import 'package:attendence_system/features/services/domain/usecases/get_permission_types.dart';
+import 'package:moet_hub/features/services/domain/entities/eleave_entity.dart';
+import 'package:moet_hub/features/services/domain/entities/permission_types_entity.dart';
+import 'package:moet_hub/features/services/domain/usecases/get_allowed_hours.dart';
+import 'package:moet_hub/features/services/domain/usecases/get_permission_types.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
