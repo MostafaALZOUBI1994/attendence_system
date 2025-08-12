@@ -1,12 +1,18 @@
 PODS:
   - add_to_wallet (0.0.1):
     - Flutter
+  - Alamofire (5.9.1)
+  - CryptoSwift (1.8.4)
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
   - flutter_carplay (1.0.3):
     - Flutter
   - health (12.1.0):
+    - Flutter
+  - http_certificate_pinning (3.0.0):
+    - Alamofire (~> 5.9.0)
+    - CryptoSwift
     - Flutter
   - image_picker_ios (0.0.1):
     - Flutter
@@ -33,6 +39,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_carplay (from `.symlinks/plugins/flutter_carplay/ios`)
   - health (from `.symlinks/plugins/health/ios`)
+  - http_certificate_pinning (from `.symlinks/plugins/http_certificate_pinning/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -43,6 +50,8 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Alamofire
+    - CryptoSwift
     - MTBBarcodeScanner
 
 EXTERNAL SOURCES:
@@ -56,6 +65,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_carplay/ios"
   health:
     :path: ".symlinks/plugins/health/ios"
+  http_certificate_pinning:
+    :path: ".symlinks/plugins/http_certificate_pinning/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   path_provider_foundation:
@@ -73,10 +84,13 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   add_to_wallet: a596dca713a9c1f637e1819b93f45051d3d115e2
+  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
+  CryptoSwift: e64e11850ede528a02a0f3e768cec8e9d92ecb90
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_carplay: 685d786d5c0815c59a7d7e9203da36520c74abdd
   health: a27e55f6f9682483a8bb8fd280084d025b80b478
+  http_certificate_pinning: 133f28ad5c2d1ecda2581dd2d2cd9dc74da59012
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
