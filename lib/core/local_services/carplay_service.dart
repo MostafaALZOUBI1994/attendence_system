@@ -1,32 +1,24 @@
 // lib/services/carplay_service.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_carplay/flutter_carplay.dart';
 
 class CarPlayService {
   static final FlutterCarplay _cp = FlutterCarplay();
-
   static Future<bool> Function()? onCheckIn;
 
   static late CPInformationTemplate _root;
   static bool _rootWasPushed = false;
   static bool _modalActive = false;
-  static const _carChannel = MethodChannel('car_channel');
+
   static Future<void> init() async {
-    // ✅ Your requested template with emoji
     _root = CPInformationTemplate(
       title: 'Check-in 🚗',
       layout: CPInformationTemplateLayout.leading,
-      informationItems: [
-        CPInformationItem(title: 'Good', detail: 'morning ☀️'),
-      ],
-      actions: [
-        CPTextButton(title: 'Check-in ✅', onPress: _handleCheckIn),
-      ],
+      informationItems: [CPInformationItem(title: 'Good', detail: 'morning ☀️')],
+      actions: [CPTextButton(title: 'Check-in ✅', onPress: _handleCheckIn)],
     );
 
-    // Listen for CarPlay connection changes.
     _cp.addListenerOnConnectionChange((status) {
       if (status == CPConnectionStatusTypes.connected) {
         _pushRoot(safe: true);
@@ -36,7 +28,6 @@ class CarPlayService {
       }
     });
 
-    // Bootstrap: retry a few times right after startup to avoid blank first open.
     await _bootstrapRootAttempts();
   }
 
@@ -45,35 +36,23 @@ class CarPlayService {
     try {
       FlutterCarplay.setRootTemplate(rootTemplate: _root, animated: false);
       _rootWasPushed = true;
-    } catch (_) {
-      // Not connected yet; ignore and let bootstrap/listener try again.
-    }
+    } catch (_) {}
   }
 
   static Future<void> _bootstrapRootAttempts() async {
-    const attempts = 10;
-    const step = Duration(milliseconds: 250);
-    for (var i = 0; i < attempts; i++) {
+    for (var i = 0; i < 10; i++) {
       _pushRoot(safe: false);
-      await Future.delayed(step);
+      await Future.delayed(const Duration(milliseconds: 250));
       if (_rootWasPushed) break;
     }
   }
 
   static Future<void> _handleCheckIn() async {
     if (_modalActive) return;
-
     bool success = false;
     try {
-      if (onCheckIn != null) {
-        success = await onCheckIn!.call(); // ✅ calls your repo in Dart
-      } else {
-        debugPrint('CarPlayService.onCheckIn not set');
-      }
-    } catch (e, st) {
-      debugPrint('CarPlay check-in error: $e\n$st');
-      success = false;
-    }
+      if (onCheckIn != null) success = await onCheckIn!.call();
+    } catch (_) { success = false; }
 
     final msg = success ? 'Checked-in!' : 'Check-in failed';
     final style = success ? CPAlertActionStyles.normal : CPAlertActionStyles.destructive;
@@ -99,12 +78,9 @@ class CarPlayService {
     Timer(const Duration(seconds: 2), _dismissModal);
   }
 
-
   static void _dismissModal() {
     if (!_modalActive) return;
-    try {
-      FlutterCarplay.popModal(animated: true);
-    } catch (_) {}
+    try { FlutterCarplay.popModal(animated: true); } catch (_) {}
     _modalActive = false;
   }
 }

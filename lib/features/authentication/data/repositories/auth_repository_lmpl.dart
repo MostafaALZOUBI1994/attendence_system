@@ -21,10 +21,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Employee>> login(String email, String password) async {
+    final username = email.trim();
     final responseEither = await _dio.safe(
           () => _dio.post(
         'GetEmployeeDetailsAD',
-        data: {'username': email, 'password': password, 'imei': '123'},
+        data: {'username': username, 'password': password, 'imei': '123'},
       ),
           (res) => res,
     );

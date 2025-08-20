@@ -8,7 +8,7 @@ PODS:
   - Flutter (1.0.0)
   - flutter_carplay (1.0.3):
     - Flutter
-  - health (12.1.0):
+  - health (12.2.1):
     - Flutter
   - http_certificate_pinning (3.0.0):
     - Alamofire (~> 5.9.0)
@@ -89,7 +89,7 @@ SPEC CHECKSUMS:
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_carplay: 685d786d5c0815c59a7d7e9203da36520c74abdd
-  health: a27e55f6f9682483a8bb8fd280084d025b80b478
+  health: fe206e65f13a9b88623605fbd8af8f029e23dc35
   http_certificate_pinning: 133f28ad5c2d1ecda2581dd2d2cd9dc74da59012
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb

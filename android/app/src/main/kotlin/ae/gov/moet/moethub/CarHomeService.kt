@@ -8,6 +8,7 @@ import androidx.car.app.validation.HostValidator
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugins.GeneratedPluginRegistrant
+import io.flutter.FlutterInjector
 
 class CarHomeService : CarAppService() {
 
@@ -16,14 +17,23 @@ class CarHomeService : CarAppService() {
     private lateinit var flutterEngine: FlutterEngine
 
     override fun onCreate() {
+        android.util.Log.i("MOETHUB", "CarHomeService.onCreate")
         super.onCreate()
-        // Headless Flutter engine for MethodChannel calls
         flutterEngine = FlutterEngine(this).apply {
+            // Register plugins for this engine
             GeneratedPluginRegistrant.registerWith(this)
+
+            // Run the **named** Dart entrypoint (so we don't boot the full app here)
+            val appBundlePath = FlutterInjector.instance().flutterLoader().findAppBundlePath()
             dartExecutor.executeDartEntrypoint(
-                DartExecutor.DartEntrypoint.createDefault()
+                DartExecutor.DartEntrypoint(appBundlePath, "carEntryPoint")
             )
         }
+    }
+
+    override fun onDestroy() {
+        try { flutterEngine.destroy() } catch (_: Throwable) {}
+        super.onDestroy()
     }
 
     override fun createHostValidator(): HostValidator {
@@ -36,8 +46,11 @@ class CarHomeService : CarAppService() {
         }
     }
 
-    override fun onCreateSession(): Session = object : Session() {
-        override fun onCreateScreen(intent: Intent) =
-            CheckInScreen(carContext, flutterEngine)
+    override fun onCreateSession(): Session {
+        android.util.Log.i("MOETHUB", "CarHomeService.onCreateSession")
+        return object: Session() {
+            override fun onCreateScreen(intent: Intent) =
+                CheckInScreen(carContext, flutterEngine)
+        }
     }
 }
