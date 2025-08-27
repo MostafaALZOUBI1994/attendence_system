@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert'; // for Base64
 import 'package:moet_hub/features/services/domain/entities/permission_types_entity.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -14,7 +15,6 @@ import '../bloc/services_bloc.dart';
 import '../widgets/date_picker.dart';
 import '../widgets/time_picker.dart';
 import 'base_screen.dart';
-
 
 class HRRequestScreen extends StatefulWidget {
   const HRRequestScreen({Key? key}) : super(key: key);
@@ -193,23 +193,24 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     String? hint,
     FormFieldValidator<String>? validator,
     int maxLines = 1,
-  }) => TextFormField(
-    readOnly: onTap != null,
-    controller: controller ?? TextEditingController(text: text),
-    maxLines: maxLines,
-    decoration: InputDecoration(
-      labelText: label,
-      hintText: hint,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      suffixIcon: Icon(icon, color: primaryColor),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: primaryColor),
-      ),
-    ),
-    onTap: onTap,
-    validator: validator,
-  );
+  }) =>
+      TextFormField(
+        readOnly: onTap != null,
+        controller: controller ?? TextEditingController(text: text),
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          suffixIcon: Icon(icon, color: primaryColor),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: primaryColor),
+          ),
+        ),
+        onTap: onTap,
+        validator: validator,
+      );
 
   Widget _buildDropdownField(List<PermissionTypesEntity> types) {
     final locale = getIt<LocalService>().getSavedLocale().languageCode;
@@ -291,38 +292,53 @@ class _HRRequestScreenState extends State<HRRequestScreen> {
     child: Center(child: Text('subReq'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
   );
 
-  void _submitForm() {
+  // --------- FIXED/LEAN LOGIC BELOW (no UI changes) ---------
+
+  Future<void> _submitForm() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final dur = _formatDuration();
+
+    final dur = _formatDuration(); // robust HH:mm
+    final attachmentB64 = await _fileToBase64(_attachment);
+    final date = DateFormat('dd/MM/yyyy', 'en').format(_selectedDate);
+    // Keep your existing event but send cleaner values:
     context.read<ServicesBloc>().add(
       ServicesEvent.submitRequest(
-        dateDayType: 'Tomorrow',
-        fromTime: _formatTimeOfDay(_fromTime),
-        toTime: _formatTimeOfDay(_toTime),
+        dateDayType: date,
+        fromTime: _formatTimeOfDay(_fromTime), // 24h HH:mm
+        toTime: _formatTimeOfDay(_toTime),     // 24h HH:mm
         duration: dur,
         reason: _reasonController.text,
-        attachment: _attachment?.path ?? '',
+        // send Base64 instead of local path
+        attachment: attachmentB64 ?? '',
         eLeaveType: _selectedType,
       ),
     );
   }
 
-  String _formatDuration() {
-    final diff = toDouble(_toTime) - toDouble(_fromTime);
-    final totalMin = (diff * 60).toInt();
-    final h = totalMin ~/ 60;
-    final m = totalMin % 60;
-    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
-  }
 
+  // HH:mm (24-hour), padded
   String _formatTimeOfDay(TimeOfDay t) {
-    final hour = t.hourOfPeriod;
-    final minute = t.minute.toString().padLeft(2, '0');
-    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
-    return '\$hour:\$minute \$period';
+    final h = t.hour.toString().padLeft(2, '0');
+    final m = t.minute.toString().padLeft(2, '0');
+    return '$h:$m';
   }
 
-  double toDouble(TimeOfDay t) => t.hour + t.minute / 60.0;
+  // Duration between _fromTime and _toTime, supports crossing midnight
+  String _formatDuration() {
+    final fm = _fromTime.hour * 60 + _fromTime.minute;
+    final tm = _toTime.hour * 60 + _toTime.minute;
+    int diff = tm - fm;
+    if (diff < 0) diff += 24 * 60; // handle overnight
+    final h = (diff ~/ 60).toString().padLeft(2, '0');
+    final m = (diff % 60).toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
+  Future<String?> _fileToBase64(File? f) async {
+    if (f == null) return null;
+    final bytes = await f.readAsBytes();
+    return base64Encode(bytes);
+  }
 
   double _calculateRemainingHours(EleaveEntity lb) {
     try {

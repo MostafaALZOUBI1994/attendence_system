@@ -101,6 +101,8 @@ class ServicesRepositoryImpl implements ServiceRepository {
             'attachment': params.attachment,
             'userid': 'NLA47014',
             'eleavetype': params.eleavetype,
+            "StartDate":params.datedaytype,
+            "EndDate":params.datedaytype
           },
         ),
             (res) => res,
