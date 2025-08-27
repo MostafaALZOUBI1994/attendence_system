@@ -106,12 +106,6 @@ class _AccessCardState extends State<AccessCard>
   }
 
   Widget _buildFront() {
-    final name = widget.isArabic
-        ? widget.employee.employeeNameInAr
-        : widget.employee.employeeNameInEn;
-    final role = widget.isArabic
-        ? widget.employee.employeeTitleInAr
-        : widget.employee.employeeTitleInEn;
     return _buildCard(
       child: Column(
         children: [
@@ -132,7 +126,7 @@ class _AccessCardState extends State<AccessCard>
                       style: TextStyle(color: primaryColor, fontSize: 10),
                     ),
                     Text(
-                      role,
+                        widget.employee.employeeTitleInAr,
                       style: TextStyle(color: Colors.grey, fontSize: 10),
                     ),
                     SizedBox(height: 15),
