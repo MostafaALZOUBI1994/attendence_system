@@ -186,7 +186,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final chipMaxWidth = constraints.maxWidth * 0.42; // cap chip to ~40% of card
+        // Cap the right chip to ~40% of the card width
+        final double chipMaxWidth = constraints.maxWidth * 0.40;
 
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
@@ -219,7 +220,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // LEFT: date & times (now wraps if tight)
+                    // LEFT: date & times (wrap when tight)
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +254,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     ),
                     const SizedBox(width: 8),
 
-                    // RIGHT: status chip (width-capped + scales down if still tight)
+                    // RIGHT: status chip (capped + scales down)
                     ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: chipMaxWidth),
                       child: Align(
@@ -290,8 +291,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
           const SizedBox(width: 6),
           Text(
             text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
+
         ],
       ),
     );
@@ -343,7 +348,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     const textColor = Colors.white;
 
     return Tooltip(
-      message: detail != null && detail.isNotEmpty ? '$mainLabel: $detail' : mainLabel,
+      message: detail != null && detail!.isNotEmpty ? '$mainLabel: $detail' : mainLabel,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -367,8 +372,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           children: [
             Icon(icon, size: 18, color: textColor),
             const SizedBox(width: 8),
-            // Let title shrink first
-            Flexible(
+            Flexible( // let title shrink first
               child: Text(
                 mainLabel,
                 maxLines: 1,
@@ -390,7 +394,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 72), // badge limit
+                  constraints: const BoxConstraints(maxWidth: 72), // small badge cap
                   child: Text(
                     detail!,
                     maxLines: 1,
@@ -409,6 +413,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         ),
       ),
     );
+
 
   }
 }

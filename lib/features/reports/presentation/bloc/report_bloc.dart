@@ -20,7 +20,16 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
       );
       result.fold(
             (failure) => emit(ReportState.error(failure.message)),
-            (reports) => emit(ReportState.loaded(report: reports)),
+            (reports) {
+          final filteredReports = reports.where(
+                (r) => (r.lateIn.isNotEmpty || r.earlyOut.isNotEmpty),
+          ).toList();
+
+          emit(ReportState.loaded(
+            report: reports,
+            filteredReport: filteredReports,
+          ));
+        },
       );
     });
   }
