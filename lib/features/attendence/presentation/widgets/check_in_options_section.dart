@@ -14,123 +14,126 @@ import '../bloc/attendence_bloc.dart';
 import 'analog_clock.dart';
 import 'card_container.dart';
 
-
-/// Shows off‑site check‑in mood selector or analog clock plus countdown for on‑site.
 class CheckInOptionsSection extends StatelessWidget {
   final Employee employee;
   final TodayStatus todayStatus;
 
-  const CheckInOptionsSection({Key? key, required this.employee, required this.todayStatus})
-      : super(key: key);
+  const CheckInOptionsSection({
+    Key? key,
+    required this.employee,
+    required this.todayStatus,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Determine the end of the grace period for off‑site check‑ins.
-    final last = todayStatus.offSiteCheckIns.isNotEmpty
-        ? DateTime.fromMillisecondsSinceEpoch(todayStatus.offSiteCheckIns.last)
-        : DateTime.now();
-    final graceMinutes = int.tryParse(employee.gracePeriod) ?? 0;
-    final endTime = last.add(Duration(minutes: graceMinutes));
-    final now = DateTime.now();
-    final remaining = endTime.difference(now);
+    return StreamBuilder<DateTime>(
+      stream: Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()),
+      initialData: DateTime.now(),
+      builder: (context, snapshot) {
+        final now = snapshot.data ?? DateTime.now();
+        final last = todayStatus.offSiteCheckIns.isNotEmpty
+            ? DateTime.fromMillisecondsSinceEpoch(todayStatus.offSiteCheckIns.last)
+            : now;
+        final graceMinutes = int.tryParse(employee.gracePeriod) ?? 0;
+        final endTime = last.add(Duration(minutes: graceMinutes));
+        final remaining = endTime.difference(now);
 
-    if (todayStatus.offSiteCheckIns.isEmpty) {
-      // No off‑site check‑ins yet; show mood joystick for remote check‑in.
-      return CardContainer(
-        child: Center(
-          child: MoodCheckJoystick(
-            onCheckInWithMood: (mood) => context
-                .read<AttendenceBloc>()
-                .add(AttendenceEvent.checkIn(mood)),
-          ),
-        ),
-      );
-    } else {
-      // Already checked off‑site, show analog clock with countdown and check‑in overlay.
-      return CardContainer(
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            AnalogAttendanceClock(
-              eventTimestamps: todayStatus.offSiteCheckIns,
-              ringGradient: primaryGradient,
-            ),
-            Positioned(
-              child: GestureDetector(
-                onTap: () => context
-                    .read<AttendenceBloc>()
-                    .add(const AttendenceEvent.checkIn('happy')),
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: primaryGradient,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'chkIn'.tr(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+        if (todayStatus.offSiteCheckIns.isEmpty) {
+          return CardContainer(
+            child: Center(
+              child: MoodCheckJoystick(
+                onCheckInWithMood: (mood) =>
+                    context.read<AttendenceBloc>().add(AttendenceEvent.checkIn(mood)),
               ),
             ),
-            // Countdown ring in the top‑right corner
-            Positioned(
-              top: 0,
-              right: 0,
-              child: SizedBox(
-                width: 80,
-                height: 80,
-                child: DashedCircularProgressBar(
-                  seekColor: primaryColor,
-                  foregroundColor: primaryColor,
-                  backgroundColor: lightGray,
-                  progress: () {
-                    final total = endTime.difference(last).inSeconds;
-                    final passed = now.difference(last).inSeconds;
-                    if (passed <= 0 || total == 0) return 0.0;
-                    return (passed / total).clamp(0.0, 1.0) * 100;
-                  }(),
-                  width: 10,
-                  height: 10,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Directionality(
-                          textDirection: ui.TextDirection.ltr,
-                          child: SlideCountdown(
-                            duration: remaining.isNegative ? Duration.zero : remaining,
-                            decoration: const BoxDecoration(color: Colors.transparent),
-                            style: const TextStyle(
-                              color: primaryColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            separatorStyle: const TextStyle(
-                              color: primaryColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+          );
+        } else {
+          return CardContainer(
+            child: Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                AnalogAttendanceClock(
+                  eventTimestamps: todayStatus.offSiteCheckIns,
+                  ringGradient: primaryGradient,
+                ),
+                Positioned(
+                  child: GestureDetector(
+                    onTap: () => context
+                        .read<AttendenceBloc>()
+                        .add(const AttendenceEvent.checkIn('happy')),
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: primaryGradient,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'chkIn'.tr(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
                         ),
-                        const SizedBox(height: 4),
-                        const Icon(Icons.timer, color: primaryColor, size: 20),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: SizedBox(
+                    width: 80,
+                    height: 80,
+                    child: DashedCircularProgressBar(
+                      seekColor: primaryColor,
+                      foregroundColor: primaryColor,
+                      backgroundColor: lightGray,
+                      progress: () {
+                        final total = endTime.difference(last).inSeconds;
+                        final passed = now.difference(last).inSeconds;
+                        if (passed <= 0 || total == 0) return 0.0;
+                        return (passed / total).clamp(0.0, 1.0) * 100;
+                      }(),
+                      width: 10,
+                      height: 10,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Directionality(
+                              textDirection: ui.TextDirection.ltr,
+                              child: SlideCountdown(
+                                duration: remaining.isNegative ? Duration.zero : remaining,
+                                decoration:
+                                const BoxDecoration(color: Colors.transparent),
+                                style: const TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                separatorStyle: const TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Icon(Icons.timer, color: primaryColor, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
-    }
+          );
+        }
+      },
+    );
   }
 }

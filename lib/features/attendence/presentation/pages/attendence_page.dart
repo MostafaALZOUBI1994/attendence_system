@@ -1,4 +1,3 @@
-
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/attendence_bloc.dart';
 import '../widgets/main_content.dart';
 
-
-
 class TimeScreen extends StatelessWidget {
   TimeScreen({Key? key}) : super(key: key);
-
-  final String _currentDate =
-  DateFormat('MMMM d, yyyy   hh:mm a', 'en').format(DateTime.now());
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +41,6 @@ class TimeScreen extends StatelessWidget {
             remainingTime: l.remainingTime,
             progress: l.progress,
             todayStatus: l.todayStatus,
-            currentDate: _currentDate,
             isCheckInSuccess: false,
           ),
           checkInSuccess: (s) => MainContent(
@@ -56,7 +49,6 @@ class TimeScreen extends StatelessWidget {
             remainingTime: s.remainingTime,
             progress: s.progress,
             todayStatus: s.todayStatus,
-            currentDate: _currentDate,
             isCheckInSuccess: true,
           ),
           error: (e) => MainContent(
@@ -65,7 +57,6 @@ class TimeScreen extends StatelessWidget {
             remainingTime: e.remainingTime,
             progress: e.progress,
             todayStatus: e.todayStatus,
-            currentDate: _currentDate,
             isCheckInSuccess: false,
           ),
           orElse: () => const SizedBox.shrink(),
@@ -74,6 +65,3 @@ class TimeScreen extends StatelessWidget {
     );
   }
 }
-
-
-

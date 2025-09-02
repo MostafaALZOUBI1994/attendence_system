@@ -6,7 +6,7 @@ import '../../domain/entities/today_status.dart';
 import 'checkIn_status_section.dart';
 import 'check_in_options_section.dart';
 import 'header_section.dart';
-
+import 'off_site_checkins_grid.dart';
 
 class MainContent extends StatelessWidget {
   final Employee employee;
@@ -14,7 +14,6 @@ class MainContent extends StatelessWidget {
   final Duration remainingTime;
   final double progress;
   final TodayStatus todayStatus;
-  final String currentDate;
   final bool isCheckInSuccess;
 
   const MainContent({
@@ -24,7 +23,6 @@ class MainContent extends StatelessWidget {
     required this.remainingTime,
     required this.progress,
     required this.todayStatus,
-    required this.currentDate,
     required this.isCheckInSuccess,
   }) : super(key: key);
 
@@ -35,12 +33,10 @@ class MainContent extends StatelessWidget {
         ListView(
           shrinkWrap: true,
           children: [
-            HeaderSection(employee: employee, currentDate: currentDate),
+            HeaderSection(employee: employee),
             const SizedBox(height: 10),
-            // Step 0: Check‑in options
             if (currentStepIndex == 0)
               CheckInOptionsSection(employee: employee, todayStatus: todayStatus),
-            // Step 1+: Check‑in status
             if (currentStepIndex >= 1)
               CheckInStatusSection(
                 employee: employee,
@@ -58,6 +54,9 @@ class MainContent extends StatelessWidget {
               remainingTime: remainingTime,
               progress: progress,
             ),
+            const SizedBox(height: 10),
+            if (todayStatus.offSiteCheckIns.isNotEmpty)
+              OffSiteCheckInsGrid(offSiteCheckIns: todayStatus.offSiteCheckIns),
           ],
         ),
       ],

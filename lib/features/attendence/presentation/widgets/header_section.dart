@@ -1,25 +1,50 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'dart:async';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../authentication/domain/entities/employee.dart';
 
-/// Displays a greeting with the user’s first name and the current date/time.
-class HeaderSection extends StatelessWidget {
+class HeaderSection extends StatefulWidget {
   final Employee employee;
-  final String currentDate;
+  const HeaderSection({Key? key, required this.employee}) : super(key: key);
+  @override
+  State<HeaderSection> createState() => _HeaderSectionState();
+}
 
-  const HeaderSection({Key? key, required this.employee, required this.currentDate})
-      : super(key: key);
+class _HeaderSectionState extends State<HeaderSection> {
+  late Timer _timer;
+  String _currentDate = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _updateDate();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) => _updateDate());
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _updateDate() {
+    final now = DateTime.now();
+    final formatter = DateFormat('MMMM d, yyyy   hh:mm a', 'en');
+    setState(() {
+      _currentDate = formatter.format(now);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final lang = context.locale.languageCode;
-    final fullName =
-    (lang == 'ar' && employee.employeeNameInAr.isNotEmpty)
-        ? employee.employeeNameInAr
-        : employee.employeeNameInEn;
+    final fullName = (lang == 'ar' && widget.employee.employeeNameInAr.isNotEmpty)
+        ? widget.employee.employeeNameInAr
+        : widget.employee.employeeNameInEn;
     final firstName = fullName.split(' ').first;
     final greeting = 'helloName'.tr(namedArgs: {'name': firstName});
     return Row(
@@ -42,7 +67,7 @@ class HeaderSection extends StatelessWidget {
               ),
             ),
             Text(
-              currentDate,
+              _currentDate,
               style: const TextStyle(color: lightGray, fontSize: 14),
             ),
           ],
