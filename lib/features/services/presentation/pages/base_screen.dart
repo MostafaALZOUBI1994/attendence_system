@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moet_hub/core/constants/constants.dart';
 
 import '../bloc/services_bloc.dart';
 
@@ -21,20 +22,20 @@ class BaseScreen extends StatelessWidget {
         Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
-              'assets/c1.png',
-              fit: BoxFit.cover,
-            ),
-            Container(color: Colors.black.withOpacity(0.7)),
-            Container(color: Colors.white.withOpacity(0.25)),
+            // Image.asset(
+            //   'assets/c1.png',
+            //   fit: BoxFit.cover,
+            // ),
+            // Container(color: Colors.black.withOpacity(0.7)),
+             Container(color: Colors.white.withOpacity(0.90),),
             Scaffold(
               extendBody: true,
               extendBodyBehindAppBar: true,
               backgroundColor: Colors.transparent,
               appBar: AppBar(
-                title: Text(titleKey.tr(), style: const TextStyle(color: Colors.white)),
+                title: Text(titleKey.tr(), style: const TextStyle(color: primaryColor)),
                 backgroundColor: Colors.transparent,
-                iconTheme: const IconThemeData(color: Colors.white),
+                iconTheme: const IconThemeData(color: primaryColor),
               ),
               body: SafeArea(
                 top: true,

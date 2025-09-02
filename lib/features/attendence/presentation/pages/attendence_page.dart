@@ -20,8 +20,8 @@ import '../widgets/timeline.dart';
 class TimeScreen extends StatelessWidget {
   TimeScreen({Key? key}) : super(key: key);
 
-  final String _currentDate =
-      DateFormat('MMMM d, yyyy   HH:mm a' ,'en').format(DateTime.now());
+  final _currentDate = DateFormat('MMMM d, yyyy   hh:mm a', 'en').format(DateTime.now());
+
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +143,7 @@ class TimeScreen extends StatelessWidget {
           children: [
             Text(greeting,
               style: const TextStyle(
-                color: Colors.white,
+                color: primaryColor,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -337,6 +337,7 @@ class TimeScreen extends StatelessWidget {
                   final now = DateTime.now();
                   final total = endTime.difference(last).inSeconds;
                   final passed = now.difference(last).inSeconds;
+                  final pct = (passed / total).clamp(0, 1) * 100;
                   return (total / passed)*100;
                 }(),
                 width: 10,

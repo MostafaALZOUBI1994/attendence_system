@@ -58,20 +58,6 @@ class _MainScreenState extends State<MainScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            "assets/c1.png",
-            fit: BoxFit.cover,
-          ),
-          Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.7)),
-          ),
-
-
-          Positioned.fill(
-            child: Container(
-              color: Colors.white.withOpacity(0.25),
-            ),
-          ),
           SafeArea(top: true,
               bottom: false,  child:  _pages[_currentIndex]),
         ],

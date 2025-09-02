@@ -153,7 +153,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       name,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: primaryColor,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -162,7 +162,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       role,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: primaryColor,
                         fontSize: 16,
                       ),
                     ),
@@ -170,7 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       directManager,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: primaryColor,
                         fontSize: 16,
                       ),
                     ),
@@ -178,7 +178,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       department,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: primaryColor,
                         fontSize: 16,
                       ),
                     ),
@@ -186,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               },
               orElse: () =>
-              const Center(child: CircularProgressIndicator(color: Colors.white)),
+              const Center(child: CircularProgressIndicator(color: primaryColor,)),
             );
           },
         ),
