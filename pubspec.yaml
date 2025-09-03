@@ -71,6 +71,7 @@ dependencies:
   easy_localization: ^3.0.7+1
   slide_countdown: ^2.0.2
   http_certificate_pinning: ^3.0.1
+  firebase_messaging: ^16.0.1
 
 
 

@@ -14,17 +14,34 @@ class ServicesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Kick off loading of any data when the screen is first built
     Future.microtask(() {
       context.read<ServicesBloc>().add(const ServicesEvent.loadData());
     });
-    return  Column(
-        children: [
-          Expanded(child: _buildServiceGrid(context)),
-        ],
-      );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Add a section header to introduce the Services page and align with
+        // the app's design language.  Using the primary colour ties it back to
+        // the rest of the app.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+          child: Text(
+            'services'.tr(),
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
+            ),
+          ),
+        ),
+        Expanded(child: _buildServiceGrid(context)),
+      ],
+    );
   }
 
   Widget _buildServiceGrid(BuildContext context) {
+    // List of service metadata. Each entry defines the icon, translation key and route.
     final services = [
       {
         'icon': Icons.assignment_ind,
@@ -36,11 +53,6 @@ class ServicesScreen extends StatelessWidget {
         'title': 'pantry'.tr(),
         'route': '/pantry-request',
       },
-      // {
-      //   'icon': Icons.headset_mic,
-      //   'title': 'helpDesk'.tr(),
-      //   'route': '/help-desk',
-      // },
       {
         'icon': Icons.smart_toy_outlined,
         'title': 'askBot'.tr(),
@@ -59,14 +71,16 @@ class ServicesScreen extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GridView.builder(
         itemCount: services.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 1,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          // A slightly rectangular aspect ratio gives more vertical space for
+          // the header and icon while maintaining a balanced look.
+          childAspectRatio: 1.1,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
         ),
         itemBuilder: (context, index) {
           final service = services[index];
@@ -83,26 +97,46 @@ class ServicesScreen extends StatelessWidget {
 
   Widget _buildServiceCard(
       BuildContext context, IconData icon, String title, String routeName) {
-    return InkWell(
-      onTap: () => _navigateTo(context, routeName),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.8),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 2),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 40, color: primaryColor),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        splashColor: primaryColor.withOpacity(0.2),
+        highlightColor: primaryColor.withOpacity(0.1),
+        onTap: () => _navigateTo(context, routeName),
+        child: Container(
+          decoration: BoxDecoration(
+            // Use the secondary gradient defined in constants to stay within
+            // the established colour palette while adding subtle depth.
+            gradient: secondryGradient.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Icon inside a lightly tinted circle for a refined look
+              Container(
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Icon(icon, size: 32, color: primaryColor),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: secondaryColor,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
