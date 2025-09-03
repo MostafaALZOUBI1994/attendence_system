@@ -2,6 +2,8 @@ import 'package:moet_hub/features/profile/presentation/bloc/profile_event.dart';
 import 'package:moet_hub/features/profile/presentation/bloc/profile_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/errors/failures.dart';
+import '../../domain/entities/health_model.dart';
 import '../../domain/usecases/fetch_health_data.dart';
 
 @injectable
@@ -13,7 +15,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       try {
         final result = await fetchHealthData();
         result.fold(
-              (failure) => emit(ProfileState.error(failure.message)),
+              (failure) {
+            // When health permission is denied, display zero metrics
+            if (failure is InvalidInputFailure) {
+              emit(
+                ProfileState.loaded(
+                  healthData: HealthData(
+                    steps: 0,
+                    heartRate: 0,
+                    caloriesBurned: 0,
+                    sleepDuration: 0,
+                  ),
+                ),
+              );
+            } else {
+              emit(ProfileState.error(failure.message));
+            }
+          },
               (healthData) => emit(ProfileState.loaded(healthData: healthData)),
         );
       } catch (e) {

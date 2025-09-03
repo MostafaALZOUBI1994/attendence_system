@@ -21,7 +21,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Employee>> login(String email, String password) async {
-    final username = email.trim();
+    final username = email.trim().split('@').first;
     final responseEither = await _dio.safe(
           () => _dio.post(
         'GetEmployeeDetailsAD',
@@ -43,6 +43,9 @@ class AuthRepositoryImpl implements AuthRepository {
           return Left(ServerFailure(details['_statusMessage'] as String));
         }
 
+        if (details['EmployeeId'] == null) {
+          return Left(ServerFailure(details['_statusMessage'] as String));
+        }
         // parse your full JSON into the model
         final model = EmployeeModel.fromJson(details);
 
