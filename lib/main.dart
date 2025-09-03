@@ -55,7 +55,10 @@ Future<void> carEntryPoint() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
   await CarChannel.register();
+  await CarPlayService.init();
+  CarPlayService.onCheckIn = CarBridge.handleCheckIn;
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

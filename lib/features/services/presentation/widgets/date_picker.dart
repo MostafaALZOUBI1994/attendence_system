@@ -1,21 +1,20 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../../../../core/constants/constants.dart';
 
 class SimpleDatePicker extends StatefulWidget {
   final DateTime selectedDate;
   final Function(DateTime) onDateSelected;
-
-  /// NEW: pass the allowed date-only values (year-month-day)
   final Set<DateTime>? allowedDates;
+  /// NEW: optional map of date-only → issue (“Late In” or “Early Out”)
+  final Map<DateTime, String>? issues;
 
   const SimpleDatePicker({
     Key? key,
     required this.selectedDate,
     required this.onDateSelected,
-    this.allowedDates, // NEW
+    this.allowedDates,
+    this.issues,
   }) : super(key: key);
 
   @override
@@ -33,12 +32,14 @@ class _SimpleDatePickerState extends State<SimpleDatePicker> {
   void initState() {
     super.initState();
     _currentDate = _dOnly(widget.selectedDate);
-    _dates = _generateDates(); // from allowedDates if provided
-    // if selected not in allowed, default to first allowed
+    _dates = _generateDates();
+    // default to first allowed if current is not in list
     if (_dates.isNotEmpty && !_dates.contains(_currentDate)) {
       _currentDate = _dates.first;
     }
-    _scrollController = ScrollController(initialScrollOffset: _getInitialOffset());
+    _scrollController = ScrollController(
+      initialScrollOffset: _getInitialOffset(),
+    );
   }
 
   List<DateTime> _generateDates() {
@@ -50,48 +51,32 @@ class _SimpleDatePickerState extends State<SimpleDatePicker> {
         ..sort();
       return list;
     }
-    // fallback: original 7-day window centered on today
+    // fallback: 7-day window centered on today
     final today = _dOnly(DateTime.now());
-    return List.generate(7, (index) => today.subtract(const Duration(days: 3)).add(Duration(days: index)));
+    return List.generate(
+      7,
+          (index) => today.subtract(const Duration(days: 3)).add(Duration(days: index)),
+    );
   }
 
   double _getInitialOffset() {
     final idx = _dates.indexWhere((d) => d == _currentDate);
+    // each card is 80 px wide, so scroll offset uses 80.0
     return (idx >= 0 ? idx : 0) * 80.0;
-  }
-
-  @override
-  void didUpdateWidget(covariant SimpleDatePicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    final selectedChanged = _dOnly(widget.selectedDate) != _currentDate;
-    final allowedChanged = (oldWidget.allowedDates?.length ?? 0) != (widget.allowedDates?.length ?? 0)
-        || (oldWidget.allowedDates != widget.allowedDates);
-
-    if (selectedChanged || allowedChanged) {
-      _currentDate = _dOnly(widget.selectedDate);
-      _dates = _generateDates();
-      if (_dates.isNotEmpty && !_dates.contains(_currentDate)) {
-        _currentDate = _dates.first;
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.jumpTo(_getInitialOffset());
-        }
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (_dates.isEmpty) {
-      // safety: nothing allowed
       return SizedBox(
         height: 100,
         child: Center(
           child: Text(
             'No available days',
-            style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       );
@@ -107,8 +92,25 @@ class _SimpleDatePickerState extends State<SimpleDatePicker> {
           final date = _dates[index];
           final isSelected = date == _currentDate;
 
+          // Look up the issue for this date (if any)
+          String? issue;
+          Color? issueColor;
+          if (widget.issues != null) {
+            final key = _dOnly(date);
+            issue = widget.issues![key];
+            if (issue != null) {
+              if (issue == 'Late In') {
+                issueColor = Colors.red.shade400;
+              } else if (issue == 'Early Out') {
+                issueColor = Colors.orange.shade400;
+              } else {
+                issueColor = Colors.green.shade400;
+              }
+            }
+          }
+
           return Container(
-            width: 80,
+            width: 80, // keep width consistent with scroll offset
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               color: isSelected ? primaryColor : Colors.white,
@@ -141,15 +143,36 @@ class _SimpleDatePickerState extends State<SimpleDatePicker> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
-                    "${date.day} / ${date.month}",
+                    '${date.day} / ${date.month}',
                     style: TextStyle(
                       fontSize: 20,
                       color: isSelected ? Colors.white : primaryColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  if (issue != null) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: issueColor ?? Colors.grey,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        issue,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -157,11 +180,5 @@ class _SimpleDatePickerState extends State<SimpleDatePicker> {
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 }

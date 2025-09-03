@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/entities/report_model.dart';
@@ -32,5 +33,10 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
         },
       );
     });
+    final now = DateTime.now();
+    final df = DateFormat('dd/MM/yyyy');
+    final from = df.format(DateTime.utc(now.year, 1, 1));
+    final to = df.format(now);
+    add(ReportEvent.fetchReport(fromDate: from, toDate: to));
   }
 }

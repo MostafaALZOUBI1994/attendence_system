@@ -46,7 +46,15 @@ class _MainScreenState extends State<MainScreen> {
           getIt<AttendenceBloc>()..add(const AttendenceEvent.loadData()),
         ),
         BlocProvider(
-          create: (context) => getIt<ReportBloc>(),
+          create: (context) => getIt<ReportBloc>()
+            ..add(
+              ReportEvent.fetchReport(
+                fromDate: DateFormat('dd/MM/yyyy').format(
+                  DateTime(DateTime.now().year, 1, 1),
+                ),
+                toDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+              ),
+            ),
         ),
         BlocProvider(
           create: (context) =>
