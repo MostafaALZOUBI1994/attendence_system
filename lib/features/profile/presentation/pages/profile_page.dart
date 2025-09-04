@@ -74,7 +74,6 @@ class _ProfilePageState extends State<ProfilePage> {
             Expanded(
                 child: SingleChildScrollView(
                     child: _buildProfileContent(context))),
-            SizedBox(height: 80,)
           ],
         ),
       ),
