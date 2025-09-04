@@ -408,6 +408,8 @@ class _HRRequestScreenState extends State<HRRequestScreen>
       await showModalBottomSheet(
         context: context,
         backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        useSafeArea: true,
         builder: (_) => _BottomSheetWrap(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1150,7 +1152,9 @@ class _BottomSheetWrap extends StatelessWidget {
         left: 16,
         right: 16,
         top: 12,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            16,
       ),
       child: child,
     );

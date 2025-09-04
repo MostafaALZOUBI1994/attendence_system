@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final _controller = NotchBottomBarController(index: 0);
+  final _notchController = NotchBottomBarController(index: 0);
+  final _pageController = PageController(initialPage: 0);
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
@@ -34,79 +36,92 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    // Android must be flush; iOS needs the home-indicator inset.
+    final insetForBar = Platform.isIOS ? bottomInset : 0.0;
+
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (_) => getIt<ProfileBloc>()),
+        BlocProvider(create: (_) => getIt<AuthBloc>()),
+        BlocProvider(create: (_) => getIt<AttendenceBloc>()..add(const AttendenceEvent.loadData())),
         BlocProvider(
-          create: (context) => getIt<ProfileBloc>(),
-        ),
-        BlocProvider(create: (context) => getIt<AuthBloc>()),
-        BlocProvider(
-          create: (context) =>
-          getIt<AttendenceBloc>()..add(const AttendenceEvent.loadData()),
-        ),
-        BlocProvider(
-          create: (context) => getIt<ReportBloc>()
+          create: (_) => getIt<ReportBloc>()
             ..add(
               ReportEvent.fetchReport(
-                fromDate: DateFormat('dd/MM/yyyy').format(
-                  DateTime(DateTime.now().year, 1, 1),
-                ),
+                fromDate: DateFormat('dd/MM/yyyy').format(DateTime(DateTime.now().year, 1, 1)),
                 toDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
               ),
             ),
         ),
-        BlocProvider(
-          create: (context) =>
-          getIt<ServicesBloc>()..add(const ServicesEvent.loadData()),
-        ),
+        BlocProvider(create: (_) => getIt<ServicesBloc>()..add(const ServicesEvent.loadData())),
       ],
-  child: Scaffold(
-      extendBody: true,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          SafeArea(top: true,
-              bottom: false,  child:  _pages[_currentIndex]),
-        ],
-      ),
-      bottomNavigationBar: SizedBox(
-        height: 80 + MediaQuery.of(context).padding.bottom,
-        child: AnimatedNotchBottomBar(
-          showLabel: true,
-          notchColor: primaryColor.withOpacity(0.7),
-          color: veryLightGray.withOpacity(1.0),
-          itemLabelStyle: const TextStyle(
-            fontSize: 10.0,
-            fontWeight: FontWeight.w500,
+      child: Scaffold(
+        // Body sits above the bar; no bottom SafeArea (we handle it inside the bar)
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: PageView(
+            controller: _pageController,
+            physics: const ClampingScrollPhysics(),
+            onPageChanged: (i) {
+              setState(() => _currentIndex = i);
+              _notchController.jumpTo(i); // keep the bar in sync
+            },
+            children: _pages,
           ),
-          bottomBarItems: [
-            _bottomBarItem(Icons.home, "home".tr()),
-            _bottomBarItem(Icons.build, "services".tr()),
-            _bottomBarItem(Icons.list_alt, "reports".tr()),
-            _bottomBarItem(Icons.person, "profile".tr()),
-          ],
-          onTap: (index) => setState(() => _currentIndex = index),
-          notchBottomBarController: _controller,
-          removeMargins: true,
-          kBottomRadius: 60.0,
-          elevation: 0,
-          shadowElevation: 0,
-          showShadow: false,
-          bottomBarHeight: 90.0,
-          kIconSize: 20,
+        ),
+
+        // Bottom bar: flush on Android, inset only on iOS (painted to look seamless)
+        bottomNavigationBar: Container(
+          color: veryLightGray.withOpacity(1.0), // paint under-bar area
+          padding: EdgeInsets.only(bottom: insetForBar),
+          child: AnimatedNotchBottomBar(
+            notchBottomBarController: _notchController,
+            onTap: (i) {
+              if (_currentIndex == i) return;
+              setState(() => _currentIndex = i);
+              _pageController.animateToPage(
+                i,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubic, // smooth transition
+              );
+            },
+            removeMargins: true,
+            bottomBarHeight: kBottomNavigationBarHeight, // 56dp content height
+            kIconSize: 20,
+            showLabel: true,
+            itemLabelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+            color: veryLightGray.withOpacity(1.0),
+            notchColor: primaryColor.withOpacity(0.7),
+            kBottomRadius: 32.0,
+            elevation: 0,
+            shadowElevation: 0,
+            showShadow: false,
+            bottomBarItems: [
+              _item(Icons.home, "home".tr()),
+              _item(Icons.build, "services".tr()),
+              _item(Icons.list_alt, "reports".tr()),
+              _item(Icons.person, "profile".tr()),
+            ],
+          ),
         ),
       ),
-
-    ),
-);
+    );
   }
 
-  BottomBarItem _bottomBarItem(IconData icon, String label) {
+  BottomBarItem _item(IconData icon, String label) {
     return BottomBarItem(
-    inActiveItem: Icon(icon, color: Colors.grey),
-    activeItem: Icon(icon, color: Colors.white),
-    itemLabel: label,
-  );
+      inActiveItem: Icon(icon, color: Colors.grey),
+      activeItem: Icon(icon, color: Colors.white),
+      itemLabel: label,
+    );
   }
 }
