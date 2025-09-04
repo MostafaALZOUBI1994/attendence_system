@@ -31,7 +31,6 @@ Future<void> main() async {
   await configureDependencies();
   await EasyLocalization.ensureInitialized();
 
-
   await CarChannel.register();
 
   if (Platform.isIOS) {

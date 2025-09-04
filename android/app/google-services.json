@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "773298162247",
+    "project_id": "moet-hub",
+    "storage_bucket": "moet-hub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:773298162247:android:38fba2a2f463bc67bd3f62",
+        "android_client_info": {
+          "package_name": "ae.gov.moet.moethub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdVPc8HL6AvQM5Qss0mFAu5M1s-UE-RJ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
