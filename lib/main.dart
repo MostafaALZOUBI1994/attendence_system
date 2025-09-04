@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:moet_hub/features/authentication/presentation/pages/login_page.dart';
 import 'package:moet_hub/features/reports/presentation/bloc/report_bloc.dart';
 import 'package:moet_hub/features/services/presentation/bloc/services_bloc.dart';
@@ -25,6 +27,7 @@ import 'features/profile/presentation/bloc/profile_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   await configureDependencies();
   await EasyLocalization.ensureInitialized();
 
@@ -36,6 +39,7 @@ Future<void> main() async {
     CarPlayService.onCheckIn = CarBridge.handleCheckIn;
   }
 
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   final savedLocale = getIt<LocalService>().getSavedLocale();
   Intl.defaultLocale = savedLocale.languageCode;
 
@@ -57,6 +61,13 @@ Future<void> carEntryPoint() async {
   await CarChannel.register();
   await CarPlayService.init();
   CarPlayService.onCheckIn = CarBridge.handleCheckIn;
+}
+
+@pragma('vm:entry-point') // required for background handler in Flutter ≥3.3
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Initialise Firebase in the background isolate before using other services
+  await Firebase.initializeApp();
+  // TODO: handle the background message (e.g. store it, update local DB, etc.)
 }
 
 
