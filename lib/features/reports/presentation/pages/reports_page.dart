@@ -16,6 +16,8 @@ class ReportsScreen extends StatefulWidget {
 
 class _ReportsScreenState extends State<ReportsScreen> {
   String _selectedFilter = "All";
+  final DateFormat _dfShort = DateFormat('dd/MM/yyyy', 'en');
+  final DateFormat _dfLong = DateFormat('EEE, MMM d, yyyy', 'en');
 
   @override
   void initState() {
@@ -30,8 +32,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   // ---------------- Helpers ----------------
 
-  final DateFormat _dfShort = DateFormat('dd/MM/yyyy', 'en');
-  final DateFormat _dfLong = DateFormat('EEE, MMM d, yyyy', 'en');
 
   void _dispatchFetch({required DateTime fromDate, required DateTime toDate}) {
     context.read<ReportBloc>().add(
@@ -50,7 +50,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         return now.subtract(const Duration(days: 30));
       case "All":
       default:
-        return DateTime.utc(2025, 1, 1);
+        return  now.subtract(const Duration(days: 120));
     }
   }
 

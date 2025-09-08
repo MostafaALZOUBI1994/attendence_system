@@ -56,8 +56,8 @@ class _MainScreenState extends State<MainScreen> {
           create: (_) => getIt<ReportBloc>()
             ..add(
               ReportEvent.fetchReport(
-                fromDate: DateFormat('dd/MM/yyyy').format(DateTime(DateTime.now().year, 1, 1)),
-                toDate: DateFormat('dd/MM/yyyy').format(DateTime.now()),
+                fromDate: DateFormat('dd/MM/yyyy', 'en').format(DateTime.now().subtract(const Duration(days: 120))),
+                toDate: DateFormat('dd/MM/yyyy', 'en').format(DateTime.now()),
               ),
             ),
         ),

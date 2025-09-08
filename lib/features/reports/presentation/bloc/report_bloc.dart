@@ -34,8 +34,8 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
       );
     });
     final now = DateTime.now();
-    final df = DateFormat('dd/MM/yyyy');
-    final from = df.format(DateTime.utc(now.year, 1, 1));
+    final df = DateFormat('dd/MM/yyyy', 'en');
+    final from = df.format(now.subtract(const Duration(days:  120)));
     final to = df.format(now);
     add(ReportEvent.fetchReport(fromDate: from, toDate: to));
   }

@@ -6,8 +6,34 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/attendence_bloc.dart';
 import '../widgets/main_content.dart';
 
-class TimeScreen extends StatelessWidget {
+class TimeScreen extends StatefulWidget {
   TimeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<TimeScreen> createState() => _TimeScreenState();
+}
+
+class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver{
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<AttendenceBloc>().add(const AttendenceEvent.loadData());
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
