@@ -1,4 +1,5 @@
 import Flutter
+import FirebaseCore
 import UIKit
 
 @main
@@ -7,6 +8,8 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-      return true
+      FirebaseApp.configure()
+      GeneratedPluginRegistrant.register(with: self)  // register messaging and other plugins
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

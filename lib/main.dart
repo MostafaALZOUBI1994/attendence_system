@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:moet_hub/features/authentication/presentation/pages/login_page.dart';
@@ -23,16 +24,20 @@ import 'features/attendence/domain/repositories/attendence_repository.dart';
 import 'features/attendence/presentation/bloc/attendence_bloc.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
+import 'firebase_options.dart';
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   await configureDependencies();
   await EasyLocalization.ensureInitialized();
 
   await CarChannel.register();
-
+  await _initFirebaseMessaging();
   if (Platform.isIOS) {
     await CarPlayService.init();
     CarPlayService.onCheckIn = CarBridge.handleCheckIn;
@@ -62,13 +67,42 @@ Future<void> carEntryPoint() async {
   CarPlayService.onCheckIn = CarBridge.handleCheckIn;
 }
 
-@pragma('vm:entry-point') // required for background handler in Flutter ≥3.3
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Initialise Firebase in the background isolate before using other services
   await Firebase.initializeApp();
   // TODO: handle the background message (e.g. store it, update local DB, etc.)
 }
+Future<void> _initFirebaseMessaging() async {
+  final messaging = FirebaseMessaging.instance;
 
+  // Request permission on iOS (no-op on Android)
+  await messaging.requestPermission(alert: true, badge: true, sound: true);
+
+  // Allow foreground notification presentation on iOS
+  await messaging.setForegroundNotificationPresentationOptions(
+    alert: true, badge: true, sound: true,
+  );
+
+
+
+    final fcmToken = await messaging.getToken();
+    if (fcmToken != null) {
+      debugPrint('FCM token: $fcmToken');
+      // TODO: send to your backend
+    }
+   else {
+    // FCM token will be delivered via onTokenRefresh when ready
+    messaging.onTokenRefresh.listen((newToken) {
+      debugPrint('FCM token refreshed: $newToken');
+      // TODO: send to your backend
+    });
+  }
+
+  FirebaseMessaging.onMessage.listen((message) {
+    debugPrint('Foreground message: ${message.messageId}');
+  });
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
