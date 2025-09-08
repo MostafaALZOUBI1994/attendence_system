@@ -7,6 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/local_services/local_services.dart';
+import '../../../../core/local_services/simple_notifier.dart';
 import '../../../authentication/data/datasources/employee_local_data_source.dart';
 import '../../../authentication/domain/entities/employee.dart';
 import '../../domain/entities/today_status.dart';
@@ -75,6 +76,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
           _startTicker();
         }
 
+        UaeShiftNotifier.scheduleTodayUae(todayStatus.expectedOutTime);
         emit(AttendenceState.loaded(
           employee: employee,
           todayStatus: todayStatus,
