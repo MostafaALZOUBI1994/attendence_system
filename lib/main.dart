@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:moet_hub/core/local_services/carplay_service.dart';
 import 'package:moet_hub/features/authentication/presentation/pages/login_page.dart';
 import 'package:moet_hub/features/reports/presentation/bloc/report_bloc.dart';
 import 'package:moet_hub/features/services/presentation/bloc/services_bloc.dart';
@@ -38,10 +39,10 @@ Future<void> main() async {
 
   await CarChannel.register();
   await _initFirebaseMessaging();
-  if (Platform.isIOS) {
-    await CarPlayService.init();
-    CarPlayService.onCheckIn = CarBridge.handleCheckIn;
-  }
+  // if (Platform.isIOS) {
+  //   await CarPlayService.init();
+  //   CarPlayService.onCheckIn = CarBridge.handleCheckIn;
+  // }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   final savedLocale = getIt<LocalService>().getSavedLocale();
