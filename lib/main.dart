@@ -24,20 +24,32 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 1) Kick off CarPlay ASAP (non-blocking). This fixes the blank screen.
+  Future<void> carplayInit = Future.value();
   if (Platform.isIOS) {
-    await CarPlayService.init();
+    carplayInit = CarPlayService.init(); // don't await yet
     CarPlayService.onCheckIn = CarBridge.handleCheckIn;
   }
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  // 2) Initialize Firebase SAFELY (works whether called 0 or 1 time).
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  // 3) Rest of your app boot.
   await configureDependencies();
   await EasyLocalization.ensureInitialized();
-  await CarChannel.register();
+
+  if (!Platform.isIOS) {
+    await CarChannel.register(); // Android/others
+  }
+
   await _initFirebaseMessaging();
-
-
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   final savedLocale = getIt<LocalService>().getSavedLocale();
   Intl.defaultLocale = savedLocale.languageCode;
 
@@ -51,13 +63,28 @@ void main() async {
       child: const MyApp(),
     ),
   );
+
+  // 4) After the UI is up, make sure the CarPlay root is actually visible.
+  if (Platform.isIOS) {
+    // Your CarPlayService already retries pushing a root; this ensures it runs.
+    unawaited(carplayInit);
+  }
 }
+
 @pragma('vm:entry-point')
 Future<void> carEntryPoint() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await configureDependencies();
-  await CarChannel.register();
+
+  // Optional: only if something here truly needs Firebase
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  // Keep CarPlay light and independent of localization/DI where possible
   await CarPlayService.init();
+  await CarChannel.register();
   CarPlayService.onCheckIn = CarBridge.handleCheckIn;
 }
 

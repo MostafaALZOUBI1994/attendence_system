@@ -1,5 +1,10 @@
 <resources>
     <string-array name="hosts_allowlist_sample">
         <item>com.google.android.projection.gearhead</item>
+        <!-- AAOS system hosts -->
+        <item>com.google.android.apps.automotive.*</item>
+        <!-- Desktop Head Unit (older/newer DHU names are covered by gearhead on recent tools, this keeps you safe) -->
+        <item>com.google.android.car.deskheadunit</item>
+        <item>com.google.android.projection.deskheadunit</item>
     </string-array>
 </resources>
