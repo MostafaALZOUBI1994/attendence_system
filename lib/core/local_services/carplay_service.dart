@@ -26,7 +26,7 @@ class CarPlayService {
         CPInformationItem(title: 'Good', detail: 'morning ☀️'),
       ],
       actions: [
-        CPTextButton(title: 'Check-in ✅', onPress: _handleCheckIn),
+        CPTextButton(title: 'Check-in 🫆', onPress: _handleCheckIn),
       ],
     );
 
@@ -36,6 +36,7 @@ class CarPlayService {
       } else {
         _rootWasPushed = false;
         _modalActive = false;
+       // init();
       }
     });
 

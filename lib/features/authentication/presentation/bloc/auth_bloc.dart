@@ -25,25 +25,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(Login(email: event.email, isScanning: false));
     });
 
-    on<StartScanning>((event, emit) {
-      if (state is Login) {
-        emit(Login(
-          email: (state as Login).email,
-          isScanning: true,
-        ));
-      } else {
-        emit(const Login(email: '', isScanning: true));
-      }
-    });
-
-    on<StopScanning>((event, emit) {
-      if (state is Login) {
-        emit(Login(
-          email: (state as Login).email,
-          isScanning: false,
-        ));
-      }
-    });
 
     on<LoginSubmitted>((event, emit) async {
       emit(const AuthState.loading());

@@ -20,12 +20,14 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true       // <-- Groovy name
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "1.8"
     }
 
     defaultConfig {
@@ -62,6 +64,7 @@ android {
 dependencies {
 
     implementation "androidx.car.app:app:1.4.0"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.4"
 }
 
 flutter {

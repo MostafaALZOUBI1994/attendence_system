@@ -1,48 +1,41 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:moet_hub/core/local_services/carplay_service.dart';
 import 'package:moet_hub/features/authentication/presentation/pages/login_page.dart';
 import 'package:moet_hub/features/reports/presentation/bloc/report_bloc.dart';
 import 'package:moet_hub/features/services/presentation/bloc/services_bloc.dart';
-import 'package:moet_hub/ui/screens/carplay_screen.dart';
 import 'package:moet_hub/ui/screens/main_screen.dart';
 import 'package:moet_hub/ui/screens/splash_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_carplay/carplay_worker.dart';
-import 'package:flutter_carplay/flutter_carplay.dart';
 import 'core/constants/constants.dart';
 import 'core/injection.dart';
 import 'core/local_services/local_services.dart';
-import 'core/utils/car_bridge.dart' hide getIt;
-import 'core/utils/car_channel.dart' hide getIt;
-import 'features/attendence/domain/repositories/attendence_repository.dart';
+import 'core/utils/car_bridge.dart';
+import 'core/utils/car_channel.dart';
 import 'features/attendence/presentation/bloc/attendence_bloc.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'firebase_options.dart';
 
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isIOS) {
+    await CarPlayService.init();
+    CarPlayService.onCheckIn = CarBridge.handleCheckIn;
+  }
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   await configureDependencies();
   await EasyLocalization.ensureInitialized();
-
   await CarChannel.register();
   await _initFirebaseMessaging();
-  // if (Platform.isIOS) {
-  //   await CarPlayService.init();
-  //   CarPlayService.onCheckIn = CarBridge.handleCheckIn;
-  // }
+
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   final savedLocale = getIt<LocalService>().getSavedLocale();
