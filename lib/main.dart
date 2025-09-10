@@ -24,23 +24,22 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 1) Kick off CarPlay ASAP (non-blocking). This fixes the blank screen.
-  Future<void> carplayInit = Future.value();
+  // Start CarPlay without awaiting – avoids blank page.
   if (Platform.isIOS) {
-    carplayInit = CarPlayService.init(); // don't await yet
+    CarPlayService.init();
     CarPlayService.onCheckIn = CarBridge.handleCheckIn;
   }
-
-  // 2) Initialize Firebase SAFELY (works whether called 0 or 1 time).
+  // Only initialise Firebase if it hasn’t been created yet.
   if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   }
-
-  // 3) Rest of your app boot.
   await configureDependencies();
+  await EasyLocalization.ensureInitialized();
+  if (!Platform.isIOS) {
+    await CarChannel.register();
+  }
+  await _initFirebaseMessaging();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await EasyLocalization.ensureInitialized();
 
   if (!Platform.isIOS) {
@@ -64,35 +63,33 @@ void main() async {
     ),
   );
 
-  // 4) After the UI is up, make sure the CarPlay root is actually visible.
-  if (Platform.isIOS) {
-    // Your CarPlayService already retries pushing a root; this ensures it runs.
-    unawaited(carplayInit);
-  }
 }
 
 @pragma('vm:entry-point')
 Future<void> carEntryPoint() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Optional: only if something here truly needs Firebase
+  // Only if something here truly needs Firebase; otherwise skip to keep it light.
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
 
-  // Keep CarPlay light and independent of localization/DI where possible
-  await CarPlayService.init();
-  await CarChannel.register();
+  await CarPlayService.init();   // must NOT depend on Firebase
+  await CarChannel.register();   // if your car bridge needs it
   CarPlayService.onCheckIn = CarBridge.handleCheckIn;
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Initialise Firebase in the background isolate before using other services
-  await Firebase.initializeApp();
-  // TODO: handle the background message (e.g. store it, update local DB, etc.)
+  // In background isolates, Firebase might not be initialized yet:
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+  // …your logic…
 }
 Future<void> _initFirebaseMessaging() async {
   final messaging = FirebaseMessaging.instance;
