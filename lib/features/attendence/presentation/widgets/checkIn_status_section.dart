@@ -7,7 +7,7 @@ import 'package:slide_countdown/slide_countdown.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../authentication/domain/entities/employee.dart';
 import '../../domain/entities/today_status.dart';
-import 'analog_clock.dart';
+import 'ClockTicksPainter.dart';
 import 'card_container.dart';
 
 /// Shows a circular check‑in button or a success animation depending on state.
