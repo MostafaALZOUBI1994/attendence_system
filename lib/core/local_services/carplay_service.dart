@@ -43,10 +43,11 @@ class CarPlayService {
     await _bootstrapRootAttempts();
   }
 
-  static void _pushRoot({bool safe = false}) {
+  static Future<void> _pushRoot({bool safe = false}) async {
     if (_rootWasPushed && safe) return;
     try {
-      FlutterCarplay.setRootTemplate(rootTemplate: _root, animated: false);
+      await FlutterCarplay.setRootTemplate(rootTemplate: _root, animated: false);
+      _cp.forceUpdateRootTemplate();
       _rootWasPushed = true;
     } catch (_) {
       // ignore – will retry
@@ -57,7 +58,7 @@ class CarPlayService {
     const attempts = 10;
     const step = Duration(milliseconds: 250);
     for (var i = 0; i < attempts; i++) {
-      _pushRoot(safe: false);
+      await _pushRoot(safe: false);
       await Future.delayed(step);
       if (_rootWasPushed) break;
     }

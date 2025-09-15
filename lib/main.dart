@@ -21,33 +21,19 @@ import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'firebase_options.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Start CarPlay without awaiting – avoids blank page.
-  if (Platform.isIOS) {
-    CarPlayService.init();
-    CarPlayService.onCheckIn = CarBridge.handleCheckIn;
-  }
-  // Only initialise Firebase if it hasn’t been created yet.
+
+  // Firebase for phone UI
   if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   }
+
   await configureDependencies();
   await EasyLocalization.ensureInitialized();
-  if (!Platform.isIOS) {
-    await CarChannel.register();
-  }
   await _initFirebaseMessaging();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await EasyLocalization.ensureInitialized();
-
-  if (!Platform.isIOS) {
-    await CarChannel.register(); // Android/others
-  }
-
-  await _initFirebaseMessaging();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   final savedLocale = getIt<LocalService>().getSavedLocale();
   Intl.defaultLocale = savedLocale.languageCode;
@@ -62,35 +48,23 @@ void main() async {
       child: const MyApp(),
     ),
   );
-
 }
 
-@pragma('vm:entry-point')
-Future<void> carEntryPoint() async {
-  WidgetsFlutterBinding.ensureInitialized();
 
-  // Only if something here truly needs Firebase; otherwise skip to keep it light.
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  }
-
-  await CarPlayService.init();   // must NOT depend on Firebase
-  await CarChannel.register();   // if your car bridge needs it
-  CarPlayService.onCheckIn = CarBridge.handleCheckIn;
-}
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Initialise Firebase in the background isolate before using other services
+  await Firebase.initializeApp();
+  // TODO: handle the background message (e.g. store it, update local DB, etc.)
   // In background isolates, Firebase might not be initialized yet:
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
-  // …your logic…
 }
+
 Future<void> _initFirebaseMessaging() async {
   final messaging = FirebaseMessaging.instance;
 
@@ -104,12 +78,12 @@ Future<void> _initFirebaseMessaging() async {
 
 
 
-    final fcmToken = await messaging.getToken();
-    if (fcmToken != null) {
-      debugPrint('FCM token: $fcmToken');
-      // TODO: send to your backend
-    }
-   else {
+  final fcmToken = await messaging.getToken();
+  if (fcmToken != null) {
+    debugPrint('FCM token: $fcmToken');
+    // TODO: send to your backend
+  }
+  else {
     // FCM token will be delivered via onTokenRefresh when ready
     messaging.onTokenRefresh.listen((newToken) {
       debugPrint('FCM token refreshed: $newToken');
@@ -122,9 +96,25 @@ Future<void> _initFirebaseMessaging() async {
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+  car();
+   super.initState();
+  }
+  car() async {
+    await CarPlayService.init();     // keep this idempotent
+    await CarChannel.register();     // if your bridge needs it
+    CarPlayService.onCheckIn = CarBridge.handleCheckIn;
+  }
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -163,5 +153,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
