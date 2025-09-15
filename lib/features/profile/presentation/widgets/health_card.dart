@@ -45,7 +45,7 @@ class HealthCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _healthMetric("cal".tr(), "${healthData.caloriesBurned} kcal", "assets/lottie/calories.json"),
+              _healthMetric("cal".tr(), "${healthData.caloriesBurned.toStringAsFixed(2)} kcal", "assets/lottie/calories.json"),
               _healthMetric("sleep".tr(), "${healthData.sleepDuration} hrs", "assets/lottie/sleep.json"),
             ],
           ),

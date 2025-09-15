@@ -84,7 +84,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       child: Column(
         children: [
           _HeaderCard(
-            title: 'Reports'.tr(),
+            title: 'reports'.tr(),
             subtitle: _currentRangeText(),
             child: _buildFilterChips(),
           ),
@@ -233,7 +233,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: .2),
                           ),
                           const SizedBox(height: 10),
-                          Wrap(
+                          if (record.checkIn != "" || record.checkOut != "")
+                            Wrap(
                             spacing: 8,
                             runSpacing: 8,
                             children: [
@@ -314,22 +315,22 @@ class _ReportsScreenState extends State<ReportsScreen> {
     IconData icon;
 
     if (s == 'ABSENT') {
-      mainLabel = 'Absent';
+      mainLabel = 'Absnt'.tr();
       baseColor = Colors.red;
       icon = Icons.cancel_rounded;
     } else if (s == 'PRESENT') {
       if (hasEarlyOut || hasLateIn) {
         if (hasEarlyOut) {
-          mainLabel = 'Early Out';
+          mainLabel = 'erlyOt'.tr();
           detail = earlyOut.trim();
         } else {
-          mainLabel = 'Late In';
+          mainLabel = 'ltn'.tr();
           detail = lateIn.trim();
         }
         baseColor = Colors.orange;
         icon = Icons.access_time_filled_rounded;
       } else {
-        mainLabel = 'Present';
+        mainLabel = 'chkIn'.tr();
         baseColor = Colors.green;
         icon = Icons.check_circle_rounded;
       }
@@ -339,11 +340,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       icon = Icons.help_rounded;
     }
 
-    final gradient = LinearGradient(
-      colors: [baseColor.withOpacity(0.85), baseColor],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
+
 
     const textColor = Colors.white;
 

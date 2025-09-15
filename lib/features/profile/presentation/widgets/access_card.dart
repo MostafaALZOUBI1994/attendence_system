@@ -82,22 +82,22 @@ class _AccessCardState extends State<AccessCard>
                 ),
               ),
               // Wallet Button at the Bottom Left Corner
-              Positioned(
-                bottom: 8,
-                left: 8,
-                child: ElevatedButton.icon(
-                  onPressed: () => _addToWallet(context),
-                  icon: const Icon(Icons.credit_card),
-                  label: const Text("Wallet"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
+              // Positioned(
+              //   bottom: 8,
+              //   left: 8,
+              //   child: ElevatedButton.icon(
+              //     onPressed: () => _addToWallet(context),
+              //     icon: const Icon(Icons.credit_card),
+              //     label: const Text("Wallet"),
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: primaryColor,
+              //       foregroundColor: Colors.white,
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(10),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           );
         },

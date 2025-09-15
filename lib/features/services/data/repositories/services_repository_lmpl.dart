@@ -17,9 +17,9 @@ import '../models/permission_types_model.dart';
 @LazySingleton(as: ServiceRepository)
 class ServicesRepositoryImpl implements ServiceRepository {
   final Dio _dio;
-  final LocalService _localService;
 
-  ServicesRepositoryImpl(this._dio, this._localService);
+
+  ServicesRepositoryImpl(this._dio);
 
   @override
   Future<Either<Failure, EleaveEntity>> getLeaveBalance() async {

@@ -68,7 +68,7 @@ class _HRRequestScreenState extends State<HRRequestScreen>
   @override
   Widget build(BuildContext context) {
     return BaseScreen(
-      titleKey: 'hrReq',
+      titleKey: 'elve'.tr(),
       child: Stack(
         children: [
           // Animated gradient background
@@ -114,12 +114,12 @@ class _HRRequestScreenState extends State<HRRequestScreen>
                                 percent: percent,
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            _GlassCard(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 10),
-                              child: _buildRequestToggle(),
-                            ),
+                            // const SizedBox(height: 16),
+                            // _GlassCard(
+                            //   padding: const EdgeInsets.symmetric(
+                            //       vertical: 12, horizontal: 10),
+                            //   child: _buildRequestToggle(),
+                            // ),
                             const SizedBox(height: 16),
                             _GlassCard(
                               padding:
@@ -138,7 +138,7 @@ class _HRRequestScreenState extends State<HRRequestScreen>
                                           setState(() => _selectedType = v),
                                     ),
                                     const SizedBox(height: 16),
-                                    _SectionTitle('date'.tr()),
+                                    _SectionTitle('dte'.tr()),
                                     const SizedBox(height: 8),
                                     BlocBuilder<ReportBloc, ReportState>(
                                       builder: (context, reportState) {
@@ -236,8 +236,8 @@ class _HRRequestScreenState extends State<HRRequestScreen>
                                     const SizedBox(height: 8),
                                     _TinyTips(
                                       text: _isLeaveRequest
-                                          ? '• ${'levType'.tr()}  • ${'date'.tr()}  • ${'time'.tr()}  • ${'res'.tr()}'
-                                          : '• ${'attCorr'.tr()}  • ${'date'.tr()}  • ${'time'.tr()}  • ${'crrRes'.tr()}',
+                                          ? '• ${'levType'.tr()}  • ${'dte'.tr()}  • ${'time'.tr()}  • ${'res'.tr()}'
+                                          : '• ${'attCorr'.tr()}  • ${'dte'.tr()}  • ${'time'.tr()}  • ${'crrRes'.tr()}',
                                     ),
                                   ],
                                 ),
@@ -276,12 +276,7 @@ class _HRRequestScreenState extends State<HRRequestScreen>
                           icon: Icons.send_rounded,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      _SecondaryIconBtn(
-                        tooltip: 'attachments'.tr(),
-                        icon: Icons.attach_file_rounded,
-                        onTap: _pickAttachment,
-                      ),
+
                     ],
                   ),
                 ),
@@ -625,7 +620,7 @@ class _HRRequestScreenState extends State<HRRequestScreen>
 
   double _calculateRemainingHours(EleaveEntity lb) {
     try {
-      final av = _parseTime(lb.noOfHrsAvailable);
+      final av = _parseTime(lb.noOfHrsUtilized);
       final al = _parseTime(lb.noOfHrsAllowed);
       return al <= 0 ? 0 : (av / al).clamp(0, 1);
     } catch (_) {
@@ -679,7 +674,7 @@ class _Header extends StatelessWidget {
                       _LegendDot(color: primaryColor),
                       const SizedBox(width: 6),
                       Text(
-                          '${'available'.tr()}: ${leaveBalance.noOfHrsAvailable}',
+                          '${'avlbe'.tr()}: ${leaveBalance.noOfHrsAvailable}',
                           style: theme.textTheme.bodyMedium),
                     ],
                   ),
@@ -689,7 +684,7 @@ class _Header extends StatelessWidget {
                       _LegendDot(color: Colors.grey.shade400),
                       const SizedBox(width: 6),
                       Text(
-                        '${'allowed'.tr()}: ${leaveBalance.noOfHrsAllowed}',
+                        '${'alowd'.tr()}: ${leaveBalance.noOfHrsAllowed}',
                         style: theme.textTheme.bodyMedium
                             ?.copyWith(color: Colors.grey[700]),
                       ),
@@ -912,9 +907,10 @@ class _DurationPill extends StatelessWidget {
         children: [
           const Icon(Icons.timelapse_rounded, color: Colors.black87),
           const SizedBox(width: 8),
-          Text('${'duration'.tr()}: $duration',
-              style: const TextStyle(
-                  fontWeight: FontWeight.w700, letterSpacing: 0.2)),
+          Text(
+            '${'duration'.tr()}: $duration',
+            style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
+          )
         ],
       ),
     );

@@ -45,29 +45,29 @@ class ServicesScreen extends StatelessWidget {
     final services = [
       {
         'icon': Icons.assignment_ind,
-        'title': 'hrSupport'.tr(),
+        'title': 'elve'.tr(),
         'route': '/hr-requests',
       },
-      {
-        'icon': Icons.local_cafe,
-        'title': 'pantry'.tr(),
-        'route': '/pantry-request',
-      },
-      {
-        'icon': Icons.smart_toy_outlined,
-        'title': 'askBot'.tr(),
-        'route': '/ask-ai',
-      },
+      // {
+      //   'icon': Icons.local_cafe,
+      //   'title': 'pantry'.tr(),
+      //   'route': '/pantry-request',
+      // },
+      // {
+      //   'icon': Icons.smart_toy_outlined,
+      //   'title': 'askBot'.tr(),
+      //   'route': '/ask-ai',
+      // },
       {
         'icon': Icons.people_alt_outlined,
         'title': 'tmsContacts'.tr(),
         'route': '/team-contacts',
       },
-      {
-        'icon': Icons.calendar_month,
-        'title': 'upCmEvents'.tr(),
-        'route': '/events',
-      },
+      // {
+      //   'icon': Icons.calendar_month,
+      //   'title': 'upCmEvents'.tr(),
+      //   'route': '/events',
+      // },
     ];
 
     return Padding(

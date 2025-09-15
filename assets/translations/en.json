@@ -18,6 +18,7 @@
   "chkOutTime": "Check-out: {chkoutTime}",
   "pantry": "Pantry",
   "hrSupport": "HR Support",
+  "elve": "Eleave",
   "askBot": "Ask Bot",
   "helpDesk": "Help Desk",
   "upCmEvents": "Upcoming Events",
@@ -51,5 +52,14 @@
   "subReq": "Submit Request",
   "wlcmBck": "Welcome Back!",
   "lgnAcc": "Login to your account",
-  "wlc": "Welcome to MOET Employee App"
+  "wlc": "Welcome to MOET Employee App",
+  "dte": "Date",
+  "time": "Time",
+  "duration" : "Duration",
+  "avlbe" : "Available",
+  "alowd" : "Allowed",
+  "erlyOt":  "Early Out",
+  "ltn": "Late In",
+  "Absnt": "Absent"
+
 }

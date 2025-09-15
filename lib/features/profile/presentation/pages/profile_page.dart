@@ -274,7 +274,7 @@ class _ProfilePageState extends State<ProfilePage>
                   const SizedBox(height: 12),
                   HealthCard(healthData: healthData),
                   const SizedBox(height: 12),
-                  _statsRow(),
+                  //_statsRow(),
                   const SizedBox(height: 28),
                 ],
               );
