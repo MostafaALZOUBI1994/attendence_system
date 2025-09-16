@@ -1,3 +1,4 @@
+// features/services/leave/view/hr_request_screen.dart
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui'; // BackdropFilter
@@ -17,13 +18,21 @@ import '../../../../core/local_services/local_services.dart';
 import '../../../reports/domain/entities/report_model.dart';
 import '../../../reports/presentation/bloc/report_bloc.dart';
 
-// Services (existing)
+// Domain entities
 import '../../domain/entities/eleave_entity.dart';
 import '../../domain/entities/permission_types_entity.dart';
-import '../bloc/services_bloc.dart';
-import '../widgets/date_picker.dart'; // <- SimpleDatePicker (updated in next file)
-import '../widgets/time_picker.dart';
-import 'base_screen.dart';
+
+
+
+// Request params
+import '../../data/models/leave_request_params.dart';
+
+// UI helpers
+import '../leave/cubit/leave_data_cubit.dart';
+import '../leave/cubit/leave_submit_cubit.dart';
+import '../widgets/date_picker.dart'; // SimpleDatePicker
+import '../widgets/time_picker.dart'; // SafeTimePicker
+import '../../presentation/pages/base_screen.dart';
 
 class HRRequestScreen extends StatefulWidget {
   const HRRequestScreen({Key? key}) : super(key: key);
@@ -38,13 +47,13 @@ class _HRRequestScreenState extends State<HRRequestScreen>
   final _reasonController = TextEditingController();
   File? _attachment;
 
-  bool _isLeaveRequest = true;
+  bool _isLeaveRequest = true; // reserved for future: attendance correction toggle
   String _selectedType = '';
 
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _fromTime = TimeOfDay.now();
   TimeOfDay _toTime =
-      TimeOfDay.fromDateTime(DateTime.now().add(const Duration(hours: 1)));
+  TimeOfDay.fromDateTime(DateTime.now().add(const Duration(hours: 1)));
 
   late AnimationController _bgAnim;
   late Animation<double> _waveAnim;
@@ -53,8 +62,8 @@ class _HRRequestScreenState extends State<HRRequestScreen>
   void initState() {
     super.initState();
     _bgAnim =
-        AnimationController(vsync: this, duration: const Duration(seconds: 12))
-          ..repeat(reverse: true);
+    AnimationController(vsync: this, duration: const Duration(seconds: 12))
+      ..repeat(reverse: true);
     _waveAnim = CurvedAnimation(parent: _bgAnim, curve: Curves.easeInOutSine);
   }
 
@@ -67,252 +76,312 @@ class _HRRequestScreenState extends State<HRRequestScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BaseScreen(
-      titleKey: 'elve'.tr(),
-      child: Stack(
-        children: [
-          // Animated gradient background
-          AnimatedBuilder(
-            animation: _waveAnim,
-            builder: (_, __) {
-              return Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment(0, -1 + _waveAnim.value * 0.2),
-                    end: Alignment(0, 1 - _waveAnim.value * 0.2),
-                    colors: [
-                      primaryColor.withOpacity(0.12),
-                      primaryColor.withOpacity(0.04),
-                      Colors.white.withOpacity(0.0),
-                    ],
+    return MultiBlocProvider(
+      providers: [
+        // Uses getIt to resolve needed use cases in LeaveDataCubit
+        BlocProvider(
+          create: (_) =>
+          LeaveDataCubit(getIt(), getIt())..load(), // load once
+        ),
+        BlocProvider(
+          create: (_) => LeaveSubmitCubit(getIt()),
+        ),
+      ],
+      child: BaseScreen(
+        titleKey: 'elve'.tr(),
+        child: Stack(
+          children: [
+            // Animated gradient background
+            AnimatedBuilder(
+              animation: _waveAnim,
+              builder: (_, __) {
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment(0, -1 + _waveAnim.value * 0.2),
+                      end: Alignment(0, 1 - _waveAnim.value * 0.2),
+                      colors: [
+                        primaryColor.withOpacity(0.12),
+                        primaryColor.withOpacity(0.04),
+                        Colors.white.withOpacity(0.0),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
 
-          BlocConsumer<ServicesBloc, ServicesState>(
-            listener: _blocListener,
-            builder: (context, state) {
-              if (state is LoadSuccess) {
-                _initSelectedType(state.leaveTypes);
-                final percent = _calculateRemainingHours(state.leaveBalance);
-                final duration = _formatDuration();
-
-                return CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    SliverToBoxAdapter(
+            // Listen to submit results
+            BlocListener<LeaveSubmitCubit, LeaveSubmitState>(
+              listener: (context, st) {
+                st.maybeWhen(
+                  success: (msg) {
+                    _dialog(context, DialogType.success, 'success', msg,
+                        onOk: () =>
+                            context.read<LeaveDataCubit>().load()); // refresh
+                  },
+                  failure: (msg) =>
+                      _dialog(context, DialogType.error, 'oops', msg),
+                  orElse: () {},
+                );
+              },
+              child: BlocBuilder<LeaveDataCubit, LeaveDataState>(
+                builder: (context, state) {
+                  return state.when(
+                    initial: () => const Center(
+                        child: SizedBox.shrink()), // shouldn't be visible
+                    loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                    error: (m) => Center(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                        child: Column(
-                          children: [
-                            _GlassCard(
-                              padding: const EdgeInsets.all(18),
-                              child: _Header(
-                                leaveBalance: state.leaveBalance,
-                                percent: percent,
-                              ),
-                            ),
-                            // const SizedBox(height: 16),
-                            // _GlassCard(
-                            //   padding: const EdgeInsets.symmetric(
-                            //       vertical: 12, horizontal: 10),
-                            //   child: _buildRequestToggle(),
-                            // ),
-                            const SizedBox(height: 16),
-                            _GlassCard(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 18, 16, 10),
-                              child: Form(
-                                key: _formKey,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _SectionTitle('levType'.tr()),
-                                    const SizedBox(height: 8),
-                                    _LeaveTypeChips(
-                                      types: state.leaveTypes,
-                                      selected: _selectedType,
-                                      onSelected: (v) =>
-                                          setState(() => _selectedType = v),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    _SectionTitle('dte'.tr()),
-                                    const SizedBox(height: 8),
-                                    BlocBuilder<ReportBloc, ReportState>(
-                                      builder: (context, reportState) {
-                                        final isLoaded =
-                                            reportState is ReportLoaded;
-                                        return _DateCard(
-                                          date: _selectedDate,
-                                          onTap: isLoaded
-                                              ? () async {
-                                                  await _pickDate(
-                                                    initial: _selectedDate,
-                                                    onPicked: (d) => setState(
-                                                        () =>
-                                                            _selectedDate = d),
-                                                  );
-                                                }
-                                              : () {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content: Text(
-                                                            'Report data is loading...')),
-                                                  );
-                                                },
-                                        );
-                                      },
-                                    ),
-                                    const SizedBox(height: 16),
-                                    _SectionTitle('time'.tr()),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: _TimeCard(
-                                            label: 'from'.tr(),
-                                            time: _fromTime,
-                                            onTap: () async {
-                                              await _pickTime(
-                                                initial: _fromTime,
-                                                onPicked: (t) => setState(
-                                                    () => _fromTime = t),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: _TimeCard(
-                                            label: 'to'.tr(),
-                                            time: _toTime,
-                                            onTap: () async {
-                                              await _pickTime(
-                                                initial: _toTime,
-                                                onPicked: (t) =>
-                                                    setState(() => _toTime = t),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _DurationPill(duration: duration),
-                                    const SizedBox(height: 18),
-                                    _SectionTitle(_isLeaveRequest
-                                        ? 'res'.tr()
-                                        : 'crrRes'.tr()),
-                                    const SizedBox(height: 8),
-                                    TextFormField(
-                                      controller: _reasonController,
-                                      maxLines: 4,
-                                      textInputAction: TextInputAction.newline,
-                                      decoration: _inputDecoration(
-                                        hint: 'entRes'.tr(),
-                                        icon: Icons.edit_rounded,
-                                      ),
-                                      validator: (v) =>
-                                          (v == null || v.trim().isEmpty)
-                                              ? 'plsEntRes'.tr()
-                                              : null,
-                                    ),
-                                    const SizedBox(height: 18),
-                                    _SectionTitle('attachments'.tr()),
-                                    const SizedBox(height: 8),
-                                    _attachment == null
-                                        ? _AttachmentDrop(
-                                            onPick: _pickAttachment)
-                                        : _AttachmentPreview(
-                                            file: _attachment!,
-                                            onRemove: () => setState(
-                                                () => _attachment = null),
-                                          ),
-                                    const SizedBox(height: 14),
-                                    _SubtleDivider(),
-                                    const SizedBox(height: 8),
-                                    _TinyTips(
-                                      text: _isLeaveRequest
-                                          ? '• ${'levType'.tr()}  • ${'dte'.tr()}  • ${'time'.tr()}  • ${'res'.tr()}'
-                                          : '• ${'attCorr'.tr()}  • ${'dte'.tr()}  • ${'time'.tr()}  • ${'crrRes'.tr()}',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 110), // space for CTA
-                          ],
-                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Text(m, textAlign: TextAlign.center),
                       ),
                     ),
-                  ],
-                );
-              }
-              return const Center(child: CircularProgressIndicator());
-            },
-          ),
+                    loaded: (leaveTypes, leaveBalance) {
+                      _initSelectedType(leaveTypes);
+                      final percent = _calculateRemainingHours(leaveBalance);
+                      final duration = _formatDuration();
 
-          // Sticky submit bar
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: _GlassCard(
-                  blur: 16,
-                  color: Colors.white.withOpacity(0.7),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _PrimaryCTA(
-                          label: 'subReq'.tr(),
-                          onTap: _submitForm,
-                          icon: Icons.send_rounded,
+                      return CustomScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding:
+                              const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                              child: Column(
+                                children: [
+                                  _GlassCard(
+                                    padding: const EdgeInsets.all(18),
+                                    child: _Header(
+                                      leaveBalance: leaveBalance,
+                                      percent: percent,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // Toggle reserved (disabled for now)
+                                  // _GlassCard(
+                                  //   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                  //   child: _buildRequestToggle(),
+                                  // ),
+                                  // const SizedBox(height: 16),
+                                  _GlassCard(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 18, 16, 10),
+                                    child: Form(
+                                      key: _formKey,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                        children: [
+                                          _SectionTitle('levType'.tr()),
+                                          const SizedBox(height: 8),
+                                          _LeaveTypeChips(
+                                            types: leaveTypes,
+                                            selected: _selectedType,
+                                            onSelected: (v) => setState(
+                                                    () => _selectedType = v),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          _SectionTitle('dte'.tr()),
+                                          const SizedBox(height: 8),
+                                          BlocBuilder<ReportBloc, ReportState>(
+                                            builder:
+                                                (context, reportState) {
+                                              final isLoaded = reportState
+                                              is ReportLoaded;
+                                              return _DateCard(
+                                                date: _selectedDate,
+                                                onTap: isLoaded
+                                                    ? () async {
+                                                  await _pickDate(
+                                                    initial:
+                                                    _selectedDate,
+                                                    onPicked: (d) =>
+                                                        setState(() =>
+                                                        _selectedDate =
+                                                            d),
+                                                  );
+                                                }
+                                                    : () {
+                                                  ScaffoldMessenger.of(
+                                                      context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                          'Report data is loading...'),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                          const SizedBox(height: 16),
+                                          _SectionTitle('time'.tr()),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: _TimeCard(
+                                                  label: 'from'.tr(),
+                                                  time: _fromTime,
+                                                  onTap: () async {
+                                                    await _pickTime(
+                                                      initial: _fromTime,
+                                                      onPicked: (t) =>
+                                                          setState(() =>
+                                                          _fromTime = t),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: _TimeCard(
+                                                  label: 'to'.tr(),
+                                                  time: _toTime,
+                                                  onTap: () async {
+                                                    await _pickTime(
+                                                      initial: _toTime,
+                                                      onPicked: (t) =>
+                                                          setState(() =>
+                                                          _toTime = t),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 12),
+                                          _DurationPill(duration: duration),
+                                          const SizedBox(height: 18),
+                                          _SectionTitle(_isLeaveRequest
+                                              ? 'res'.tr()
+                                              : 'crrRes'.tr()),
+                                          const SizedBox(height: 8),
+                                          TextFormField(
+                                            controller: _reasonController,
+                                            maxLines: 4,
+                                            textInputAction:
+                                            TextInputAction.newline,
+                                            decoration: _inputDecoration(
+                                              hint: 'entRes'.tr(),
+                                              icon: Icons.edit_rounded,
+                                            ),
+                                            validator: (v) => (v == null ||
+                                                v.trim().isEmpty)
+                                                ? 'plsEntRes'.tr()
+                                                : null,
+                                          ),
+                                          const SizedBox(height: 18),
+                                          _SectionTitle('attachments'.tr()),
+                                          const SizedBox(height: 8),
+                                          _attachment == null
+                                              ? _AttachmentDrop(
+                                              onPick: _pickAttachment)
+                                              : _AttachmentPreview(
+                                            file: _attachment!,
+                                            onRemove: () => setState(() =>
+                                            _attachment =
+                                            null),
+                                          ),
+                                          const SizedBox(height: 14),
+                                          _SubtleDivider(),
+                                          const SizedBox(height: 8),
+                                          _TinyTips(
+                                            text: _isLeaveRequest
+                                                ? '• ${'levType'.tr()}  • ${'dte'.tr()}  • ${'time'.tr()}  • ${'res'.tr()}'
+                                                : '• ${'attCorr'.tr()}  • ${'dte'.tr()}  • ${'time'.tr()}  • ${'crrRes'.tr()}',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 110), // space for CTA
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+
+            // Sticky submit bar
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: _GlassCard(
+                    blur: 16,
+                    color: Colors.white.withOpacity(0.7),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: BlocBuilder<LeaveSubmitCubit, LeaveSubmitState>(
+                            builder: (context, st) {
+                              final submitting =
+                              st.maybeWhen(submitting: () => true,
+                                  orElse: () => false);
+                              return ElevatedButton.icon(
+                                icon: submitting
+                                    ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor:
+                                      AlwaysStoppedAnimation(
+                                          Colors.white)),
+                                )
+                                    : const Icon(Icons.send_rounded),
+                                onPressed: submitting ? null : _submitForm,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryColor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 14, horizontal: 16),
+                                  elevation: 2,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.circular(14)),
+                                ),
+                                label: Text('subReq'.tr(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w800)),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // ---------- Logic / helpers ----------
-
-  void _blocListener(BuildContext context, ServicesState state) {
-    state.maybeWhen(
-      error: (msg) => _dialog(context, DialogType.error, 'oops', msg),
-      submissionSuccess: (msg) => _dialog(
-        context,
-        DialogType.success,
-        'success',
-        msg,
-        onOk: () => context.read<ServicesBloc>().add(const LoadData()),
-      ),
-      submissionFailure: (msg) =>
-          _dialog(context, DialogType.error, 'oops', msg),
-      orElse: () {},
-    );
-  }
+  // ---------- Dialogs ----------
 
   void _dialog(
-    BuildContext ctx,
-    DialogType type,
-    String titleKey,
-    String desc, {
-    VoidCallback? onOk,
-  }) {
+      BuildContext ctx,
+      DialogType type,
+      String titleKey,
+      String desc, {
+        VoidCallback? onOk,
+      }) {
     AwesomeDialog(
       context: ctx,
       dialogType: type,
@@ -323,19 +392,19 @@ class _HRRequestScreenState extends State<HRRequestScreen>
     ).show();
   }
 
-  // ---- Allowed dates from ReportBloc.filteredReport & date-only utility
+  // ---------- Report helpers (allowed dates & auto-times) ----------
+
   DateTime _dOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
   Set<DateTime> _allowedDatesFromFiltered() {
     final st = context.read<ReportBloc>().state; // non-listening
     final filtered = st.whenOrNull(
-          loaded: (report, filteredReport) => filteredReport,
-        ) ??
+      loaded: (report, filteredReport) => filteredReport,
+    ) ??
         const <Report>[];
     return filtered.map((r) => _dOnly(r.pdate)).toSet();
   }
 
-  // ---- Parse and time math helpers
   TimeOfDay _parseHHmm(String s) {
     if (s.isEmpty) return const TimeOfDay(hour: 0, minute: 0);
     final parts = s.split(':');
@@ -441,7 +510,6 @@ class _HRRequestScreenState extends State<HRRequestScreen>
     }
   }
 
-  // ---- Open date bottom sheet with allowedDates
   Future<void> _pickDate({
     required DateTime initial,
     required ValueChanged<DateTime> onPicked,
@@ -456,7 +524,6 @@ class _HRRequestScreenState extends State<HRRequestScreen>
 
     final init = allowed.contains(_dOnly(initial)) ? initial : allowed.first;
 
-    // Build a date→issue map (“Late In” / “Early Out”) from filtered reports
     Map<DateTime, String> _issuesFromFiltered() {
       final st = context.read<ReportBloc>().state;
       final filtered = st.whenOrNull(
@@ -487,7 +554,7 @@ class _HRRequestScreenState extends State<HRRequestScreen>
         child: SimpleDatePicker(
           selectedDate: init,
           allowedDates: allowed,
-          issues: _issuesFromFiltered(), // pass in the issues map
+          issues: _issuesFromFiltered(),
           onDateSelected: (d) async {
             await _applyAutoTimesForDate(d); // auto-fill times based on issue
             onPicked(d);
@@ -498,39 +565,12 @@ class _HRRequestScreenState extends State<HRRequestScreen>
     );
   }
 
+  // ---------- Misc helpers ----------
 
   void _initSelectedType(List<PermissionTypesEntity> types) {
     if (_selectedType.isEmpty && types.isNotEmpty) {
       _selectedType = types.first.permissionCode;
     }
-  }
-
-  Widget _buildRequestToggle() {
-    return LayoutBuilder(
-      builder: (context, _) {
-        return Row(
-          children: [
-            Expanded(
-              child: _SegmentBtn(
-                icon: Icons.beach_access_rounded,
-                label: 'levReq'.tr(),
-                selected: _isLeaveRequest,
-                onTap: () => setState(() => _isLeaveRequest = true),
-              ),
-            ),
-            // const SizedBox(width: 8),
-            // Expanded(
-            //   child: _SegmentBtn(
-            //     icon: Icons.edit_calendar_rounded,
-            //     label: 'attCorr'.tr(),
-            //     selected: !_isLeaveRequest,
-            //     onTap: () => setState(() => _isLeaveRequest = false),
-            //   ),
-            // ),
-          ],
-        );
-      },
-    );
   }
 
   InputDecoration _inputDecoration({
@@ -579,21 +619,19 @@ class _HRRequestScreenState extends State<HRRequestScreen>
   Future<void> _submitForm() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final dur = _formatDuration();
     final attachmentB64 = await _fileToBase64(_attachment);
     final date = DateFormat('dd/MM/yyyy', 'en').format(_selectedDate);
 
-    context.read<ServicesBloc>().add(
-          ServicesEvent.submitRequest(
-            dateDayType: date,
-            fromTime: _formatTimeOfDay(_fromTime),
-            toTime: _formatTimeOfDay(_toTime),
-            duration: dur,
-            reason: _reasonController.text,
-            attachment: attachmentB64 ?? '',
-            eLeaveType: _selectedType,
-          ),
-        );
+    final params = SubmitLeaveRequestParams(
+      datedaytype: date,
+      fromtime: _formatTimeOfDay(_fromTime),
+      totime: _formatTimeOfDay(_toTime),
+      duration: _formatDuration(),
+      reason: _reasonController.text,
+      attachment: attachmentB64 ?? '',
+      eleavetype: _selectedType,
+    );
+    context.read<LeaveSubmitCubit>().submit(params);
   }
 
   String _formatTimeOfDay(TimeOfDay t) {
@@ -619,18 +657,21 @@ class _HRRequestScreenState extends State<HRRequestScreen>
   }
 
   double _calculateRemainingHours(EleaveEntity lb) {
+    // Percent = available / allowed (clamped)
     try {
-      final av = _parseTime(lb.noOfHrsUtilized);
-      final al = _parseTime(lb.noOfHrsAllowed);
-      return al <= 0 ? 0 : (av / al).clamp(0, 1);
+      final available = _parseTimeToHours(lb.noOfHrsAvailable);
+      final allowed = _parseTimeToHours(lb.noOfHrsAllowed);
+      return allowed <= 0 ? 0 : (available / allowed).clamp(0, 1);
     } catch (_) {
       return 0;
     }
   }
 
-  double _parseTime(String s) {
+  double _parseTimeToHours(String s) {
     final p = s.split(':');
-    return double.parse(p[0]) + double.parse(p[1]) / 60;
+    final h = double.tryParse(p[0]) ?? 0;
+    final m = double.tryParse(p.length > 1 ? p[1] : '0') ?? 0;
+    return h + m / 60.0;
   }
 }
 
@@ -654,7 +695,7 @@ class _Header extends StatelessWidget {
               child: Align(
                 alignment: Alignment.topRight,
                 child:
-                    Icon(Icons.blur_on_rounded, size: 120, color: primaryColor),
+                Icon(Icons.blur_on_rounded, size: 120, color: primaryColor),
               ),
             ),
           ),
@@ -724,62 +765,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _SegmentBtn extends StatelessWidget {
-  const _SegmentBtn({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final bg = selected ? primaryColor : Colors.white.withOpacity(0.7);
-    final fg = selected ? Colors.white : Colors.black87;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-        border:
-            Border.all(color: selected ? primaryColor : Colors.grey.shade300),
-        boxShadow: selected
-            ? [
-                BoxShadow(
-                  color: primaryColor.withOpacity(0.25),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                )
-              ]
-            : [],
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: fg),
-              const SizedBox(width: 8),
-              Text(label,
-                  style: TextStyle(color: fg, fontWeight: FontWeight.w700)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _LeaveTypeChips extends StatelessWidget {
   const _LeaveTypeChips({
     required this.types,
@@ -802,7 +787,7 @@ class _LeaveTypeChips extends StatelessWidget {
         for (final t in types)
           ChoiceChip(
             label:
-                Text(locale == 'ar' ? t.permissionNameAR : t.permissionNameEN),
+            Text(locale == 'ar' ? t.permissionNameAR : t.permissionNameEN),
             selected: selected == t.permissionCode,
             onSelected: (_) => onSelected(t.permissionCode),
             selectedColor: primaryColor.withOpacity(0.15),
@@ -909,7 +894,8 @@ class _DurationPill extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             '${'duration'.tr()}: $duration',
-            style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
+            style: const TextStyle(
+                fontWeight: FontWeight.w700, letterSpacing: 0.2),
           )
         ],
       ),
@@ -1001,61 +987,6 @@ class DottedBorderContainer extends StatelessWidget {
             border: Border.all(color: Colors.grey.shade400, width: 1.2),
           ),
           child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _PrimaryCTA extends StatelessWidget {
-  const _PrimaryCTA({required this.label, required this.onTap, this.icon});
-
-  final String label;
-  final VoidCallback onTap;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      icon: Icon(icon ?? Icons.send_rounded),
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
-    );
-  }
-}
-
-class _SecondaryIconBtn extends StatelessWidget {
-  const _SecondaryIconBtn({
-    required this.icon,
-    required this.onTap,
-    required this.tooltip,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: const Padding(
-            padding: EdgeInsets.all(12),
-            child: Icon(Icons.attach_file_rounded, color: Colors.black87),
-          ),
         ),
       ),
     );

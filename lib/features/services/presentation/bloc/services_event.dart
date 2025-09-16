@@ -13,4 +13,8 @@ class ServicesEvent with _$ServicesEvent {
     required String attachment,
     required String eLeaveType,
   }) = SubmitRequest;
+
+  const factory ServicesEvent.fetchEmployees({
+    required String department,
+  }) = FetchEmployees;
 }

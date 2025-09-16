@@ -75,6 +75,7 @@ dependencies:
 
 
 
+
 dev_dependencies:
   injectable_generator: ^2.7.0
   flutter_test:

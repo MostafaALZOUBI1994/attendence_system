@@ -9,7 +9,9 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/local_services/local_services.dart';
 import '../../../authentication/data/datasources/employee_local_data_source.dart';
+import '../../domain/entities/employee_details_entity.dart';
 import '../../domain/repositories/services_repository.dart';
+import '../models/EmployeeDetailsModel.dart';
 import '../models/eleave_model.dart';
 import '../models/leave_request_params.dart';
 import '../models/permission_types_model.dart';
@@ -127,5 +129,40 @@ class ServicesRepositoryImpl implements ServiceRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, List<EmployeeDetailsEntity>>> getEmployeeDetails({
+    required String department,
+  }) async {
+    try {
+      final responseEither = await _dio.safe(
+            () => _dio.get(
+          '/GetEmployeeDetails',
+          queryParameters: {'department': department},
+        ),
+            (res) => res,
+      );
+
+      return await responseEither.fold(
+            (failure) => Left(failure),
+            (response) {
+          final list = response.data as List<dynamic>;
+          final entities = list
+              .map((e) => EmployeeDetailsModel.fromJson(e as Map<String, dynamic>))
+              .map((m) => EmployeeDetailsEntity(
+            displayNameAr: m.displayNameAr,
+            displayNameEn: m.displayNameEn,
+            titleEn: m.titleEn,
+            titleAr: m.titleAr,
+            phoneNumber: m.phoneNumber,
+            photoBase64: m.photoBase64, email: m.email
+          ))
+              .toList();
+          return Right(entities);
+        },
+      );
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: $e'));
+    }
+  }
 }
 
