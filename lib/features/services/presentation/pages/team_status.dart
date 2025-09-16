@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/injection.dart'; // ⬅️ getIt lives here
+import '../../../../core/local_services/local_services.dart';
 import '../../domain/entities/employee_details_entity.dart';
 import '../../domain/usecases/get_employee_details.dart';
 import '../employees/cubit/employees_cubit.dart';
@@ -77,10 +78,11 @@ class _TeamMemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = getIt<LocalService>().getSavedLocale().languageCode;
     final displayName =
-    member.displayNameEn.isNotEmpty ? member.displayNameEn : member.displayNameAr;
+    locale == "ar" ? member.displayNameAr : member.displayNameEn;
     final title =
-    member.titleEn.isNotEmpty ? member.titleEn : member.titleAr;
+    locale == "ar" ? member.titleAr : member.titleEn;
     final ext = member.phoneNumber;
     final avatar = _decodeBase64(member.photoBase64);
     final mail = member.email;

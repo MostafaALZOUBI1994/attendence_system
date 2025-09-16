@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/constants/constants.dart';
+import '../../../../../core/injection.dart';
+import '../../../../../core/local_services/local_services.dart';
 import '../../../presentation/pages/base_screen.dart';
 
 import '../../../domain/entities/employee_details_entity.dart';
@@ -60,10 +62,12 @@ class _TeamMemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = member.displayNameEn.isNotEmpty ? member.displayNameEn : member.displayNameAr;
-    final title = member.titleEn.isNotEmpty ? member.titleEn : member.titleAr;
-    final ext = member.phoneNumber;
+    final locale = getIt<LocalService>().getSavedLocale().languageCode;
+    final displayName = locale =="ar" ? member.displayNameEn : member.displayNameAr;
+    final title = locale =="ar"  ? member.titleEn : member.titleAr;
+    final ext =   member.phoneNumber;
     final avatar = _decodeBase64(member.photoBase64);
+
 
     return Card(
       shape: RoundedRectangleBorder(
