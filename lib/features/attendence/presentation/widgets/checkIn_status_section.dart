@@ -16,7 +16,6 @@ class CheckInStatusSection extends StatelessWidget {
   final TodayStatus todayStatus;
   final int currentStepIndex;
   final Duration remainingTime;
-  final double progress;
   final bool isCheckInSuccess;
 
   const CheckInStatusSection({
@@ -25,7 +24,6 @@ class CheckInStatusSection extends StatelessWidget {
     required this.todayStatus,
     required this.currentStepIndex,
     required this.remainingTime,
-    required this.progress,
     required this.isCheckInSuccess,
   }) : super(key: key);
 

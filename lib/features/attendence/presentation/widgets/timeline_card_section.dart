@@ -11,7 +11,7 @@ class TimelineCardSection extends StatelessWidget {
   final TodayStatus todayStatus;
   final int currentStepIndex;
   final Duration remainingTime;
-  final double progress;
+
 
   const TimelineCardSection({
     Key? key,
@@ -19,7 +19,6 @@ class TimelineCardSection extends StatelessWidget {
     required this.todayStatus,
     required this.currentStepIndex,
     required this.remainingTime,
-    required this.progress,
   }) : super(key: key);
 
   @override

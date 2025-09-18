@@ -12,7 +12,7 @@ class MainContent extends StatelessWidget {
   final Employee employee;
   final int currentStepIndex;
   final Duration remainingTime;
-  final double progress;
+
   final TodayStatus todayStatus;
   final bool isCheckInSuccess;
 
@@ -21,7 +21,7 @@ class MainContent extends StatelessWidget {
     required this.employee,
     required this.currentStepIndex,
     required this.remainingTime,
-    required this.progress,
+
     required this.todayStatus,
     required this.isCheckInSuccess,
   }) : super(key: key);
@@ -43,7 +43,6 @@ class MainContent extends StatelessWidget {
                 todayStatus: todayStatus,
                 currentStepIndex: currentStepIndex,
                 remainingTime: remainingTime,
-                progress: progress,
                 isCheckInSuccess: isCheckInSuccess,
               ),
             const SizedBox(height: 10),
@@ -52,7 +51,6 @@ class MainContent extends StatelessWidget {
               todayStatus: todayStatus,
               currentStepIndex: currentStepIndex,
               remainingTime: remainingTime,
-              progress: progress,
             ),
             const SizedBox(height: 10),
             if (todayStatus.offSiteCheckIns.isNotEmpty)

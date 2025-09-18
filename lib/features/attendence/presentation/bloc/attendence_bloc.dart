@@ -111,7 +111,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
           todayStatus: loaded.todayStatus,
           currentStepIndex: loaded.currentStepIndex,
           remainingTime: loaded.remainingTime,
-          progress: loaded.progress,
+
         ));
       },
           (successMessage) {
@@ -121,7 +121,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
           todayStatus: loaded.todayStatus,
           currentStepIndex: loaded.currentStepIndex + 1,
           remainingTime: loaded.remainingTime,
-          progress: loaded.progress,
+
         ));
 
         Future.delayed(const Duration(milliseconds: 1500), () {

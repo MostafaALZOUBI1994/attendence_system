@@ -107,6 +107,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
             checkIns,
             DateTime.now().millisecondsSinceEpoch,
           );
+
           return Right(data['_statusMessage'] as String);
         },
       );

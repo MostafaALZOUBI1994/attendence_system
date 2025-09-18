@@ -111,6 +111,7 @@ class _MyAppState extends State<MyApp> {
    super.initState();
   }
   car() async {
+
     await CarPlayService.init();     // keep this idempotent
     await CarChannel.register();     // if your bridge needs it
     CarPlayService.onCheckIn = CarBridge.handleCheckIn;

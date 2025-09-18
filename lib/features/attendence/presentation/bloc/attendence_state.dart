@@ -19,7 +19,7 @@ class AttendenceState with _$AttendenceState {
     required TodayStatus todayStatus,
     @Default(0) int currentStepIndex,
     @Default(Duration.zero) Duration remainingTime,
-    @Default(0.0) double progress,
+
   }) = CheckInSuccess;
 
   const factory AttendenceState.error({
@@ -28,7 +28,7 @@ class AttendenceState with _$AttendenceState {
     required TodayStatus todayStatus,
     @Default(0) int currentStepIndex,
     @Default(Duration.zero) Duration remainingTime,
-    @Default(0.0) double progress,
+
   }) = Error;
 }
 
