@@ -1,6 +1,4 @@
 import 'package:injectable/injectable.dart';
-import 'package:dartz/dartz.dart';
-import '../../../../core/errors/failures.dart';
 import '../repositories/mood_repository.dart';
 
 @lazySingleton

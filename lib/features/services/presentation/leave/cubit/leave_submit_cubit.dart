@@ -1,11 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 import '../../../data/models/leave_request_params.dart';
 import '../../../domain/usecases/submit_leaveRequest.dart';
 
 part 'leave_submit_cubit.freezed.dart';
 part 'leave_submit_state.dart';
 
+@injectable
 class LeaveSubmitCubit extends Cubit<LeaveSubmitState> {
   final SubmitLeaveRequestUseCase _submit;
   LeaveSubmitCubit(this._submit) : super(const LeaveSubmitState.idle());
@@ -19,3 +21,4 @@ class LeaveSubmitCubit extends Cubit<LeaveSubmitState> {
     );
   }
 }
+

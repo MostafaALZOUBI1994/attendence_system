@@ -1,16 +1,18 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/employee_mood.dart';
 import '../../domain/repositories/mood_repository.dart';
 
+@LazySingleton(as: MoodRepository)
 class MoodRepositoryImpl implements MoodRepository {
   final Dio _dio;
   MoodRepositoryImpl(this._dio);
 
-  // Formatters: API POST expects "yyyy/MM/dd"; GET expects "yyyy-MM-dd"
+
   final _postFmt = DateFormat('yyyy/MM/dd');
   final _getFmt  = DateFormat('yyyy-MM-dd');
 

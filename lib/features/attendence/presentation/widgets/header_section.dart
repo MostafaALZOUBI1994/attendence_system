@@ -72,13 +72,13 @@ class _HeaderSectionState extends State<HeaderSection> {
             ),
           ],
         ),
-        const SizedBox(width: 25),
-        Lottie.asset(
-          'assets/lottie/sunny.json',
-          width: 48,
-          height: 48,
-          fit: BoxFit.cover,
-        ),
+        // const SizedBox(width: 25),
+        // Lottie.asset(
+        //   'assets/lottie/sunny.json',
+        //   width: 48,
+        //   height: 48,
+        //   fit: BoxFit.cover,
+        // ),
       ],
     );
   }

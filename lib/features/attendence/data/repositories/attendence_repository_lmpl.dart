@@ -26,8 +26,6 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
   Future<Either<Failure, TodayStatus>> getTodayStatus() async {
     try {
       final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
-
-
       final responseEither = await _dio.safe(
             () =>
             _dio.get(

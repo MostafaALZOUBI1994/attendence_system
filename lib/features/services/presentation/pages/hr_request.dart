@@ -28,6 +28,9 @@ import '../../domain/entities/permission_types_entity.dart';
 import '../../data/models/leave_request_params.dart';
 
 // UI helpers
+import '../../domain/usecases/get_allowed_hours.dart';
+import '../../domain/usecases/get_permission_types.dart';
+import '../../domain/usecases/submit_leaveRequest.dart';
 import '../leave/cubit/leave_data_cubit.dart';
 import '../leave/cubit/leave_submit_cubit.dart';
 import '../widgets/date_picker.dart'; // SimpleDatePicker
@@ -78,16 +81,60 @@ class _HRRequestScreenState extends State<HRRequestScreen>
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // Uses getIt to resolve needed use cases in LeaveDataCubit
         BlocProvider(
-          create: (_) =>
-          LeaveDataCubit(getIt(), getIt())..load(), // load once
+          create: (_) => LeaveDataCubit(
+            getIt<GetPermissionTypesUseCase>(),
+            getIt<GetAllowedHourseUseCase>(),
+          )..load(),
         ),
         BlocProvider(
-          create: (_) => LeaveSubmitCubit(getIt()),
+          create: (_) => LeaveSubmitCubit(getIt<SubmitLeaveRequestUseCase>()),
         ),
       ],
-      child: BaseScreen(
+      child:BlocListener<LeaveSubmitCubit, LeaveSubmitState>(
+        listener: (ctx, st) {
+          st.maybeWhen(
+            success: (msg) {
+              // capture a provider-visible context for refresh
+              final dataCtx = ctx;
+
+              // use root navigator context only to show dialog
+              final rootOverlay = Navigator.of(ctx, rootNavigator: true).overlay;
+              final rootContext = rootOverlay?.context ?? ctx;
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                AwesomeDialog(
+                  context: rootContext,
+                  dialogType: DialogType.success,
+                  animType: AnimType.rightSlide,
+                  title: 'success'.tr(),
+                  desc: msg.isEmpty ? 'Submitted successfully' : msg,
+                  btnOkOnPress: () {
+                    // refresh with provider context (NOT rootContext)
+                    dataCtx.read<LeaveDataCubit>().load();
+                  },
+                ).show();
+              });
+            },
+            failure: (msg) {
+              final rootOverlay = Navigator.of(ctx, rootNavigator: true).overlay;
+              final rootContext = rootOverlay?.context ?? ctx;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                AwesomeDialog(
+                  context: rootContext,
+                  dialogType: DialogType.error,
+                  animType: AnimType.rightSlide,
+                  title: 'oops'.tr(),
+                  desc: msg.isEmpty ? 'Request failed' : msg,
+                  btnOkOnPress: () {},
+                ).show();
+              });
+            },
+            orElse: () {},
+          );
+        },
+        child:
+        BaseScreen(
         titleKey: 'elve'.tr(),
         child: Stack(
           children: [
@@ -343,7 +390,8 @@ class _HRRequestScreenState extends State<HRRequestScreen>
                                           Colors.white)),
                                 )
                                     : const Icon(Icons.send_rounded),
-                                onPressed: submitting ? null : _submitForm,
+                                  onPressed: submitting ? null : () => _submitForm(context), // ✅ pass descendant ctx
+
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: primaryColor,
                                   foregroundColor: Colors.white,
@@ -370,7 +418,7 @@ class _HRRequestScreenState extends State<HRRequestScreen>
           ],
         ),
       ),
-    );
+    ));
   }
 
   // ---------- Dialogs ----------
@@ -616,7 +664,8 @@ class _HRRequestScreenState extends State<HRRequestScreen>
     );
   }
 
-  Future<void> _submitForm() async {
+  Future<void> _submitForm(BuildContext ctx) async {
+
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final attachmentB64 = await _fileToBase64(_attachment);
@@ -631,7 +680,7 @@ class _HRRequestScreenState extends State<HRRequestScreen>
       attachment: attachmentB64 ?? '',
       eleavetype: _selectedType,
     );
-    context.read<LeaveSubmitCubit>().submit(params);
+    ctx.read<LeaveSubmitCubit>().submit(params);
   }
 
   String _formatTimeOfDay(TimeOfDay t) {
