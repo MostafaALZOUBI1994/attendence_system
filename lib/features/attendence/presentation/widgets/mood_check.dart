@@ -7,10 +7,10 @@ import 'package:lottie/lottie.dart';
 import '../../../../core/constants/constants.dart';
 
 class MoodCheckJoystick extends StatefulWidget {
-  final Function(String) onCheckInWithMood;
 
-  const MoodCheckJoystick({required this.onCheckInWithMood, Key? key})
-      : super(key: key);
+  final Future<void> Function(String) onCheckInWithMood;
+  const MoodCheckJoystick({required this.onCheckInWithMood, Key? key}) : super(key: key);
+
 
   @override
   _MoodCheckJoystickState createState() => _MoodCheckJoystickState();
@@ -115,34 +115,18 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
             return Positioned(
               left: 110 + 80 * cos(angle) - 24,
               top: 110 + 80 * sin(angle) - 24,
-              child: ScaleTransition(
-                scale: Tween<double>(
-                  begin: 0.9,
-                  end: 1.1,
-                ).animate(
-                  CurvedAnimation(
-                    parent: _controller,
-                    curve: const Interval(
-                      0.2,
-                      0.8,
-                      curve: Curves.easeInOut,
-                    ),
-                  ),
-                ),
-                child: AnimatedOpacity(
-                  opacity: _selectedMood == mood['label'] ? 1 : 0.6,
-                  duration: const Duration(milliseconds: 200),
-                  child: Lottie.asset(
-                    mood['lottie'],
-                    width: 48,
-                    height: 48,
-                    fit: BoxFit.cover,
-                  ),
+              child: AnimatedOpacity(
+                opacity: _selectedMood == mood['label'] ? 1 : 0.6,
+                duration: const Duration(milliseconds: 200),
+                child: Lottie.asset(
+                  mood['lottie'],
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
                 ),
               ),
             );
           }).toList(),
-
           Positioned(
             left: 75 + _offset.dx,
             top: 75 + _offset.dy,

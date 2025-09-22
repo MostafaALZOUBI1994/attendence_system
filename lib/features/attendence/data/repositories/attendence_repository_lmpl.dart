@@ -10,7 +10,9 @@ import 'package:ntp/ntp.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/local_services/local_services.dart';
+import '../../../../core/sync/offsite_event_bus.dart';
 import '../../../authentication/data/datasources/employee_local_data_source.dart';
+import 'package:moet_hub/core/sync/offsite_event_bus.dart';
 
 @LazySingleton(as: AttendenceRepository)
 class AttendenceRepositoryImpl implements AttendenceRepository {
@@ -63,12 +65,14 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
+
   @override
   Future<Either<Failure, String>> checkIn() async {
     try {
       final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
       final String time = intl.DateFormat('dd/MM/yyyy HH:mm:ss', 'en')
           .format(await NTP.now());
+
       final responseEither = await _dio.safe(
             () => _dio.post(
           '/CheckIn',
@@ -103,10 +107,14 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
             return Left(ServerFailure(data['_statusMessage'] as String));
           }
 
+          // Persist locally
           _localService.addMillis(
             checkIns,
             DateTime.now().millisecondsSinceEpoch,
           );
+
+
+          getIt<OffsiteEventBus>().notifyChanged();
 
           return Right(data['_statusMessage'] as String);
         },

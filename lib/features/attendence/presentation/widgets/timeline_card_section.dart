@@ -1,17 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:moet_hub/features/attendence/presentation/widgets/timeline.dart';
+
 import '../../../authentication/domain/entities/employee.dart';
 import '../../domain/entities/process_step.dart';
 import '../../domain/entities/today_status.dart';
 
-/// Wraps the process timeline in a card.
 class TimelineCardSection extends StatelessWidget {
   final Employee employee;
   final TodayStatus todayStatus;
   final int currentStepIndex;
   final Duration remainingTime;
-
 
   const TimelineCardSection({
     Key? key,
@@ -23,21 +23,23 @@ class TimelineCardSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Build process steps list from todayStatus
     final steps = <ProcessStep>[
       ProcessStep(
         'offSiteCheckIns'.tr(),
         Icons.wifi,
         todayStatus.offSiteCheckIns.isNotEmpty
-            ? DateFormat('hh:mm a', 'en')
-            .format(DateTime.fromMillisecondsSinceEpoch(
-            todayStatus.offSiteCheckIns.last))
+            ? DateFormat('hh:mm a', 'en').format(
+          DateTime.fromMillisecondsSinceEpoch(
+            todayStatus.offSiteCheckIns.last,
+          ),
+        )
             : '--:--',
       ),
       ProcessStep('onSiteCheckIn'.tr(), Icons.fingerprint, todayStatus.punchInOffice),
       ProcessStep('working'.tr(), Icons.work, todayStatus.expectedOutTime),
-      ProcessStep('chkOut'.tr(), Icons.logout, todayStatus.expectedOutTime),
+      ProcessStep('chkOut'.tr(), Icons.logout, todayStatus.outTime.isNotEmpty ? todayStatus.outTime : todayStatus.expectedOutTime),
     ];
+
     return Card(
       elevation: 5,
       color: Colors.white.withOpacity(0.7),
@@ -46,10 +48,8 @@ class TimelineCardSection extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(
-              'attSystem'.tr(),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            Text('attSystem'.tr(),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
             ProcessTimeline(currentIndex: currentStepIndex, steps: steps),
           ],

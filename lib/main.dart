@@ -24,16 +24,16 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase for phone UI
+  await configureDependencies(); // OK: fast
+  await EasyLocalization.ensureInitialized(); // OK: needed before runApp
+
+  // ✅ Do NOT wait for Firebase Messaging / APNs before runApp
+  // Initialize Firebase core only (fast)
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
-
-  await configureDependencies();
-  await EasyLocalization.ensureInitialized();
-  await _initFirebaseMessaging();
 
   final savedLocale = getIt<LocalService>().getSavedLocale();
   Intl.defaultLocale = savedLocale.languageCode;
@@ -48,8 +48,13 @@ void main() async {
       child: const MyApp(),
     ),
   );
-}
 
+  // ✅ Kick off slower stuff AFTER the first frame (non-blocking)
+  //   (don’t await; let UI show immediately)
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _initFirebaseMessaging(); // no await
+  });
+}
 
 
 @pragma('vm:entry-point')
@@ -65,35 +70,44 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 }
 
+Future<String?> _waitForApnsToken(Duration timeout) async {
+  final end = DateTime.now().add(timeout);
+  String? apns;
+  while (DateTime.now().isBefore(end)) {
+    await Future.delayed(const Duration(milliseconds: 400));
+    apns = await FirebaseMessaging.instance.getAPNSToken();
+    if (apns != null) return apns;
+  }
+  return null;
+}
+
 Future<void> _initFirebaseMessaging() async {
   final messaging = FirebaseMessaging.instance;
 
-  // Request permission on iOS (no-op on Android)
+  // Ask permissions (iOS)
   await messaging.requestPermission(alert: true, badge: true, sound: true);
 
-  // Allow foreground notification presentation on iOS
+  // ✅ No waiting/polling for APNs. Let SDK deliver when ready.
+  await messaging.setAutoInitEnabled(true);
+
+  // Try to get token, but don’t crash/slow if null
+  try {
+    final token = await messaging.getToken();
+    if (token != null) {
+      debugPrint('FCM token: $token');
+      // send to backend if needed
+    }
+  } catch (e) {
+    debugPrint('getToken error (will rely on onTokenRefresh): $e');
+  }
+
+  messaging.onTokenRefresh.listen((t) {
+    debugPrint('FCM token refreshed: $t');
+  });
+
   await messaging.setForegroundNotificationPresentationOptions(
     alert: true, badge: true, sound: true,
   );
-
-
-
-  final fcmToken = await messaging.getToken();
-  if (fcmToken != null) {
-    debugPrint('FCM token: $fcmToken');
-    // TODO: send to your backend
-  }
-  else {
-    // FCM token will be delivered via onTokenRefresh when ready
-    messaging.onTokenRefresh.listen((newToken) {
-      debugPrint('FCM token refreshed: $newToken');
-      // TODO: send to your backend
-    });
-  }
-
-  FirebaseMessaging.onMessage.listen((message) {
-    debugPrint('Foreground message: ${message.messageId}');
-  });
 }
 
 class MyApp extends StatefulWidget {
@@ -107,14 +121,19 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-  car();
-   super.initState();
+    super.initState();
+    _initCarPlay();
   }
-  car() async {
 
-    await CarPlayService.init();     // keep this idempotent
-    await CarChannel.register();     // if your bridge needs it
-    CarPlayService.onCheckIn = CarBridge.handleCheckIn;
+  Future<void> _initCarPlay() async {
+    try {
+      if (Platform.isIOS) {
+        await CarPlayService.init();   // keep idempotent
+        await CarChannel.register();
+      }
+    } catch (e) {
+      debugPrint('CarPlay init skipped: $e');
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -122,8 +141,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider(create: (_) => getIt<ProfileBloc>()),
         BlocProvider(create: (_) => getIt<AuthBloc>()),
-        BlocProvider(create: (_) => getIt<AttendenceBloc>()
-          ..add(const AttendenceEvent.loadData())),
+        BlocProvider(create: (_) => getIt<AttendenceBloc>()),
         BlocProvider(create: (_) => getIt<ReportBloc>()),
         BlocProvider(create: (_) => getIt<ServicesBloc>()
           ..add(const ServicesEvent.loadData())),

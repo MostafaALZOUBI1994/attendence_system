@@ -13,7 +13,8 @@ class CarChannel {
 
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'checkIn') {
-        return await CarBridge.handleCheckIn(); // return bool
+        // Native Auto path: just do a check-in (mood handled natively there)
+        return await CarBridge.handleCheckIn(); // returns bool
       }
       return null;
     });

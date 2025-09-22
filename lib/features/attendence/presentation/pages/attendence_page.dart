@@ -7,18 +7,22 @@ import '../bloc/attendence_bloc.dart';
 import '../widgets/main_content.dart';
 
 class TimeScreen extends StatefulWidget {
-  TimeScreen({Key? key}) : super(key: key);
+  const TimeScreen({Key? key}) : super(key: key);
 
   @override
   State<TimeScreen> createState() => _TimeScreenState();
 }
 
-class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver{
-
+class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver {
+  @override
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AttendenceBloc>().add(const AttendenceEvent.loadData());
+    });
   }
 
   @override
@@ -30,14 +34,25 @@ class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver{
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // ✅ fetch TodayStatus only on resume/first load
       context.read<AttendenceBloc>().add(const AttendenceEvent.loadData());
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AttendenceBloc, AttendenceState>(
+      listenWhen: (previous, current) {
+        // show dialog only when *entering* success/error
+        final prevType = previous.runtimeType;
+        final currType = current.runtimeType;
+        final isTarget = current.maybeMap(
+          checkInSuccess: (_) => true,
+          error: (_) => true,
+          orElse: () => false,
+        );
+        return isTarget && prevType != currType;
+      },
       listener: (context, state) {
         state.maybeMap(
           checkInSuccess: (s) => AwesomeDialog(
@@ -61,11 +76,13 @@ class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver{
       },
       builder: (context, state) {
         return state.maybeMap(
+          loading: (_) => const Center(child: CircularProgressIndicator()),
           loaded: (l) => MainContent(
             employee: l.employee,
             currentStepIndex: l.currentStepIndex,
             remainingTime: l.remainingTime,
             todayStatus: l.todayStatus,
+            phase: l.phase,
             isCheckInSuccess: false,
           ),
           checkInSuccess: (s) => MainContent(
@@ -73,13 +90,15 @@ class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver{
             currentStepIndex: s.currentStepIndex,
             remainingTime: s.remainingTime,
             todayStatus: s.todayStatus,
-            isCheckInSuccess: true,
+            phase: s.phase,
+            isCheckInSuccess: true, // show success Lottie once
           ),
           error: (e) => MainContent(
             employee: e.employee,
             currentStepIndex: e.currentStepIndex,
             remainingTime: e.remainingTime,
             todayStatus: e.todayStatus,
+            phase: e.phase,
             isCheckInSuccess: false,
           ),
           orElse: () => const SizedBox.shrink(),

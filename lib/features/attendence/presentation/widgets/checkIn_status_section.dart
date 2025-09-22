@@ -10,7 +10,7 @@ import '../../domain/entities/today_status.dart';
 import 'ClockTicksPainter.dart';
 import 'card_container.dart';
 
-/// Shows a circular check‑in button or a success animation depending on state.
+/// Shows a circular check-in button or a success animation depending on state.
 class CheckInStatusSection extends StatelessWidget {
   final Employee employee;
   final TodayStatus todayStatus;
@@ -36,7 +36,6 @@ class CheckInStatusSection extends StatelessWidget {
     );
   }
 
-  /// Builds the circular check‑in button with countdown and icon.
   Widget _buildCheckInButton(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -76,7 +75,6 @@ class CheckInStatusSection extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // tick marks imported from analog_clock.dart via ClockTicksPainter
                     CustomPaint(
                       size: const Size(250, 250),
                       painter: ClockTicksPainter(tickColor: primaryColor),
@@ -89,9 +87,7 @@ class CheckInStatusSection extends StatelessWidget {
                             textDirection: ui.TextDirection.ltr,
                             child: SlideCountdown(
                               duration: remainingTime,
-                              decoration: const BoxDecoration(
-                                color: Colors.transparent,
-                              ),
+                              decoration: const BoxDecoration(color: Colors.transparent),
                               style: const TextStyle(
                                 color: primaryColor,
                                 fontSize: 24,

@@ -3,6 +3,7 @@ import 'package:moet_hub/features/attendence/presentation/widgets/timeline_card_
 
 import '../../../authentication/domain/entities/employee.dart';
 import '../../domain/entities/today_status.dart';
+import '../bloc/attendence_bloc.dart'; // for AttendancePhase
 import 'checkIn_status_section.dart';
 import 'check_in_options_section.dart';
 import 'header_section.dart';
@@ -12,8 +13,8 @@ class MainContent extends StatelessWidget {
   final Employee employee;
   final int currentStepIndex;
   final Duration remainingTime;
-
   final TodayStatus todayStatus;
+  final AttendancePhase phase;
   final bool isCheckInSuccess;
 
   const MainContent({
@@ -21,8 +22,8 @@ class MainContent extends StatelessWidget {
     required this.employee,
     required this.currentStepIndex,
     required this.remainingTime,
-
     required this.todayStatus,
+    required this.phase,
     required this.isCheckInSuccess,
   }) : super(key: key);
 
@@ -35,9 +36,17 @@ class MainContent extends StatelessWidget {
           children: [
             HeaderSection(employee: employee),
             const SizedBox(height: 10),
-            if (currentStepIndex == 0)
-              CheckInOptionsSection(employee: employee, todayStatus: todayStatus),
-            if (currentStepIndex >= 1)
+
+            // Offsite section: beforeArrival or offsite
+            if (phase == AttendancePhase.beforeArrival || phase == AttendancePhase.offsite)
+              CheckInOptionsSection(
+                employee: employee,
+                todayStatus: todayStatus,
+                phase: phase,
+              ),
+
+            // Onsite (working) section or success animation
+            if (phase == AttendancePhase.onsite)
               CheckInStatusSection(
                 employee: employee,
                 todayStatus: todayStatus,
@@ -45,14 +54,18 @@ class MainContent extends StatelessWidget {
                 remainingTime: remainingTime,
                 isCheckInSuccess: isCheckInSuccess,
               ),
+
             const SizedBox(height: 10),
+
             TimelineCardSection(
               employee: employee,
               todayStatus: todayStatus,
               currentStepIndex: currentStepIndex,
               remainingTime: remainingTime,
             ),
+
             const SizedBox(height: 10),
+
             if (todayStatus.offSiteCheckIns.isNotEmpty)
               OffSiteCheckInsGrid(offSiteCheckIns: todayStatus.offSiteCheckIns),
           ],
