@@ -1,4 +1,3 @@
-// lib/core/notifications/uae_shift_notifier.dart
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -9,7 +8,10 @@ class UaeShiftNotifier {
   static final FlutterLocalNotificationsPlugin _plugin =
   FlutterLocalNotificationsPlugin();
 
-  static bool _inited = false;
+  // --- remove _inited; use a shared Future instead
+  static Future<void>? _initFuture;
+
+  // late final is fine once we guarantee single initialization
   static late final tz.Location _dubai;
   static const int _notifId = 1001;
 
@@ -21,15 +23,20 @@ class UaeShiftNotifier {
     importance: Importance.max,
     priority: Priority.high,
   );
-  static const DarwinNotificationDetails _iosDetails = DarwinNotificationDetails();
+
+  static const DarwinNotificationDetails _iosDetails =
+  DarwinNotificationDetails();
+
   static const NotificationDetails _details =
   NotificationDetails(android: _androidDetails, iOS: _iosDetails);
 
-  static Future<void> _ensureInit() async {
-    if (_inited) return;
+  // Run init exactly once, even if called concurrently.
+  static Future<void> _ensureInit() =>
+      _initFuture ??= _doInit(); // <-- single-flight
 
-    // Time zone: fixed to Asia/Dubai (no network calls needed)
-    tzdata.initializeTimeZones();
+  static Future<void> _doInit() async {
+    // Time zone setup
+    tzdata.initializeTimeZones(); // idempotent
     _dubai = tz.getLocation('Asia/Dubai');
 
     const init = InitializationSettings(
@@ -43,16 +50,13 @@ class UaeShiftNotifier {
     await _plugin.initialize(init);
 
     if (Platform.isAndroid) {
-      final android = _plugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      final android = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
       await android?.requestNotificationsPermission();
     }
-
-    _inited = true;
   }
 
-  /// expectedOutTime: e.g. "03:58 PM"
-  /// Schedules for **today in UAE**; returns false if time already passed (no schedule).
+
   static Future<bool> scheduleTodayUae(String expectedOutTime) async {
     await _ensureInit();
 
@@ -80,7 +84,7 @@ class UaeShiftNotifier {
       targetDubai,
       _details,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: null, // not repeating
+      matchDateTimeComponents: null, // one-shot
       payload: 'shift_end',
     );
     return true;

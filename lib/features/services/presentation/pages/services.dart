@@ -2,6 +2,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:moet_hub/features/services/presentation/pages/team_status.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../../../core/constants/constants.dart';
 import '../registry/service_registry.dart';
 import 'hr_request.dart';
@@ -24,7 +25,14 @@ class ServicesScreen extends StatelessWidget {
       titleKey: 'tmsContacts',
       builder: (_) => const TeamContactScreen(),
     ),
-    // Add more here whenever you need
+    ServiceDef(
+      icon: Icons.people_alt_outlined,
+      titleKey: 'Ai',
+      builder: (_) => const SquirroPage(
+        url: 'https://moet-uae.squirro.cloud/app/dashboard/PFMmwYKgTZaSdw5oNDPh4w/uBQUASdtTtGpA6J6aVShpw?token=PASTE_THE_FULL_TOKEN_HERE',
+      ),
+    ),
+
   ];
 
   @override
@@ -106,6 +114,32 @@ class _ServiceCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+
+class SquirroPage extends StatelessWidget {
+  final String url; // paste the FULL Squirro URL (with token) here
+  const SquirroPage({super.key, required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0xFFFFFFFF))
+      ..setNavigationDelegate(NavigationDelegate(
+        onWebResourceError: (err) {
+          // Optional: show a basic error message in release instead of a black view
+          debugPrint('Web error: ${err.errorCode} ${err.description}');
+        },
+      ))
+      ..loadRequest(Uri.parse(url));
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('AI')),
+      body: SafeArea(child: WebViewWidget(controller: controller)),
     );
   }
 }

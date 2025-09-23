@@ -737,7 +737,7 @@ class _Header extends StatelessWidget {
     final theme = Theme.of(context);
     return Stack(
       children: [
-        Positioned.fill(
+        const Positioned.fill(
           child: IgnorePointer(
             child: Opacity(
               opacity: 0.15,
