@@ -77,7 +77,9 @@ class CarPlayService {
       // refresh info (last time / count)
       try {
         await _setRoot(template: _buildMainTemplate());
-      } catch (_) {}
+      } catch (_) {
+
+      }
     }
   }
 
@@ -159,15 +161,16 @@ class CarPlayService {
         : '--:--';
 
     return CPInformationTemplate(
-      title: 'Off-site Check-in',
+      title: '',
       layout: CPInformationTemplateLayout.leading,
       informationItems: [
-        CPInformationItem(title: 'Last',  detail: last),
-        CPInformationItem(title: 'Count', detail: list.length.toString()),
+        CPInformationItem(title: '',  detail: ""),
+        CPInformationItem(title: 'Last Check- in 🫆',  detail: last),
+        // CPInformationItem(title: 'Count', detail: list.length.toString()),
       ],
       actions: [
         CPTextButton(
-          title: 'Check-in',
+          title: 'Check-in 🫆',
           onPress: () async {
             if (_busy) return;
             _busy = true;

@@ -7,7 +7,6 @@ class SubmitMoodUC {
   SubmitMoodUC(this.repo);
 
   MoodPostResult call(Params p) => repo.postMood(
-    employeeId: p.employeeId,
     moodId: p.moodId,
     mood: p.mood,
     note: p.note,
@@ -16,13 +15,11 @@ class SubmitMoodUC {
 }
 
 class Params {
-  final int employeeId;
   final int moodId;
   final String mood;
   final String? note;
   final DateTime? date;
   Params({
-    required this.employeeId,
     required this.moodId,
     required this.mood,
     this.note,

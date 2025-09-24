@@ -2,9 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:moet_hub/features/mood/presentation/mappers/mood_ui_mapper.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../mood/presentation/bloc/mood_bloc.dart';
 
 class MoodCheckJoystick extends StatefulWidget {
 
@@ -28,6 +31,7 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
   String _selectedMood = 'Happy';
   Offset _offset = Offset.zero;
   final double _maxDragDistance = 60.0;
+
 
   @override
   void initState() {
@@ -58,11 +62,25 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
   }
 
   Future<void> _handleDragEnd(DragEndDetails details) async {
+    final mapped = mapUIMood((_selectedMood).toUIMood());
+    context.read<MoodBloc>().add(SubmitMood(
+      moodId: mapped.id,
+      mood: mapped.label,
+      note: '',
+      date: DateTime.now(),
+    ));
     await widget.onCheckInWithMood(_selectedMood);
     _animateReset();
   }
 
   Future<void> _handleTap() async {
+    final mapped = mapUIMood((_selectedMood).toUIMood());
+    context.read<MoodBloc>().add(SubmitMood(
+      moodId: mapped.id,
+      mood: mapped.label,
+      note: '',
+      date: DateTime.now(),
+    ));
     await widget.onCheckInWithMood(_selectedMood);
   }
 

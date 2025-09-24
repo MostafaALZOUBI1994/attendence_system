@@ -8,7 +8,6 @@ typedef MoodHistoryResult = Future<Either<Failure, List<EmployeeMood>>>;
 
 abstract class MoodRepository {
   MoodPostResult postMood({
-    required int employeeId,
     required int moodId,
     required String mood,
     String? note,
@@ -16,7 +15,6 @@ abstract class MoodRepository {
   });
 
   MoodHistoryResult getMoodHistory({
-    required int employeeId,
     required DateTime from,
     required DateTime to,
   });

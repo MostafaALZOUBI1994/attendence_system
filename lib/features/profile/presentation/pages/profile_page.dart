@@ -2,12 +2,17 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moet_hub/features/reports/domain/entities/report_model.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/local_services/local_services.dart';
+import '../../../../core/utils/Initials.dart';
+import '../../../../core/utils/base64_utils.dart';
 import '../../../authentication/presentation/bloc/auth_bloc.dart';
+import '../../../mood/presentation/bloc/mood_bloc.dart';
+import '../../../reports/presentation/bloc/report_bloc.dart'; // ⬅️ read attendance here
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
@@ -26,8 +31,7 @@ class _ProfilePageState extends State<ProfilePage>
   final List<double> _moodHistory = [0.66, 1.0, 1.0, 0.66, 1.0];
 
   late final AnimationController _scoreController;
-  late final Animation<double> _scoreAnim;
-  final double _finalPerformanceScore = 85;
+  late Animation<double> _scoreAnim; // 0..100
 
   double get _averageMood {
     if (_moodHistory.isEmpty) return 0.0;
@@ -49,27 +53,41 @@ class _ProfilePageState extends State<ProfilePage>
     // Fetch data
     context.read<AuthBloc>().add(const AuthEvent.getProfileData());
     context.read<ProfileBloc>().add(const ProfileEvent.fetchProfileData());
+    context.read<MoodBloc>().add(const MoodEvent.fetchMoodHistory());
 
-    // Smooth animation for performance score (instead of Timer.periodic)
+    // Gauge animation setup; we’ll animate to the computed % after first frame
     _scoreController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     );
-
-    _scoreAnim = Tween<double>(begin: 0, end: _finalPerformanceScore).animate(
+    _scoreAnim = Tween<double>(begin: 0, end: 0).animate(
       CurvedAnimation(parent: _scoreController, curve: Curves.easeOutCubic),
     )..addListener(() {
-      if (!mounted) return; // extra safety
+      if (!mounted) return;
       setState(() {});
     });
 
-    _scoreController.forward();
+    // Read ReportBloc once (already fetched) and animate
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final p = _attendancePercentFromReportBloc(context); // 0..100
+      _animateScoreTo(p);
+    });
   }
 
   @override
   void dispose() {
-    _scoreController.dispose(); // ✅ avoids setState after dispose
+    _scoreController.dispose();
     super.dispose();
+  }
+
+  void _animateScoreTo(double target) {
+    final begin = _scoreAnim.value;
+    _scoreAnim = Tween<double>(begin: begin, end: target.clamp(0, 100)).animate(
+      CurvedAnimation(parent: _scoreController, curve: Curves.easeOutCubic),
+    );
+    _scoreController
+      ..reset()
+      ..forward();
   }
 
   @override
@@ -77,23 +95,34 @@ class _ProfilePageState extends State<ProfilePage>
     final localeSvc = getIt<LocalService>();
     final isArabic = localeSvc.getSavedLocale().languageCode == 'ar';
 
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is UnAuthenticated) {
-          Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is UnAuthenticated) {
+              Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+            }
+          },
+        ),
+        // Optional: re-animate gauge when reports refresh (e.g., pull-to-refresh)
+        BlocListener<ReportBloc, ReportState>(
+          listenWhen: (_, s) => s.maybeWhen(loaded: (_, __) => true, orElse: () => false),
+          listener: (context, state) {
+            final p = state.maybeWhen(
+              loaded: (report, _) => _attendancePercent(report),
+              orElse: () => 0.0,
+            );
+            _animateScoreTo(p);
+          },
+        ),
+      ],
       child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             stops: [0.0, 0.35, 1.0],
-            colors: [
-              Color(0xFFEEF5FF),
-              Color(0xFFEAF2FF),
-              Color(0xFFF7F9FC),
-            ],
+            colors: [Color(0xFFEEF5FF), Color(0xFFEAF2FF), Color(0xFFF7F9FC)],
           ),
         ),
         child: SafeArea(
@@ -123,6 +152,32 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
+  // ───────────────────────── Attendance % from reports ─────────────────────────
+
+  double _attendancePercentFromReportBloc(BuildContext ctx) {
+    final state = ctx.read<ReportBloc>().state;
+    return state.maybeWhen(
+      loaded: (report, _) => _attendancePercent(report),
+      orElse: () => 0.0,
+    );
+  }
+
+  double _attendancePercent(List<Report> reports) {
+    if (reports.isEmpty) return 0.0;
+
+    // take the last 30 elements (or all if < 30)
+    final last30 = reports.length <= 30
+        ? reports
+        : reports.sublist(reports.length - 30);
+
+    final total  = last30.length;
+    final absent = last30.where((r) => (r.status ?? '').trim().toUpperCase() == 'ABSENT').length;
+    final present = total - absent;
+
+    return (present / total * 100).clamp(0.0, 100.0);
+  }
+
+
   // ───────────────────────── UI Pieces ─────────────────────────
 
   Widget _glass({required Widget child, EdgeInsets? padding}) {
@@ -144,14 +199,10 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-
-
-  // Top language + logout
   Widget _topBar({required bool isArabic, required LocalService localeSvc}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Language toggle
         GestureDetector(
           onTap: () async {
             final newLocale = isArabic ? const Locale('en') : const Locale('ar');
@@ -164,7 +215,6 @@ class _ProfilePageState extends State<ProfilePage>
             child: Text(isArabic ? '🇬🇧' : '🇦🇪', style: const TextStyle(fontSize: 20)),
           ),
         ),
-        // Logout
         InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () => context.read<AuthBloc>().add(SignOut()),
@@ -178,26 +228,26 @@ class _ProfilePageState extends State<ProfilePage>
     );
   }
 
-  // Header with avatar & identity
   Widget _headerCard({required bool isArabic}) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         return state.maybeWhen(
           success: (employee) {
             final name = isArabic ? employee.employeeNameInAr : employee.employeeNameInEn;
-            // If you have English title field, prefer it. Fallback kept as-is to avoid breaking.
-            final role = isArabic ? employee.employeeTitleInAr : employee.employeeNameInEn;
+            final role = isArabic ? employee.employeeTitleInAr : employee.employeeNameInEn; // keep as your current fallback
             final department = isArabic ? employee.departmentInAr : employee.departmentInEn;
             final directManager = employee.directManager.split(',').first.replaceFirst('CN=', '').trim();
+            late final avatar = decodeBase64(employee.empImageUrl);
 
             return _glass(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
               child: Column(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 44,
-                    backgroundImage: AssetImage('assets/user_profile.jpg'),
-                    backgroundColor: Colors.white,
+                    backgroundColor: lightGray,
+                    backgroundImage: avatar,
+                    child: avatar == null ?  Initials(name) : null,
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -216,7 +266,6 @@ class _ProfilePageState extends State<ProfilePage>
                   Text(directManager, style: const TextStyle(color: Colors.blueGrey, fontSize: 14)),
                   const SizedBox(height: 4),
                   Text(department, style: const TextStyle(color: Colors.blueGrey, fontSize: 14)),
-
                 ],
               ),
             );
@@ -253,14 +302,15 @@ class _ProfilePageState extends State<ProfilePage>
         return BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, profileState) {
             if (profileState is ProfileLoading) {
-              return const Center(child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
-                child: CircularProgressIndicator(color: primaryColor),
-              ));
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: CircularProgressIndicator(color: primaryColor),
+                ),
+              );
             } else if (profileState is ProfileLoaded) {
               final employee = authState.maybeWhen(success: (data) => data, orElse: () => null);
               final healthData = profileState.healthData;
-
               if (employee == null) return const SizedBox.shrink();
 
               return Column(
@@ -274,7 +324,6 @@ class _ProfilePageState extends State<ProfilePage>
                   const SizedBox(height: 12),
                   HealthCard(healthData: healthData),
                   const SizedBox(height: 12),
-                  //_statsRow(),
                   const SizedBox(height: 28),
                 ],
               );
@@ -292,40 +341,85 @@ class _ProfilePageState extends State<ProfilePage>
       },
     );
   }
+  String _emojiFor(String? mood) {
+    switch ((mood ?? '').toLowerCase()) {
+      case 'happy':   return '😀';
+      case 'neutral': return '😐';
+      case 'sad':     return '😞';
+      case 'angry':   return '😡';
+      default:        return '—';
+    }
+  }
 
-  // Sentiment
-  Widget _happinessCard() {
-    final averageMood = _averageMood;
-    final mostFrequent = _mostFrequentMood;
-
+  Widget _moodTile({required String title, required String label}) {
+    final emoji = _emojiFor(label);
     return _glass(
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            "Employee Sentiment",
-            style: TextStyle(
-              color: primaryColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(child: _moodDisplay("Average Mood", averageMood)),
-              const SizedBox(width: 12),
-              Expanded(child: _moodDisplay("Most Frequent", mostFrequent)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            "Based on ${_moodHistory.length} check-ins",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[600]),
-          ),
+          Text(title, style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          Text(emoji, style: const TextStyle(fontSize: 36)),
+          const SizedBox(height: 6),
+          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
         ],
       ),
+    );
+  }
+
+  Widget _happinessCard() {
+    return Builder(
+      builder: (context) {
+        // Safe helper to pull a label whether your bloc returns String or an object with .mood
+        String labelFrom(dynamic x) {
+          if (x == null) return '--';
+          if (x is String) return x;
+          try { return (x as dynamic).mood as String; } catch (_) { return x.toString(); }
+        }
+
+        final state = context.watch<MoodBloc>().state;
+
+        final total = state.maybeWhen(
+          historyLoaded: (list, _, __) => list.length,
+          orElse: () => 0,
+        );
+
+        final lastLabel = state.maybeWhen(
+          historyLoaded: (_, last, __) => labelFrom(last),
+          orElse: () => '--',
+        );
+
+        final freqLabel = state.maybeWhen(
+          historyLoaded: (_, __, most) => labelFrom(most),
+          orElse: () => '--',
+        );
+
+        return _glass(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                "Employee Sentiment",
+                style: TextStyle(color: primaryColor, fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(child: _moodTile(title: "Last Mood",  label: lastLabel)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _moodTile(title: "Most Frequent", label: freqLabel)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Based on $total check-ins",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -364,7 +458,7 @@ class _ProfilePageState extends State<ProfilePage>
 
   // Performance Gauge
   Widget _performanceCard() {
-    final double value = _scoreAnim.value; // animated value 0.._finalPerformanceScore
+    final double value = _scoreAnim.value;
 
     return _glass(
       child: Column(
@@ -391,10 +485,10 @@ class _ProfilePageState extends State<ProfilePage>
                   cornerStyle: CornerStyle.bothCurve,
                 ),
                 ranges: <GaugeRange>[
-                  GaugeRange(startValue: 0, endValue: 40, color: Colors.red, startWidth: 0.15, endWidth: 0.15, sizeUnit: GaugeSizeUnit.factor),
-                  GaugeRange(startValue: 40, endValue: 70, color: Colors.orange, startWidth: 0.15, endWidth: 0.15, sizeUnit: GaugeSizeUnit.factor),
+                  GaugeRange(startValue: 0, endValue: 40, color: Colors.red,   startWidth: 0.15, endWidth: 0.15, sizeUnit: GaugeSizeUnit.factor),
+                  GaugeRange(startValue: 40, endValue: 70, color: Colors.orange,startWidth: 0.15, endWidth: 0.15, sizeUnit: GaugeSizeUnit.factor),
                   GaugeRange(startValue: 70, endValue: 90, color: Colors.blue, startWidth: 0.15, endWidth: 0.15, sizeUnit: GaugeSizeUnit.factor),
-                  GaugeRange(startValue: 90, endValue: 100, color: Colors.green, startWidth: 0.15, endWidth: 0.15, sizeUnit: GaugeSizeUnit.factor),
+                  GaugeRange(startValue: 90, endValue: 100,color: Colors.green,startWidth: 0.15, endWidth: 0.15, sizeUnit: GaugeSizeUnit.factor),
                 ],
                 pointers: <GaugePointer>[
                   NeedlePointer(
@@ -425,16 +519,16 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   Widget _performanceBadge(double score) {
-    String badge = score >= 90
-        ? "🎯 Early bird"
-        : score >= 80
-        ? "🦉 Night owl"
-        : score >= 70
-        ? "💼 Consistent Contributor"
-        : "🚀 Needs Improvement";
+    // String badge = score >= 90
+    //     ? "🎯 Early bird"
+    //     : score >= 80
+    //     ? "🦉 Night owl"
+    //     : score >= 70
+    //     ? "💼 Consistent Contributor"
+    //     : "🚀 Needs Improvement";
 
     return Text(
-      "Badge: $badge",
+      "attPer".tr(),
       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.blueGrey),
     );
   }
@@ -468,7 +562,7 @@ class _ProfilePageState extends State<ProfilePage>
   }
 }
 
-// Simple skeleton placeholder (no extra package)
+// Simple skeleton placeholder
 class _Skeleton extends StatelessWidget {
   final double height;
   final double width;
@@ -477,7 +571,8 @@ class _Skeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height, width: width,
+      height: height,
+      width: width,
       decoration: BoxDecoration(
         color: Colors.black12.withOpacity(0.08),
         borderRadius: BorderRadius.circular(6),

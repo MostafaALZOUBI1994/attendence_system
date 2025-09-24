@@ -1,15 +1,11 @@
 // features/services/presentation/services_screen.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:moet_hub/features/services/presentation/pages/team_status.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../../core/constants/constants.dart';
+import '../employees/view/team_contacts_screen.dart';
 import '../registry/service_registry.dart';
 import 'hr_request.dart';
-
-
-// Feature screens:
-
 
 class ServicesScreen extends StatelessWidget {
   const ServicesScreen({super.key});
@@ -25,13 +21,13 @@ class ServicesScreen extends StatelessWidget {
       titleKey: 'tmsContacts',
       builder: (_) => const TeamContactScreen(),
     ),
-    ServiceDef(
-      icon: Icons.people_alt_outlined,
-      titleKey: 'Ai',
-      builder: (_) => const SquirroPage(
-        url: 'https://moet-uae.squirro.cloud/app/dashboard/PFMmwYKgTZaSdw5oNDPh4w/uBQUASdtTtGpA6J6aVShpw?token=PASTE_THE_FULL_TOKEN_HERE',
-      ),
-    ),
+    // ServiceDef(
+    //   icon: Icons.people_alt_outlined,
+    //   titleKey: 'Ai',
+    //   builder: (_) => const SquirroPage(
+    //     url: 'https://moet-uae.squirro.cloud/app/dashboard/PFMmwYKgTZaSdw5oNDPh4w/uBQUASdtTtGpA6J6aVShpw?token=PASTE_THE_FULL_TOKEN_HERE',
+    //   ),
+    // ),
 
   ];
 

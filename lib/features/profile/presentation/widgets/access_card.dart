@@ -5,11 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/utils/Initials.dart';
+import '../../../../core/utils/base64_utils.dart';
 import '../../../authentication/domain/entities/employee.dart';
 
 class AccessCard extends StatefulWidget {
   final Employee employee;
   final bool isArabic;
+
   const AccessCard({super.key, required this.employee, required this.isArabic});
 
   @override
@@ -21,6 +24,7 @@ class _AccessCardState extends State<AccessCard>
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isFrontVisible = true;
+
 
   @override
   void initState() {
@@ -147,10 +151,7 @@ class _AccessCardState extends State<AccessCard>
                 ),
               ),
               const SizedBox(width: 25),
-              Image.asset(
-                "assets/user_profile.jpg",
-                height: 100,
-              ),
+              rectPhotoOrInitials()
             ],
           ),
         ],
@@ -213,6 +214,26 @@ class _AccessCardState extends State<AccessCard>
       ),
     );
   }
+  Widget rectPhotoOrInitials() {
+    final ImageProvider<Object>? avatar = decodeBase64(widget.employee.empImageUrl);
+    return ClipRRect(
+    borderRadius: BorderRadius.circular(12), // <- keep or remove if you want hard corners
+    child: avatar != null
+        ? Image(
+      image: avatar,
+      width: 100,
+      height: 100,
+      fit: BoxFit.cover,
+    )
+        : Container(
+      width: 100,
+      height: 100,
+      color: lightGray,
+      alignment: Alignment.center,
+      // Your initials widget (no image)
+      child: Initials(widget.employee.employeeNameInEn),
+    ),
+  );}
 
   Widget _buildCard({required Widget child}) {
     return SizedBox(

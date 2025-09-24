@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
+import 'package:moet_hub/core/utils/base64_utils.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/utils/Initials.dart';
 import '../../../authentication/domain/entities/employee.dart';
+import '../../../services/presentation/employees/view/team_contacts_screen.dart';
 
 class HeaderSection extends StatefulWidget {
   final Employee employee;
@@ -17,6 +20,7 @@ class HeaderSection extends StatefulWidget {
 class _HeaderSectionState extends State<HeaderSection> {
   late Timer _timer;
   String _currentDate = '';
+  late final avatar = decodeBase64(widget.employee.empImageUrl);
 
   @override
   void initState() {
@@ -50,9 +54,11 @@ class _HeaderSectionState extends State<HeaderSection> {
     return Row(
       children: [
         const SizedBox(width: 15),
-        const CircleAvatar(
-          radius: 30,
-          backgroundImage: AssetImage('assets/user_profile.jpg'),
+        CircleAvatar(
+          radius: 26,
+          backgroundColor: lightGray,
+          backgroundImage: avatar,
+          child: avatar == null ? Initials(fullName) : null,
         ),
         const SizedBox(width: 15),
         Column(

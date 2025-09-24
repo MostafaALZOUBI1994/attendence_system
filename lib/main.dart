@@ -18,6 +18,7 @@ import 'core/utils/car_bridge.dart';
 import 'core/utils/car_channel.dart';
 import 'features/attendence/presentation/bloc/attendence_bloc.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
+import 'features/mood/presentation/bloc/mood_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'firebase_options.dart';
 
@@ -142,6 +143,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => getIt<ProfileBloc>()),
         BlocProvider(create: (_) => getIt<AuthBloc>()),
         BlocProvider(create: (_) => getIt<AttendenceBloc>()),
+        BlocProvider(create: (_) => getIt<MoodBloc>()),
         BlocProvider(create: (_) => getIt<ReportBloc>()),
         BlocProvider(create: (_) => getIt<ServicesBloc>()
           ..add(const ServicesEvent.loadData())),

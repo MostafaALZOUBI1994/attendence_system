@@ -32,8 +32,9 @@ class CheckInOptionsSection extends StatelessWidget {
       return CardContainer(
         child: Center(
           child: MoodCheckJoystick(
-            onCheckInWithMood: (mood) async =>
-                context.read<AttendenceBloc>().add(AttendenceEvent.checkIn(mood)),
+            onCheckInWithMood: (mood) async {
+              context.read<AttendenceBloc>().add(AttendenceEvent.checkIn(mood));
+            },
           ),
         ),
       );

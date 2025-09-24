@@ -49,11 +49,11 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
           }
 
           final status = TodayStatus(
-            checkInTime: item['In_Time'] as String,
-            delay: item['LateIn'] as String,
-            expectedOutTime: item['ExpectedOutTime'] as String,
-            outTime: item['OutTime'] as String,
-            punchInOffice: item['PunchInOfficeTime'] as String,
+            checkInTime: "00:00",
+            delay: "00:00",
+            expectedOutTime: "00:00",
+            outTime: "00:00",
+            punchInOffice: "00:00",
             offSiteCheckIns: _localService.getMillisList(checkIns) ?? [],
           );
           return Right(status);

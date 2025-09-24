@@ -56,11 +56,19 @@ class UaeShiftNotifier {
     }
   }
 
-
+  /// expectedOutTime example: "03:58 PM"
   static Future<bool> scheduleTodayUae(String expectedOutTime) async {
     await _ensureInit();
 
-    // Parse strictly in English
+    final raw = expectedOutTime.trim();
+
+    // 1) If exactly "00:00" (or "0:00"), do not schedule.
+    if (raw == '00:00' || raw == '0:00') {
+      await _plugin.cancel(_notifId);
+      return false;
+    }
+
+    // 2) Parse flexibly (handles "03:58 PM", "3:58 PM", "23:10", etc.)
     final parsed = DateFormat('hh:mm a', 'en').parse(expectedOutTime.trim());
 
     final nowDubai = tz.TZDateTime.now(_dubai);
@@ -68,7 +76,13 @@ class UaeShiftNotifier {
       _dubai, nowDubai.year, nowDubai.month, nowDubai.day, parsed.hour, parsed.minute,
     );
 
-    // Today only — if already passed, cancel any existing and skip
+    // 3) If midnight after parsing (covers "12:00 AM" too), skip.
+    if (targetDubai.hour == 0 && targetDubai.minute == 0) {
+      await _plugin.cancel(_notifId);
+      return false;
+    }
+
+    // 4) Today only — if already passed, cancel and skip
     if (!targetDubai.isAfter(nowDubai)) {
       await _plugin.cancel(_notifId);
       return false;
