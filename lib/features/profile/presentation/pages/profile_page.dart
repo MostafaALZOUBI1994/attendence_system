@@ -10,6 +10,7 @@ import '../../../../core/injection.dart';
 import '../../../../core/local_services/local_services.dart';
 import '../../../../core/utils/Initials.dart';
 import '../../../../core/utils/base64_utils.dart';
+import '../../../../core/widgets/avatar_widgets.dart';
 import '../../../authentication/presentation/bloc/auth_bloc.dart';
 import '../../../mood/presentation/bloc/mood_bloc.dart';
 import '../../../reports/presentation/bloc/report_bloc.dart'; // ⬅️ read attendance here
@@ -154,6 +155,31 @@ class _ProfilePageState extends State<ProfilePage>
 
   // ───────────────────────── Attendance % from reports ─────────────────────────
 
+  String _emojiFor(String? mood) {
+    switch ((mood ?? '').toLowerCase()) {
+      case 'happy':   return '😀';
+      case 'neutral': return '😐';
+      case 'sad':     return '😞';
+      case 'angry':   return '😡';
+      default:        return '—';
+    }
+  }
+
+  Widget _moodTile({required String title, required String label}) {
+    final emoji = _emojiFor(label);
+    return _glass(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Column(
+        children: [
+          Text(title, style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          Text(emoji, style: const TextStyle(fontSize: 36)),
+          const SizedBox(height: 6),
+          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
   double _attendancePercentFromReportBloc(BuildContext ctx) {
     final state = ctx.read<ReportBloc>().state;
     return state.maybeWhen(
@@ -165,13 +191,8 @@ class _ProfilePageState extends State<ProfilePage>
   double _attendancePercent(List<Report> reports) {
     if (reports.isEmpty) return 0.0;
 
-    // take the last 30 elements (or all if < 30)
-    final last30 = reports.length <= 30
-        ? reports
-        : reports.sublist(reports.length - 30);
-
-    final total  = last30.length;
-    final absent = last30.where((r) => (r.status ?? '').trim().toUpperCase() == 'ABSENT').length;
+    final total  = reports.length;
+    final absent = reports.where((r) => r.status == 'ABSENT').length;
     final present = total - absent;
 
     return (present / total * 100).clamp(0.0, 100.0);
@@ -237,17 +258,16 @@ class _ProfilePageState extends State<ProfilePage>
             final role = isArabic ? employee.employeeTitleInAr : employee.employeeNameInEn; // keep as your current fallback
             final department = isArabic ? employee.departmentInAr : employee.departmentInEn;
             final directManager = employee.directManager.split(',').first.replaceFirst('CN=', '').trim();
-            late final avatar = decodeBase64(employee.empImageUrl);
+
 
             return _glass(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
               child: Column(
                 children: [
-                  CircleAvatar(
+                  CircleAvatarOrInitials(
+                    base64: employee.empImageUrl,
+                    fullName: employee.employeeNameInEn,
                     radius: 44,
-                    backgroundColor: lightGray,
-                    backgroundImage: avatar,
-                    child: avatar == null ?  Initials(name) : null,
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -341,32 +361,8 @@ class _ProfilePageState extends State<ProfilePage>
       },
     );
   }
-  String _emojiFor(String? mood) {
-    switch ((mood ?? '').toLowerCase()) {
-      case 'happy':   return '😀';
-      case 'neutral': return '😐';
-      case 'sad':     return '😞';
-      case 'angry':   return '😡';
-      default:        return '—';
-    }
-  }
 
-  Widget _moodTile({required String title, required String label}) {
-    final emoji = _emojiFor(label);
-    return _glass(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Column(
-        children: [
-          Text(title, style: const TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          Text(emoji, style: const TextStyle(fontSize: 36)),
-          const SizedBox(height: 6),
-          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-        ],
-      ),
-    );
-  }
-
+  // Sentiment
   Widget _happinessCard() {
     return Builder(
       builder: (context) {
@@ -393,26 +389,28 @@ class _ProfilePageState extends State<ProfilePage>
           historyLoaded: (_, __, most) => labelFrom(most),
           orElse: () => '--',
         );
+        final moods =  'basedOnCheckins'.tr(namedArgs: {'moods':total.toString()});
 
         return _glass(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                "Employee Sentiment",
+               Text(
+                'employeeSentiment'.tr(),
                 style: TextStyle(color: primaryColor, fontSize: 16, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Expanded(child: _moodTile(title: "Last Mood",  label: lastLabel)),
+                  Expanded(child: _moodTile(title: 'lastMood'.tr(),  label: lastLabel)),
                   const SizedBox(width: 12),
-                  Expanded(child: _moodTile(title: "Most Frequent", label: freqLabel)),
+                  Expanded(child: _moodTile(title: 'mostFrequent'.tr(), label: freqLabel)),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
-                "Based on $total check-ins",
+                //  namedArgs: {'chkinTime': record.checkIn}
+                'basedOnCheckins'.tr(namedArgs: {'moods':total.toString()}),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey[600]),
               ),

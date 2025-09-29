@@ -59,10 +59,10 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
 
     final model = await _employeeLocalDs.getProfile();
     if (model == null) {
-      return emit(AttendenceState.error(
+      return emit(const AttendenceState.error(
         message: "No cached employee found",
-        employee: const Employee("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
-        todayStatus: const TodayStatus(),
+        employee: Employee("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+        todayStatus: TodayStatus(),
         phase: AttendancePhase.beforeArrival,
       ));
     }
@@ -112,7 +112,7 @@ class AttendenceBloc extends Bloc<AttendenceEvent, AttendenceState> {
     final loaded = state.maybeMap(loaded: (s) => s, orElse: () => null);
     if (loaded == null) return;
 
-    final result = await _checkinUsecase.execute(); // network only for check-in
+    final result = await _checkinUsecase.execute();
     result.fold(
           (failure) {
         emit(AttendenceState.error(

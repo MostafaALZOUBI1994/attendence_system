@@ -12,6 +12,8 @@
   "attTimeline": "Attendance Timeline",
   "offsiteCheckIn": "Remote Check-In",
   "onsiteCheckIn": "Fingerprint Check-In",
+  "onSiteCheckIn": "On-site check-in",
+  "offSiteCheckIns": "Off-site check-ins",
   "working": "Working",
   "chkIn": "Check in",
   "chkOut": "Check-out",
@@ -62,6 +64,10 @@
   "erlyOt":  "Early Out",
   "ltn": "Late In",
   "Absnt": "Absent",
-   "tm":  "Team Contacts"
+   "tm":  "Team Contacts",
+  "employeeSentiment": "Employee Sentiment",
+  "lastMood": "Last Mood",
+  "mostFrequent": "Most Frequent",
+  "basedOnCheckins": "Based on {moods} check-ins"
 
 }

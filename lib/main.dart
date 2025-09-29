@@ -14,13 +14,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/constants/constants.dart';
 import 'core/injection.dart';
 import 'core/local_services/local_services.dart';
-import 'core/utils/car_bridge.dart';
 import 'core/utils/car_channel.dart';
 import 'features/attendence/presentation/bloc/attendence_bloc.dart';
 import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/mood/presentation/bloc/mood_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'firebase_options.dart';
+export 'core/local_services/car_entry.dart' show carEntryPoint;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,7 +53,7 @@ void main() async {
   // ✅ Kick off slower stuff AFTER the first frame (non-blocking)
   //   (don’t await; let UI show immediately)
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    _initFirebaseMessaging(); // no await
+    _initFirebaseMessagingNonInteractive(); // no await
   });
 }
 
@@ -71,44 +71,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 }
 
-Future<String?> _waitForApnsToken(Duration timeout) async {
-  final end = DateTime.now().add(timeout);
-  String? apns;
-  while (DateTime.now().isBefore(end)) {
-    await Future.delayed(const Duration(milliseconds: 400));
-    apns = await FirebaseMessaging.instance.getAPNSToken();
-    if (apns != null) return apns;
-  }
-  return null;
-}
 
-Future<void> _initFirebaseMessaging() async {
-  final messaging = FirebaseMessaging.instance;
-
-  // Ask permissions (iOS)
-  await messaging.requestPermission(alert: true, badge: true, sound: true);
-
-  // ✅ No waiting/polling for APNs. Let SDK deliver when ready.
-  await messaging.setAutoInitEnabled(true);
-
-  // Try to get token, but don’t crash/slow if null
-  try {
-    final token = await messaging.getToken();
-    if (token != null) {
-      debugPrint('FCM token: $token');
-      // send to backend if needed
-    }
-  } catch (e) {
-    debugPrint('getToken error (will rely on onTokenRefresh): $e');
-  }
-
-  messaging.onTokenRefresh.listen((t) {
-    debugPrint('FCM token refreshed: $t');
-  });
-
-  await messaging.setForegroundNotificationPresentationOptions(
-    alert: true, badge: true, sound: true,
-  );
+Future<void> _initFirebaseMessagingNonInteractive() async {
+  final m = FirebaseMessaging.instance;
+  await m.setAutoInitEnabled(true);
+  // ignore: discarded_futures
+  m.getToken().then((t){ if (t != null) debugPrint('FCM token: $t'); })
+      .catchError((e){ debugPrint('getToken error: $e'); });
+  m.onTokenRefresh.listen((t) => debugPrint('FCM token refreshed: $t'));
 }
 
 class MyApp extends StatefulWidget {
@@ -123,7 +93,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _initCarPlay();
+    // ⬇️ Defer to after first frame (and off the build path)
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initCarPlay());
   }
 
   Future<void> _initCarPlay() async {

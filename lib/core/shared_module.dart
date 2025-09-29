@@ -1,6 +1,7 @@
 import 'package:moet_hub/core/constants/constants.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:moet_hub/core/utils/base64_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'local_services/local_services.dart';
@@ -12,6 +13,7 @@ abstract class SharedModule {
   @preResolve
   Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
 }
+
 
 @module
 abstract class NetworkModule {
@@ -27,3 +29,4 @@ abstract class NetworkModule {
     ))..interceptors.add(ErrorMappingInterceptor());
   }
 }
+

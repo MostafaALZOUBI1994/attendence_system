@@ -25,6 +25,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
 
     <uses-feature android:name="android.hardware.nfc" android:required="true"/>
 
@@ -80,14 +82,18 @@
             android:resource="@array/hosts_allowlist_sample" />
 
         <!-- Car app service (NO android:permission here) -->
+
         <service
             android:name=".CarHomeService"
             android:exported="true"
-            android:stopWithTask="false">
+            android:enabled="true"
+            android:foregroundServiceType="connectedDevice|dataSync">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
-                <category android:name="androidx.car.app.category.CAR_APP_SERVICE" />
             </intent-filter>
+            <meta-data
+                android:name="androidx.car.app.minCarApiLevel"
+                android:value="1" />
         </service>
 
     </application>

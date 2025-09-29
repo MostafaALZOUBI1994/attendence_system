@@ -1,7 +1,12 @@
+// CarPlayService.dart
+// Ensures CarPlay screen updates (especially in release) after mood selection and check-in,
+// and shows short toasts for both flows.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_carplay/flutter_carplay.dart';
 import 'package:intl/intl.dart';
+
 import '../utils/car_bridge.dart';
 import '../injection.dart';
 import '../local_services/local_services.dart';
@@ -9,27 +14,22 @@ import '../constants/constants.dart';
 import 'package:moet_hub/features/authentication/data/datasources/employee_local_data_source.dart';
 
 class CarPlayService {
+  CarPlayService._(); // no instances
+
   static bool _initialized = false;
   static final FlutterCarplay _cp = FlutterCarplay();
 
   static _Screen _current = _Screen.unknown;
   static bool _busy = false;
-
+  static Timer? _toastTimer;
   static const _moods = <String, String>{
-    'Happy':  '😀',
-    'Neutral':'😐',
-    'Sad':    '😢',
-    'Angry':  '😡',
+    'Happy': '😀',
+    'Neutral': '😐',
+    'Sad': '😢',
+    'Angry': '😡',
   };
 
-  static Future<bool> _isLoggedIn() async {
-    try {
-      final p = await getIt<EmployeeLocalDataSource>().getProfile();
-      return p != null;
-    } catch (_) {
-      return false;
-    }
-  }
+  // ---------- Lifecycle ----------
 
   static Future<void> init() async {
     if (_initialized) return;
@@ -44,7 +44,7 @@ class CarPlayService {
       }
     });
 
-    // If CarPlay already connected when app starts
+    // If CarPlay is already connected when the app starts
     await sync();
   }
 
@@ -65,6 +65,9 @@ class CarPlayService {
       if (_current != _Screen.mood) {
         await _setRoot(template: _buildMoodTemplate());
         _current = _Screen.mood;
+      } else {
+        // idempotent re-root to ensure UI refresh in release if needed
+        await _setRoot(template: _buildMoodTemplate());
       }
       return;
     }
@@ -74,31 +77,53 @@ class CarPlayService {
       await _setRoot(template: _buildMainTemplate());
       _current = _Screen.main;
     } else {
-      // refresh info (last time / count)
-      try {
-        await _setRoot(template: _buildMainTemplate());
-      } catch (_) {
-
-      }
+      // Refresh info (last time / count) to avoid stale UI in release
+      await _setRoot(template: _buildMainTemplate());
     }
   }
 
+  // ---------- Helpers ----------
+
+  static Future<bool> _isLoggedIn() async {
+    try {
+      final p = await getIt<EmployeeLocalDataSource>().getProfile();
+      return p != null;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Aggressive root replacement that helps some head units in release mode.
+  static Future<void> _reroot(dynamic template) async {
+    try {
+      await FlutterCarplay.setRootTemplate(rootTemplate: template, animated: false);
+      // tiny delay helps some head units in release
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      _cp.forceUpdateRootTemplate();
+    } catch (_) {}
+  }
+
+  // Accept dynamic since plugin doesn't export a common CPTemplate base class
+  static Future<void> _setRoot({required dynamic template}) async {
+    await _reroot(template);
+  }
+
   // Show a transient alert with message
-  static Future<void> toast({required bool ok, required String message}) async {
-    final style = ok ? CPAlertActionStyles.normal : CPAlertActionStyles.destructive;
+  static Future<void> toast({
+    required bool ok,
+    required String message,
+    Duration duration = const Duration(milliseconds: 1200), // short!
+  }) async {
+    // Kill any previous toast/timer first to avoid stacking
+    _toastTimer?.cancel();
+    try { await FlutterCarplay.popModal(animated: false); } catch (_) {}
+
     final alert = CPAlertTemplate(
       titleVariants: [message],
-      actions: [
-        CPAlertAction(
-          title: 'OK',
-          style: style,
-          onPress: () {
-            try { FlutterCarplay.popModal(animated: true); } catch (_) {}
-          },
-        ),
-      ],
+      actions: const [], // no OK button
     );
 
+    // Show alert; if something is already presented, pop and retry once
     try {
       FlutterCarplay.showAlert(template: alert);
     } catch (_) {
@@ -108,7 +133,8 @@ class CarPlayService {
       } catch (_) {}
     }
 
-    Timer(const Duration(seconds: 2), () {
+    // Auto-dismiss after a short delay
+    _toastTimer = Timer(duration, () {
       try { FlutterCarplay.popModal(animated: true); } catch (_) {}
     });
   }
@@ -131,16 +157,26 @@ class CarPlayService {
       final label = '${e.value} ${e.key}';
       return CPListItem(
         text: label,
-        // Depending on your flutter_carplay version, you may need (item, index)
+        // NOTE: If your flutter_carplay version expects (CPListItem item, int index, void Function() completion),
+        // change the lambda accordingly and keep the body the same.
         onPress: (void Function() completion, CPListItem item) async {
-          if (_busy) { completion(); return; }
+          if (_busy) {
+            completion();
+            return;
+          }
           _busy = true;
+
           try {
             final ok = await CarBridge.handleCheckInWithMood(e.key);
-            // CarBridge will call toast() and sync() already
-          } catch (_) {}
-          completion();
-          _busy = false;
+            await toast(ok: ok == true, message: ok == true ? 'Mood saved' : 'Failed to save mood');
+            // move to main deterministically in release
+            await sync();
+          } catch (_) {
+            await toast(ok: false, message: 'Error saving mood');
+          } finally {
+            completion();
+            _busy = false;
+          }
         },
       );
     }).toList();
@@ -153,8 +189,7 @@ class CarPlayService {
 
   static CPInformationTemplate _buildMainTemplate() {
     final local = getIt<LocalService>();
-    final list = (local.getMillisList(checkIns) ?? const <int>[])
-      ..sort((a, b) => b.compareTo(a));
+    final list = (local.getMillisList(checkIns) ?? const <int>[])..sort((a, b) => b.compareTo(a));
 
     final last = list.isNotEmpty
         ? DateFormat('hh:mm a').format(DateTime.fromMillisecondsSinceEpoch(list.first))
@@ -164,10 +199,10 @@ class CarPlayService {
       title: '',
       layout: CPInformationTemplateLayout.leading,
       informationItems: [
-        CPInformationItem(title: '',  detail: ""),
-        CPInformationItem(title: 'Last Check- in 🫆',  detail: last),
-        // CPInformationItem(title: 'Count', detail: list.length.toString()),
-      ],
+        CPInformationItem(title: '', detail: ''),
+      ]..addAll([
+        CPInformationItem(title: 'Last Check- in 🫆', detail: last),
+      ]),
       actions: [
         CPTextButton(
           title: 'Check-in 🫆',
@@ -176,24 +211,22 @@ class CarPlayService {
             _busy = true;
             try {
               final ok = await CarBridge.handleCheckIn();
-              // CarBridge will call toast() + sync()
-            } catch (_) {}
-            _busy = false;
+              await toast(ok: ok == true, message: ok == true ? 'Checked in' : 'Check-in failed');
+              await sync();
+            } catch (_) {
+              await toast(ok: false, message: 'Error during check-in');
+            } finally {
+              _busy = false;
+            }
           },
         ),
       ],
     );
   }
 
-  // Accept dynamic since plugin doesn't export a CPTemplate base class
-  static Future<void> _setRoot({required dynamic template}) async {
-    try {
-      await FlutterCarplay.setRootTemplate(rootTemplate: template, animated: false);
-      _cp.forceUpdateRootTemplate();
-    } catch (_) {}
-  }
+  // ---------- External triggers ----------
 
-  // explicit screen enum to avoid loops
+  /// Explicit screen switch callable from outside if needed.
   static Future<void> showAuthRequired() async {
     if (_current == _Screen.authRequired) return;
     await _setRoot(template: _buildAuthTemplate());

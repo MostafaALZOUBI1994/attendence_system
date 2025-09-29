@@ -69,7 +69,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
     try {
       final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
       final String time = intl.DateFormat('dd/MM/yyyy HH:mm:ss', 'en')
-          .format(await NTP.now());
+          .format(DateTime.now());
 
       final responseEither = await _dio.safe(
             () => _dio.post(

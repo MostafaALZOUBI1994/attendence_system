@@ -12,6 +12,8 @@
   "attTimeline": "مخطط الحضور",
   "offSiteCheckIns": "تسجيل الحضور",
   "onSiteCheckIn": "البصمة",
+  "onSiteCheckIn": "بصمة",
+  "offSiteCheckIns": "تسجيل الحضور",
   "working": "في العمل",
   "chkIn": "حضور",
   "chkOut": "انصراف",
@@ -62,5 +64,9 @@
   "erlyOt":  "خروج مبكر",
   "ltn": "تأخير",
   "Absnt": "غياب",
-  "tm":  "جهات اتصال الفريق"
+  "tm":  "جهات اتصال الفريق",
+  "employeeSentiment": "مؤشر مزاج الموظف",
+  "lastMood": "آخر مزاج",
+  "mostFrequent": "الأكثر تكرارًا",
+  "basedOnCheckins": "استنادًا إلى {moods}  تسجيل للمزاج"
 }

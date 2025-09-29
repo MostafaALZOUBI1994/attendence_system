@@ -5,10 +5,10 @@ import android.content.pm.ApplicationInfo
 import androidx.car.app.CarAppService
 import androidx.car.app.Session
 import androidx.car.app.validation.HostValidator
+import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugins.GeneratedPluginRegistrant
-import io.flutter.FlutterInjector
 
 class CarHomeService : CarAppService() {
 
@@ -17,17 +17,23 @@ class CarHomeService : CarAppService() {
     private lateinit var flutterEngine: FlutterEngine
 
     override fun onCreate() {
-        android.util.Log.i("MOETHUB", "CarHomeService.onCreate")
         super.onCreate()
+
+        // Ensure the Flutter loader is initialized before creating the engine.
+        val loader = FlutterInjector.instance().flutterLoader()
+        if (!loader.initialized()) {
+            loader.startInitialization(this)
+            loader.ensureInitializationComplete(this, null)
+        }
+
         flutterEngine = FlutterEngine(this).apply {
-            // Register plugins for this engine
+            // Register plugins used by the car entrypoint (if any).
             GeneratedPluginRegistrant.registerWith(this)
 
-            // Run the **named** Dart entrypoint (so we don't boot the full app here)
-            val appBundlePath = FlutterInjector.instance().flutterLoader().findAppBundlePath()
-            dartExecutor.executeDartEntrypoint(
-                DartExecutor.DartEntrypoint(appBundlePath, "carEntryPoint")
-            )
+            // Run the named Dart entrypoint that serves Android Auto.
+            val appBundlePath = loader.findAppBundlePath()
+            val entrypoint = DartExecutor.DartEntrypoint(appBundlePath, "carEntryPoint")
+            dartExecutor.executeDartEntrypoint(entrypoint)
         }
     }
 
@@ -47,10 +53,9 @@ class CarHomeService : CarAppService() {
     }
 
     override fun onCreateSession(): Session {
-        android.util.Log.i("MOETHUB", "CarHomeService.onCreateSession")
-        return object: Session() {
+        return object : Session() {
             override fun onCreateScreen(intent: Intent) =
-                CheckInScreen(carContext, flutterEngine)
+                RouterScreen(carContext, flutterEngine)
         }
     }
 }

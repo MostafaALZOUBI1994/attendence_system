@@ -8,10 +8,10 @@ class TodayStatus {
 
   const TodayStatus({
     this.offSiteCheckIns   = const [],
-    this.checkInTime        = '--:--',
-    this.delay              = '--:--',
-    this.expectedOutTime    = '--:--',
-    this.outTime    = '--:--',
-    this.punchInOffice    = '--:--',
+    this.checkInTime        = '00:00',
+    this.delay              = '00:00',
+    this.expectedOutTime    = '00:00',
+    this.outTime    = '00:00',
+    this.punchInOffice    = '00:00',
   });
 }

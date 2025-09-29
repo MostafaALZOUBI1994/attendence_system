@@ -9,6 +9,7 @@ import '../../../../../core/injection.dart';
 import '../../../../../core/local_services/local_services.dart';
 import '../../../../../core/utils/Initials.dart';
 import '../../../../../core/utils/base64_utils.dart';
+import '../../../../../core/widgets/avatar_widgets.dart';
 import '../../../domain/entities/employee_details_entity.dart';
 import '../../../domain/usecases/get_employee_details.dart';
 import '../../pages/base_screen.dart';
@@ -95,7 +96,7 @@ class _EmployeeTile extends StatelessWidget {
 
     final phone = (member.phoneNumber ?? '').trim();
     final email = (member.email ?? '').trim();
-    final avatar = decodeBase64(member.photoBase64);
+
 
     return Container(
       decoration: BoxDecoration(
@@ -113,11 +114,10 @@ class _EmployeeTile extends StatelessWidget {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-        leading: CircleAvatar(
+        leading: CircleAvatarOrInitials(
+          base64: member.photoBase64,
+          fullName: member.displayNameEn,
           radius: 26,
-          backgroundColor: lightGray,
-          backgroundImage: avatar,
-          child: avatar == null ? Initials(displayName) : null,
         ),
         title: Text(
           displayName,
@@ -268,7 +268,7 @@ class _InfoPill extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                     color: secondaryColor,
                   ),

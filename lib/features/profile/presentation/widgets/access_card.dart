@@ -7,6 +7,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/utils/Initials.dart';
 import '../../../../core/utils/base64_utils.dart';
+import '../../../../core/widgets/avatar_widgets.dart';
 import '../../../authentication/domain/entities/employee.dart';
 
 class AccessCard extends StatefulWidget {
@@ -215,25 +216,12 @@ class _AccessCardState extends State<AccessCard>
     );
   }
   Widget rectPhotoOrInitials() {
-    final ImageProvider<Object>? avatar = decodeBase64(widget.employee.empImageUrl);
-    return ClipRRect(
-    borderRadius: BorderRadius.circular(12), // <- keep or remove if you want hard corners
-    child: avatar != null
-        ? Image(
-      image: avatar,
-      width: 100,
-      height: 100,
-      fit: BoxFit.cover,
-    )
-        : Container(
-      width: 100,
-      height: 100,
-      color: lightGray,
-      alignment: Alignment.center,
-      // Your initials widget (no image)
-      child: Initials(widget.employee.employeeNameInEn),
-    ),
-  );}
+
+    return RectAvatarOrInitials(
+      base64: widget.employee.empImageUrl,
+      fullName: widget.employee.employeeNameInEn,
+      size: 100,
+    );}
 
   Widget _buildCard({required Widget child}) {
     return SizedBox(

@@ -1,4 +1,7 @@
 // lib/core/utils/car_bridge.dart
+import 'package:moet_hub/features/mood/domain/repositories/mood_repository.dart';
+import 'package:moet_hub/features/mood/presentation/mappers/mood_ui_mapper.dart';
+
 import '../../features/attendence/domain/repositories/attendence_repository.dart';
 import '../constants/constants.dart';
 import '../injection.dart';
@@ -28,8 +31,8 @@ class CarBridge {
   }
 
   static Future<bool> handleCheckInWithMood(String mood) async {
-    // If mood goes to backend separately: add a dedicated repo call here.
-    // For now, calling the same checkIn endpoint.
-    return handleCheckIn();
-  }
+    final mapped = mapUIMood((mood).toUIMood());
+     await getIt<MoodRepository>().postMood(moodId: mapped.id, mood: mood);
+     return handleCheckIn();
+}
 }

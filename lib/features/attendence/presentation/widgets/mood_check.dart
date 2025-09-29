@@ -62,25 +62,25 @@ class _MoodCheckJoystickState extends State<MoodCheckJoystick>
   }
 
   Future<void> _handleDragEnd(DragEndDetails details) async {
-    final mapped = mapUIMood((_selectedMood).toUIMood());
-    context.read<MoodBloc>().add(SubmitMood(
-      moodId: mapped.id,
-      mood: mapped.label,
-      note: '',
-      date: DateTime.now(),
-    ));
+    // final mapped = mapUIMood((_selectedMood).toUIMood());
+    // context.read<MoodBloc>().add(SubmitMood(
+    //   moodId: mapped.id,
+    //   mood: mapped.label,
+    //   note: '',
+    //   date: DateTime.now(),
+    // ));
     await widget.onCheckInWithMood(_selectedMood);
     _animateReset();
   }
 
   Future<void> _handleTap() async {
-    final mapped = mapUIMood((_selectedMood).toUIMood());
-    context.read<MoodBloc>().add(SubmitMood(
-      moodId: mapped.id,
-      mood: mapped.label,
-      note: '',
-      date: DateTime.now(),
-    ));
+    // final mapped = mapUIMood((_selectedMood).toUIMood());
+    // context.read<MoodBloc>().add(SubmitMood(
+    //   moodId: mapped.id,
+    //   mood: mapped.label,
+    //   note: '',
+    //   date: DateTime.now(),
+    // ));
     await widget.onCheckInWithMood(_selectedMood);
   }
 

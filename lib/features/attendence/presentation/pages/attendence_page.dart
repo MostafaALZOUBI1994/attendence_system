@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,6 +25,7 @@ class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AttendenceBloc>().add(const AttendenceEvent.loadData());
+      _askPushPermissionOnce();
     });
   }
 
@@ -52,6 +56,23 @@ class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver {
           orElse: () => false,
         );
         return isTarget && prevType != currType;
+      },
+      buildWhen: (prev, curr) {
+        if (prev is Loaded && curr is Loaded) {
+          final samePayload =
+              identical(prev.employee, curr.employee) &&
+                  prev.phase == curr.phase &&
+                  prev.currentStepIndex == curr.currentStepIndex &&
+                  // We reuse the same TodayStatus instance in _onTick, so identity check works:
+                  identical(prev.todayStatus, curr.todayStatus);
+          // If only remainingTime/progress changed, skip rebuilding the whole page.
+          return !samePayload;
+        }
+        if (prev is CheckInSuccess && curr is Loaded) {
+          // allow rebuild when leaving success
+          return true;
+        }
+        return prev.runtimeType != curr.runtimeType;
       },
       listener: (context, state) {
         state.maybeMap(
@@ -106,4 +127,16 @@ class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver {
       },
     );
   }
+  Future<void> _askPushPermissionOnce() async {
+    if (!Platform.isIOS) return;
+    final m = FirebaseMessaging.instance;
+    final s = await m.getNotificationSettings();
+    if (s.authorizationStatus == AuthorizationStatus.notDetermined) {
+      await m.requestPermission(alert: true, badge: true, sound: true);
+      await m.setForegroundNotificationPresentationOptions(
+        alert: true, badge: true, sound: true,
+      );
+    }
+  }
 }
+
