@@ -20,7 +20,7 @@ import 'features/authentication/presentation/bloc/auth_bloc.dart';
 import 'features/mood/presentation/bloc/mood_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'firebase_options.dart';
-export 'core/local_services/car_entry.dart' show carEntryPoint;
+import 'core/local_services/car_entry.dart' as car;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +57,8 @@ void main() async {
   });
 }
 
+@pragma('vm:entry-point')
+Future<void> carEntryPoint() => car.carEntryPoint();
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

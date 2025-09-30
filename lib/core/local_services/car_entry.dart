@@ -5,7 +5,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:intl/date_symbol_data_local.dart' as intl_data;
+import 'package:intl/intl.dart' as intl;
 import '../injection.dart';
 import '../utils/car_bridge.dart';
 import '../local_services/local_services.dart';
@@ -22,6 +23,17 @@ Future<void> carEntryPoint() async {
   // Initialize DI in this isolate as well.
   try { await configureDependencies(); } catch (e) {
     debugPrint('[carEntryPoint] DI init error: $e');
+  }
+  try {
+    // if you store the user’s locale already:
+    final saved = getIt<LocalService>().getSavedLocale(); // Locale('en') / Locale('ar')
+    final lc = saved.languageCode;           // "en" or "ar"
+    await intl_data.initializeDateFormatting(lc);
+    intl.Intl.defaultLocale = lc;
+  } catch (_) {
+    // safe fallback
+    await intl_data.initializeDateFormatting('en');
+    intl.Intl.defaultLocale = 'en';
   }
 
   const channel = MethodChannel(_channelName);

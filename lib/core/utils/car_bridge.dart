@@ -23,7 +23,7 @@ class CarBridge {
   static Future<bool> handleCheckIn() async {
     try {
       final res = await getIt<AttendenceRepository>().checkIn();
-      return res.isRight(); // Either<Failure,String>
+      return res.isRight();
     } catch (e, st) {
       debugPrint('CarBridge.handleCheckIn error: $e\n$st');
       return false;
@@ -32,7 +32,7 @@ class CarBridge {
 
   static Future<bool> handleCheckInWithMood(String mood) async {
     final mapped = mapUIMood((mood).toUIMood());
-     await getIt<MoodRepository>().postMood(moodId: mapped.id, mood: mood);
-     return handleCheckIn();
-}
+    await getIt<MoodRepository>().postMood(moodId: mapped.id, mood: mood);
+    return handleCheckIn();
+  }
 }
