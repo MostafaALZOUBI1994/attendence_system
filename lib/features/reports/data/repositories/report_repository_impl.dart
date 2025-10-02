@@ -23,7 +23,7 @@ class ReportRepositoryImpl implements ReportRepository {
     try {
       final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
 
-      final responseEither = await _dio.safe(
+      final resEither = await _dio.safe(
             () => _dio.get(
           'AttendanceReport_New',
           queryParameters: {
@@ -35,26 +35,45 @@ class ReportRepositoryImpl implements ReportRepository {
             (res) => res,
       );
 
+      return resEither.fold(
+        Left.new,
+            (res) {
+          final data = res.data;
 
-      return await responseEither.fold(
-            (failure) => Left(failure),
-            (response) {
-          if (response.statusCode != 200) {
-
-            final msg = (response.data is List && response.data.isNotEmpty)
-                ? response.data[0]["_statusMessage"]
-                : 'Failed to fetch reports';
-            return Left(ServerFailure(msg));
+          // treat the API's "No data found" sentinel as an empty list
+          if (_looksLikeNoData(data)) {
+            return const Right(<Report>[]);
           }
 
-          final List<dynamic> raw = response.data as List<dynamic>;
-          final reports = raw.map((e) => Report.fromJson(e)).toList();
-          return Right(reports);
+          final list = (data as List)
+              .whereType<Map<String, dynamic>>()
+              .map((e) => Report.fromJson(Map<String, dynamic>.from(e)))
+
+              .toList(); // <- List<ReportModel> which extends Report
+
+          return Right(list); // <- OK because ReportModel : Report
         },
       );
     } catch (e) {
-      return Left(ServerFailure("An unexpected error occurred: $e"));
+      return Left(ServerFailure( e.toString()));
     }
   }
+
+  bool _looksLikeNoData(dynamic data) {
+    if (data is! List || data.isEmpty || data.first is! Map) return false;
+    final m = data.first as Map;
+    final code = m['_statusCode']?.toString();
+    final msg = (m['_statusMessage'] ?? '').toString().toLowerCase();
+
+    final businessFieldsNullOrEmpty = [
+      'EmployeeID','pdate'
+    ].every((k) {
+      final v = m[k];
+      return v == null || (v is String && v.trim().isEmpty);
+    });
+
+    return code == '101' || msg.contains('no data') || businessFieldsNullOrEmpty;
+  }
+
 
 }

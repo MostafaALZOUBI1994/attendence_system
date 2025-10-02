@@ -110,7 +110,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 } else if (state is ReportLoaded) {
                   if (state.report.isEmpty) {
                     return _EmptyState(
-                      message: 'No records in this period.'.tr(),
+                      message: "noRecs".tr(),
                       onRefresh: _onRefresh,
                     );
                   }

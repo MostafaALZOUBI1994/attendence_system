@@ -68,5 +68,6 @@
   "employeeSentiment": "مؤشر مزاج الموظف",
   "lastMood": "آخر مزاج",
   "mostFrequent": "الأكثر تكرارًا",
-  "basedOnCheckins": "استنادًا إلى {moods}  تسجيل للمزاج"
+  "basedOnCheckins": "استنادًا إلى {moods}  تسجيل للمزاج",
+  "noRecs": "لا تتوفر تقارير لهذه الفترة"
 }

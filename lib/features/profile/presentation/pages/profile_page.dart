@@ -389,7 +389,7 @@ class _ProfilePageState extends State<ProfilePage>
           historyLoaded: (_, __, most) => labelFrom(most),
           orElse: () => '--',
         );
-        final moods =  'basedOnCheckins'.tr(namedArgs: {'moods':total.toString()});
+
 
         return _glass(
           child: Column(

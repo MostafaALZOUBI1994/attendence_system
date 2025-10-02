@@ -95,20 +95,22 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // ⬇️ Defer to after first frame (and off the build path)
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initCarPlay());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Always register the channel on both platforms
+      await CarChannel.register();
+
+      // iOS-only CarPlay engine init
+      try {
+        if (Platform.isIOS) {
+          await CarPlayService.init();
+        }
+      } catch (e) {
+        debugPrint('CarPlay init skipped: $e');
+      }
+    });
   }
 
-  Future<void> _initCarPlay() async {
-    try {
-      if (Platform.isIOS) {
-        await CarPlayService.init();   // keep idempotent
-        await CarChannel.register();
-      }
-    } catch (e) {
-      debugPrint('CarPlay init skipped: $e');
-    }
-  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -130,7 +132,7 @@ class _MyAppState extends State<MyApp> {
             primary: primaryColor,
             secondary: secondaryColor,
           ),
-          inputDecorationTheme: InputDecorationTheme(
+          inputDecorationTheme: const InputDecorationTheme(
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: primaryColor),
             ),

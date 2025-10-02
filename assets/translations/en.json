@@ -68,6 +68,7 @@
   "employeeSentiment": "Employee Sentiment",
   "lastMood": "Last Mood",
   "mostFrequent": "Most Frequent",
-  "basedOnCheckins": "Based on {moods} check-ins"
+  "basedOnCheckins": "Based on {moods} check-ins",
+  "noRecs": "No records in this period."
 
 }
