@@ -255,7 +255,7 @@ class _ProfilePageState extends State<ProfilePage>
         return state.maybeWhen(
           success: (employee) {
             final name = isArabic ? employee.employeeNameInAr : employee.employeeNameInEn;
-            final role = isArabic ? employee.employeeTitleInAr : employee.employeeNameInEn; // keep as your current fallback
+            final role = isArabic ? employee.employeeTitleInAr : employee.employeeTitleInEn; // keep as your current fallback
             final department = isArabic ? employee.departmentInAr : employee.departmentInEn;
             final directManager = employee.directManager.split(',').first.replaceFirst('CN=', '').trim();
 
