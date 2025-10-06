@@ -1,11 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/employee_mood.dart';
 import '../../domain/usecases/fetch_mood_history.dart' as uc_fetch;
 import '../../domain/usecases/submit_mood.dart' as uc_submit;
-
 part 'mood_bloc.freezed.dart';
 part 'mood_event.dart';
 part 'mood_state.dart';

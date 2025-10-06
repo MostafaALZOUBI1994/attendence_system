@@ -38,7 +38,6 @@ class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // ✅ fetch TodayStatus only on resume/first load
       context.read<AttendenceBloc>().add(const AttendenceEvent.loadData());
     }
   }
@@ -112,7 +111,7 @@ class _TimeScreenState extends State<TimeScreen> with WidgetsBindingObserver {
             remainingTime: s.remainingTime,
             todayStatus: s.todayStatus,
             phase: s.phase,
-            isCheckInSuccess: true, // show success Lottie once
+            isCheckInSuccess: true,
           ),
           error: (e) => MainContent(
             employee: e.employee,

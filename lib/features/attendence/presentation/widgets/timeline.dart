@@ -97,12 +97,17 @@ class ProcessTimeline extends StatelessWidget {
 
   Widget? _buildIndicatorChild(int index) {
     if (index == currentIndex) {
+
+      if (currentIndex == 3) {
+        return const Icon(Icons.check, color: Colors.white, size: 15);
+      }
       return const Padding(
-          padding: EdgeInsets.all(8),
-          child: CircularProgressIndicator(
-            strokeWidth: 3,
-            valueColor: AlwaysStoppedAnimation(Colors.white),
-          ));
+        padding: EdgeInsets.all(8),
+        child: CircularProgressIndicator(
+          strokeWidth: 3,
+          valueColor: AlwaysStoppedAnimation(Colors.white),
+        ),
+      );
     }
     return index < currentIndex
         ? const Icon(Icons.check, color: Colors.white, size: 15)

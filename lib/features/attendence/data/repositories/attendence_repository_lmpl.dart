@@ -12,7 +12,7 @@ import '../../../../core/injection.dart';
 import '../../../../core/local_services/local_services.dart';
 import '../../../../core/sync/offsite_event_bus.dart';
 import '../../../authentication/data/datasources/employee_local_data_source.dart';
-
+import 'package:moet_hub/core/sync/offsite_event_bus.dart';
 
 @LazySingleton(as: AttendenceRepository)
 class AttendenceRepositoryImpl implements AttendenceRepository {
@@ -49,11 +49,11 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
           }
 
           final status = TodayStatus(
-            checkInTime: "00:00",
-            delay: "00:00",
-            expectedOutTime: "00:00",
-            outTime: "00:00",
-            punchInOffice: "00:00",
+            checkInTime: item['In_Time'] as String,
+            delay: item['LateIn'] as String,
+            expectedOutTime: item['ExpectedOutTime'] as String,
+            outTime: item['OutTime'] as String,
+            punchInOffice: item['PunchInOfficeTime'] as String,
             offSiteCheckIns: _localService.getMillisList(checkIns) ?? [],
           );
           return Right(status);
@@ -70,6 +70,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
       final employeeId = await getIt<EmployeeLocalDataSource>().getEmployeeId();
       final String time = intl.DateFormat('dd/MM/yyyy HH:mm:ss', 'en')
           .format(DateTime.now());
+
       final responseEither = await _dio.safe(
             () => _dio.post(
           '/CheckIn',
@@ -110,6 +111,7 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
             DateTime.now().millisecondsSinceEpoch,
           );
 
+
           getIt<OffsiteEventBus>().notifyChanged();
 
           return Right(data['_statusMessage'] as String);
@@ -119,4 +121,5 @@ class AttendenceRepositoryImpl implements AttendenceRepository {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
+
 }
